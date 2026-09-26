@@ -7,35 +7,47 @@ st.set_page_config(
 )
 
 st.title("📺 Minha TV")
-st.caption("Use apenas vídeos, transmissões e playlists que você tem autorização para usar.")
-
-if "items" not in st.session_state:
-    st.session_state.items = []
+st.caption("Adicione e assista aos seus próprios vídeos.")
 
 menu = st.sidebar.radio(
     "Menu",
     [
         "🏠 Início",
+        "📤 Enviar vídeo",
         "📡 TV ao vivo",
         "🎬 Filmes",
         "📺 Séries",
-        "🧸 Infantil",
-        "➕ Adicionar"
+        "🧸 Infantil"
     ]
 )
 
+if "videos" not in st.session_state:
+    st.session_state.videos = []
+
+# TELA INICIAL
 if menu == "🏠 Início":
-    st.subheader("Bem-vindo")
-    st.write("Adicione seus próprios links autorizados e organize por categoria.")
-    st.info("Abra **➕ Adicionar** no menu para começar.")
 
-elif menu == "➕ Adicionar":
-    st.subheader("➕ Adicionar conteúdo")
+    st.subheader("Bem-vindo ❤️")
 
-    nome = st.text_input("Nome")
+    st.write(
+        "Use o menu para enviar um vídeo da sua galeria "
+        "e assistir dentro do aplicativo."
+    )
+
+    st.info("Toque em 📤 Enviar vídeo para começar.")
+
+
+# ENVIAR VÍDEO DA GALERIA
+elif menu == "📤 Enviar vídeo":
+
+    st.subheader("📤 Enviar vídeo da galeria")
+
+    nome = st.text_input(
+        "Nome do vídeo"
+    )
 
     categoria = st.selectbox(
-        "Categoria",
+        "Escolha a categoria",
         [
             "TV ao vivo",
             "Filmes",
@@ -44,52 +56,13 @@ elif menu == "➕ Adicionar":
         ]
     )
 
-    url = st.text_input("Link do vídeo ou transmissão")
+    video = st.file_uploader(
+        "Escolha um vídeo da sua galeria",
+        type=["mp4", "mov", "m4v", "avi"]
+    )
 
-    if st.button("Adicionar"):
-        if nome and url:
-            st.session_state.items.append(
-                {
-                    "nome": nome,
-                    "categoria": categoria,
-                    "url": url
-                }
-            )
+    if video is not None:
 
-            st.success("Conteúdo adicionado.")
+        st.video(video)
 
-        else:
-            st.warning("Preencha o nome e o link.")
-
-else:
-    categoria_atual = {
-        "📡 TV ao vivo": "TV ao vivo",
-        "🎬 Filmes": "Filmes",
-        "📺 Séries": "Séries",
-        "🧸 Infantil": "Infantil"
-    }[menu]
-
-    st.subheader(menu)
-
-    itens = [
-        item
-        for item in st.session_state.items
-        if item["categoria"] == categoria_atual
-    ]
-
-    if not itens:
-        st.info("Ainda não há conteúdo nessa categoria.")
-
-    else:
-        escolhido = st.selectbox(
-            "Escolha",
-            [item["nome"] for item in itens]
-        )
-
-        item = next(
-            item
-            for item in itens
-            if item["nome"] == escolhido
-        )
-
-        st.video(item["url"])
+        if st.button("💾 Ad
