@@ -1,13 +1,37 @@
 import streamlit as st
 
 st.set_page_config(
-    page_title="Minha TV",
-    page_icon="📺",
+    page_title="Mundo da Luna TV",
+    page_icon="🌙",
     layout="wide"
 )
 
-st.title("📺 Minha TV")
-st.caption("Adicione e assista aos seus próprios vídeos.")
+st.markdown("""
+<style>
+.stApp {
+    background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
+    color: white;
+}
+.block-container {
+    padding-top: 1.2rem;
+}
+h1, h2, h3, p, label {
+    color: white !important;
+}
+div[data-testid="stSidebar"] {
+    background: #0b1020;
+}
+.card {
+    background: #182033;
+    padding: 14px;
+    border-radius: 16px;
+    margin-bottom: 14px;
+}
+</style>
+""", unsafe_allow_html=True)
+
+st.title("🌙 Mundo da Luna TV")
+st.caption("Seus vídeos organizados como um pequeno app de streaming.")
 
 if "videos" not in st.session_state:
     st.session_state.videos = []
@@ -17,61 +41,76 @@ menu = st.sidebar.radio(
     [
         "🏠 Início",
         "📤 Enviar vídeo",
-        "📡 TV ao vivo",
+        "🧸 Infantil",
         "🎬 Filmes",
-        "📺 Séries",
-        "🧸 Infantil"
+        "📺 Séries"
     ]
 )
 
 if menu == "🏠 Início":
-    st.subheader("Bem-vindo ❤️")
-    st.write(
-        "Use o menu para enviar um vídeo da sua galeria "
-        "e assistir dentro do aplicativo."
-    )
-    st.info("Toque em 📤 Enviar vídeo para começar.")
+    st.subheader("✨ Bem-vindo")
+    st.write("Escolha uma categoria no menu ou envie um novo vídeo.")
+
+    if st.session_state.videos:
+        st.subheader("🎞️ Seus vídeos")
+        cols = st.columns(2)
+
+        for i, item in enumerate(st.session_state.videos):
+            with cols[i % 2]:
+                if item.get("capa"):
+                    st.image(item["capa"], use_container_width=True)
+                st.markdown(f"### {item['nome']}")
+                st.caption(item["categoria"])
+    else:
+        st.info("Ainda não há vídeos. Abra 📤 Enviar vídeo.")
 
 elif menu == "📤 Enviar vídeo":
-    st.subheader("📤 Enviar vídeo da galeria")
+    st.subheader("📤 Enviar vídeo")
 
     nome = st.text_input("Nome do vídeo")
 
     categoria = st.selectbox(
-        "Escolha a categoria",
-        [
-            "TV ao vivo",
-            "Filmes",
-            "Séries",
-            "Infantil"
-        ]
+        "Categoria",
+        ["Infantil", "Filmes", "Séries"]
+    )
+
+    capa = st.file_uploader(
+        "Escolha uma capa",
+        type=["jpg", "jpeg", "png"],
+        key="capa"
     )
 
     video = st.file_uploader(
-        "Escolha um vídeo da sua galeria",
-        type=["mp4", "mov", "m4v", "avi"]
+        "Escolha um vídeo da galeria",
+        type=["mp4", "mov", "m4v"],
+        key="video"
     )
+
+    if capa is not None:
+        st.image(capa, caption="Prévia da capa", use_container_width=True)
 
     if video is not None:
         st.video(video)
 
-        if st.button("💾 Adicionar vídeo"):
+    if st.button("💾 Adicionar vídeo"):
+        if video is None:
+            st.warning("Escolha um vídeo primeiro.")
+        else:
             st.session_state.videos.append(
                 {
                     "nome": nome if nome else video.name,
                     "categoria": categoria,
                     "dados": video.getvalue(),
-                    "tipo": video.type
+                    "capa": capa.getvalue() if capa else None
                 }
             )
             st.success("Vídeo adicionado com sucesso!")
 
 else:
     categoria_atual = {
-        "📡 TV ao vivo": "TV ao vivo",
+        "🧸 Infantil": "Infantil",
         "🎬 Filmes": "Filmes",
-        "📺 Séries": "Séries",
-        "🧸 Infantil": "Infantil"
+        "📺 Séries": "Séries"
     }[menu]
 
     st.subheader(menu)
@@ -84,14 +123,10 @@ else:
     if not itens:
         st.info("Ainda não há vídeos nessa categoria.")
     else:
-        escolhido = st.selectbox(
-            "Escolha um vídeo",
-            [item["nome"] for item in itens]
-        )
+        for item in itens:
+            st.markdown("---")
+            if item.get("capa"):
+                st.image(item["capa"], use_container_width=True)
 
-        item = next(
-            item for item in itens
-            if item["nome"] == escolhido
-        )
-
-        st.video(item["dados"])
+            st.markdown(f"### {item['nome']}")
+            st.video(item["dados"])
