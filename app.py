@@ -13,7 +13,7 @@ st.markdown("""
 .stApp {
     background:
         radial-gradient(circle at top right, rgba(255,215,0,0.12), transparent 26%),
-        radial-gradient(circle at bottom left, rgba(198,132,255,0.14), transparent 30%),
+        radial-gradient(circle at bottom left, rgba(198,132,255,0.16), transparent 30%),
         linear-gradient(180deg, #2b124c 0%, #3d1a6e 46%, #1f0f33 100%);
     color: white;
 }
@@ -28,35 +28,21 @@ div[data-testid="stButton"] button {
     background: linear-gradient(90deg, #7c3aed, #9f7aea);
     color: white;
     border: 1px solid #d6b45f;
-    box-shadow: 0 0 14px rgba(214,180,95,0.18);
 }
 div[data-testid="stButton"] button:hover {
     background: linear-gradient(90deg, #8b5cf6, #b794f4);
-    color: white;
     border-color: #f2d675;
-}
-div[data-testid="stAlert"] {
-    border-radius: 16px;
-    border: 1px solid rgba(242,214,117,0.25);
 }
 [data-testid="stFileUploaderDropzone"] {
     background: #4b216f;
     border: 1px solid #8b5cf6;
     border-radius: 16px;
 }
-[data-baseweb="select"] > div {
-    background: #f7f3fb !important;
-    color: #2b124c !important;
-    border-radius: 14px !important;
-}
-input {border-radius: 14px !important;}
-video {border-radius: 16px !important;}
 .hero {
     padding: 18px;
     border: 1px solid rgba(242,214,117,0.30);
     border-radius: 22px;
     background: rgba(255,255,255,0.04);
-    box-shadow: 0 0 24px rgba(176,120,255,0.11);
     margin-bottom: 18px;
 }
 .gold-line {
@@ -64,14 +50,15 @@ video {border-radius: 16px !important;}
     background: linear-gradient(90deg, transparent, #f2d675, transparent);
     margin: 8px 0 18px 0;
 }
-.magic {
-    color: #f2d675 !important;
-    font-size: 1.05rem;
+.magic {color: #f2d675 !important; font-size: 1.05rem;}
+.metricbox {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(242,214,117,0.20);
+    border-radius: 16px;
+    padding: 12px;
+    text-align: center;
 }
-.cardtitle {
-    margin-top: 6px;
-    margin-bottom: 2px;
-}
+video {border-radius: 16px !important;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -162,6 +149,7 @@ menu = st.sidebar.radio(
     [
         "🏠 Início",
         "🔎 Buscar",
+        "🆕 Novidades",
         "📤 Enviar vídeo",
         "🧸 Infantil",
         "🎬 Filmes",
@@ -173,31 +161,37 @@ menu = st.sidebar.radio(
 videos = listar_videos()
 
 if menu == "🏠 Início":
-    st.subheader("✨ Novidades")
+    total = len(videos)
+    infantil = len([v for v in videos if v.get("categoria") == "Infantil"])
+    filmes = len([v for v in videos if v.get("categoria") == "Filmes"])
+    series = len([v for v in videos if v.get("categoria") == "Séries"])
+
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("🎞️ Total", total)
+    c2.metric("🧸 Infantil", infantil)
+    c3.metric("🎬 Filmes", filmes)
+    c4.metric("📺 Séries", series)
+
+    st.markdown("---")
+    st.subheader("✨ Destaques")
 
     if not videos:
         st.info("Ainda não há vídeos. Abra 📤 Enviar vídeo para começar.")
     else:
-        destaque = videos[0]
-        st.markdown("#### 🌟 Mais recente")
-        mostrar_card(destaque)
+        mostrar_card(videos[0])
 
         if len(videos) > 1:
             st.markdown("---")
-            st.subheader("🎞️ Mais vídeos")
+            st.subheader("🎞️ Continue explorando")
             cols = st.columns(2)
-            for i, item in enumerate(videos[1:]):
+            for i, item in enumerate(videos[1:5]):
                 with cols[i % 2]:
                     mostrar_card(item)
 
 elif menu == "🔎 Buscar":
     st.subheader("🔎 Buscar vídeos")
 
-    termo = st.text_input(
-        "Digite o nome do vídeo",
-        placeholder="Ex.: Luna"
-    )
-
+    termo = st.text_input("Digite o nome do vídeo", placeholder="Ex.: Luna")
     categoria_busca = st.selectbox(
         "Filtrar por categoria",
         ["Todas", "Infantil", "Filmes", "Séries"]
@@ -225,6 +219,16 @@ elif menu == "🔎 Buscar":
         for i, item in enumerate(filtrados):
             with cols[i % 2]:
                 mostrar_card(item)
+
+elif menu == "🆕 Novidades":
+    st.subheader("🆕 Novidades")
+
+    if not videos:
+        st.info("Ainda não há novidades.")
+    else:
+        for item in videos[:10]:
+            mostrar_card(item)
+            st.markdown("---")
 
 elif menu == "📤 Enviar vídeo":
     st.subheader("📤 Enviar novo vídeo")
@@ -260,9 +264,7 @@ elif menu == "📤 Enviar vídeo":
             st.image(capa, caption="✨ Prévia da capa", use_container_width=True)
 
         if video is not None:
-            st.write(
-                f"⭐ Vídeo selecionado: **{video.size / (1024 * 1024):.1f} MB**"
-            )
+            st.write(f"⭐ Vídeo selecionado: **{video.size / (1024 * 1024):.1f} MB**")
 
         if st.button("💾 Salvar permanentemente"):
             if video is None:
@@ -274,7 +276,6 @@ elif menu == "📤 Enviar vídeo":
 
                         capa_path = None
                         capa_url = None
-
                         if capa is not None:
                             capa_path, capa_url = upload_arquivo(capa, "capas")
 
@@ -289,7 +290,6 @@ elif menu == "📤 Enviar vídeo":
 
                         st.success("✅ Vídeo salvo permanentemente!")
                         st.balloons()
-
                     except Exception as e:
                         st.error(f"Não consegui salvar o vídeo: {e}")
 
@@ -301,11 +301,7 @@ elif menu in ["🧸 Infantil", "🎬 Filmes", "📺 Séries"]:
     }[menu]
 
     st.subheader(menu)
-
-    itens = [
-        v for v in videos
-        if v.get("categoria") == categoria_atual
-    ]
+    itens = [v for v in videos if v.get("categoria") == categoria_atual]
 
     if not itens:
         st.info("Ainda não há vídeos nessa categoria.")
@@ -326,16 +322,11 @@ elif menu == "🗑️ Gerenciar":
 
     if senha != st.secrets["ADMIN_PASSWORD"]:
         st.info("Digite a senha de administrador.")
-
     elif not videos:
         st.info("Não há vídeos cadastrados.")
-
     else:
         for item in videos:
             st.markdown("---")
-            st.write(
-                f"**{item.get('nome', 'Sem título')}** — {item.get('categoria', '')}"
-            )
-
+            st.write(f"**{item.get('nome', 'Sem título')}** — {item.get('categoria', '')}")
             if st.button("Excluir", key=f"excluir_{item['id']}"):
                 excluir_video(item)
