@@ -196,9 +196,13 @@ supabase = get_supabase()
 BUCKET = "videos"
 
 
-def link_plano_mercado_pago():
+def link_plano_pagamento():
     try:
-        return str(st.secrets.get("MERCADO_PAGO_PLAN_URL", "")).strip()
+        # Preferimos Kiwify. Mantemos o nome antigo apenas como fallback.
+        url = str(st.secrets.get("KIWIFY_CHECKOUT_URL", "")).strip()
+        if not url:
+            url = str(st.secrets.get("MERCADO_PAGO_PLAN_URL", "")).strip()
+        return url
     except Exception:
         return ""
 
@@ -281,7 +285,11 @@ def carregar_plano_usuario():
 
 def cliente_admin_assinaturas():
     try:
-        chave = str(st.secrets.get("SUPABASE_SERVICE_ROLE_KEY", "")).strip()
+        # Preferimos a nova Secret Key do Supabase (sb_secret_...).
+        # Mantemos compatibilidade com a antiga service_role, caso necessário.
+        chave = str(st.secrets.get("SUPABASE_SECRET_KEY", "")).strip()
+        if not chave:
+            chave = str(st.secrets.get("SUPABASE_SERVICE_ROLE_KEY", "")).strip()
     except Exception:
         chave = ""
 
@@ -295,7 +303,7 @@ def ativar_plano_admin(email, plano, status):
     admin = cliente_admin_assinaturas()
     if admin is None:
         raise RuntimeError(
-            "Falta configurar SUPABASE_SERVICE_ROLE_KEY nos Secrets do Streamlit."
+            "Falta configurar SUPABASE_SECRET_KEY nos Secrets do Streamlit."
         )
 
     busca = (
@@ -824,25 +832,25 @@ elif menu == "💎 Planos":
         </div>
         """, unsafe_allow_html=True)
 
-        mp_url = link_plano_mercado_pago()
+        checkout_url = link_plano_pagamento()
 
-        if mp_url:
+        if checkout_url:
             st.link_button(
-                "💳 Assinar Premium com Mercado Pago",
-                mp_url,
+                "💳 Assinar Premium pela Kiwify",
+                checkout_url,
                 use_container_width=True
             )
             st.caption(
-                "O pagamento acontece no ambiente do Mercado Pago. "
-                "A liberação automática do Premium será adicionada na próxima etapa."
+                "O pagamento acontece no ambiente seguro da Kiwify. "
+                "Depois vamos ativar a liberação automática do Premium pelo webhook."
             )
         else:
             st.info(
                 "💳 O botão de pagamento já está preparado. "
-                "Falta apenas adicionar o link do seu Plano de Assinatura do Mercado Pago."
+                "Falta apenas adicionar o link do checkout da sua assinatura na Kiwify."
             )
             st.caption(
-                "Nenhuma cobrança será feita enquanto o link do Mercado Pago não estiver configurado."
+                "Nenhuma cobrança será feita enquanto o link da Kiwify não estiver configurado."
             )
 
 elif menu == "🔒 Premium":
@@ -978,7 +986,7 @@ elif menu == "🗑️ Gerenciar":
     else:
         st.subheader("💳 Gerenciar assinaturas")
         st.caption(
-            "Depois de conferir o pagamento no Mercado Pago, "
+            "Depois de conferir o pagamento na Kiwify, "
             "você pode liberar ou retirar o Premium por aqui."
         )
 
