@@ -12,21 +12,14 @@ st.markdown("""
 <style>
 .stApp {
     background:
-        radial-gradient(circle at top right, rgba(255,215,0,0.10), transparent 28%),
-        radial-gradient(circle at bottom left, rgba(198,132,255,0.12), transparent 32%),
-        linear-gradient(180deg, #2b124c 0%, #3d1a6e 45%, #1f0f33 100%);
+        radial-gradient(circle at top right, rgba(255,215,0,0.12), transparent 26%),
+        radial-gradient(circle at bottom left, rgba(198,132,255,0.14), transparent 30%),
+        linear-gradient(180deg, #2b124c 0%, #3d1a6e 46%, #1f0f33 100%);
     color: white;
 }
-.block-container {
-    padding-top: 1rem;
-    padding-bottom: 2rem;
-}
-h1, h2, h3, p, label, .stMarkdown {
-    color: white !important;
-}
-div[data-testid="stSidebar"] {
-    background: #241038;
-}
+.block-container {padding-top: 1rem; padding-bottom: 2rem;}
+h1, h2, h3, p, label, .stMarkdown {color: white !important;}
+div[data-testid="stSidebar"] {background: #241038;}
 div[data-testid="stButton"] button {
     width: 100%;
     border-radius: 14px;
@@ -56,28 +49,28 @@ div[data-testid="stAlert"] {
     color: #2b124c !important;
     border-radius: 14px !important;
 }
-input {
-    border-radius: 14px !important;
-}
-video {
-    border-radius: 16px !important;
+input {border-radius: 14px !important;}
+video {border-radius: 16px !important;}
+.hero {
+    padding: 18px;
+    border: 1px solid rgba(242,214,117,0.30);
+    border-radius: 22px;
+    background: rgba(255,255,255,0.04);
+    box-shadow: 0 0 24px rgba(176,120,255,0.11);
+    margin-bottom: 18px;
 }
 .gold-line {
     height: 2px;
     background: linear-gradient(90deg, transparent, #f2d675, transparent);
     margin: 8px 0 18px 0;
 }
-.hero {
-    padding: 18px 18px 10px 18px;
-    border: 1px solid rgba(242,214,117,0.30);
-    border-radius: 20px;
-    background: rgba(255,255,255,0.03);
-    box-shadow: 0 0 24px rgba(176,120,255,0.10);
-    margin-bottom: 18px;
-}
 .magic {
     color: #f2d675 !important;
     font-size: 1.05rem;
+}
+.cardtitle {
+    margin-top: 6px;
+    margin-bottom: 2px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -136,8 +129,6 @@ def excluir_video(item):
         st.error(f"Não consegui excluir: {e}")
 
 def mostrar_card(item):
-    st.markdown('<div class="hero">', unsafe_allow_html=True)
-
     if item.get("capa_url"):
         st.image(item["capa_url"], use_container_width=True)
 
@@ -158,8 +149,6 @@ def mostrar_card(item):
             st.session_state[chave] = False
             st.rerun()
 
-    st.markdown('</div>', unsafe_allow_html=True)
-
 st.markdown("""
 <div class="hero">
 <h1>🌙 Mundo da Luna TV ✨</h1>
@@ -172,6 +161,7 @@ menu = st.sidebar.radio(
     "Menu",
     [
         "🏠 Início",
+        "🔎 Buscar",
         "📤 Enviar vídeo",
         "🧸 Infantil",
         "🎬 Filmes",
@@ -183,13 +173,56 @@ menu = st.sidebar.radio(
 videos = listar_videos()
 
 if menu == "🏠 Início":
-    st.subheader("✨ Destaques")
+    st.subheader("✨ Novidades")
 
     if not videos:
         st.info("Ainda não há vídeos. Abra 📤 Enviar vídeo para começar.")
     else:
+        destaque = videos[0]
+        st.markdown("#### 🌟 Mais recente")
+        mostrar_card(destaque)
+
+        if len(videos) > 1:
+            st.markdown("---")
+            st.subheader("🎞️ Mais vídeos")
+            cols = st.columns(2)
+            for i, item in enumerate(videos[1:]):
+                with cols[i % 2]:
+                    mostrar_card(item)
+
+elif menu == "🔎 Buscar":
+    st.subheader("🔎 Buscar vídeos")
+
+    termo = st.text_input(
+        "Digite o nome do vídeo",
+        placeholder="Ex.: Luna"
+    )
+
+    categoria_busca = st.selectbox(
+        "Filtrar por categoria",
+        ["Todas", "Infantil", "Filmes", "Séries"]
+    )
+
+    filtrados = videos
+
+    if termo.strip():
+        termo_lower = termo.lower().strip()
+        filtrados = [
+            v for v in filtrados
+            if termo_lower in v.get("nome", "").lower()
+        ]
+
+    if categoria_busca != "Todas":
+        filtrados = [
+            v for v in filtrados
+            if v.get("categoria") == categoria_busca
+        ]
+
+    if not filtrados:
+        st.info("Nenhum vídeo encontrado.")
+    else:
         cols = st.columns(2)
-        for i, item in enumerate(videos):
+        for i, item in enumerate(filtrados):
             with cols[i % 2]:
                 mostrar_card(item)
 
@@ -199,7 +232,7 @@ elif menu == "📤 Enviar vídeo":
     senha = st.text_input("Senha de administrador", type="password")
 
     if senha != st.secrets["ADMIN_PASSWORD"]:
-        st.info("Digite uma senha de administrador para liberar o envio.")
+        st.info("Digite a senha de administrador para liberar o envio.")
     else:
         nome = st.text_input(
             "Nome do vídeo",
@@ -224,11 +257,7 @@ elif menu == "📤 Enviar vídeo":
         )
 
         if capa is not None:
-            st.image(
-                capa,
-                caption="✨ Prévia da capa",
-                use_container_width=True
-            )
+            st.image(capa, caption="✨ Prévia da capa", use_container_width=True)
 
         if video is not None:
             st.write(
@@ -282,7 +311,6 @@ elif menu in ["🧸 Infantil", "🎬 Filmes", "📺 Séries"]:
         st.info("Ainda não há vídeos nessa categoria.")
     else:
         cols = st.columns(2)
-
         for i, item in enumerate(itens):
             with cols[i % 2]:
                 mostrar_card(item)
