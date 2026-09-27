@@ -115,6 +115,71 @@ video {
     padding: 22px;
     text-align: center;
 }
+
+/* LETRAS MAIORES PARA CELULAR */
+h1 {
+    font-size: 3rem !important;
+    line-height: 1.1 !important;
+}
+h2 {
+    font-size: 2.35rem !important;
+    line-height: 1.15 !important;
+}
+h3 {
+    font-size: 1.8rem !important;
+    line-height: 1.2 !important;
+}
+p, .stMarkdown, .stCaption, label {
+    font-size: 1.15rem !important;
+}
+div[data-testid="stButton"] button {
+    min-height: 58px !important;
+    padding: 0.75rem 1rem !important;
+}
+div[data-testid="stButton"] button p {
+    font-size: 1.22rem !important;
+    font-weight: 800 !important;
+}
+div[data-testid="stLinkButton"] a {
+    min-height: 58px !important;
+    font-size: 1.22rem !important;
+    font-weight: 800 !important;
+}
+div[data-testid="stRadio"] label p {
+    font-size: 1.22rem !important;
+    font-weight: 700 !important;
+}
+div[data-testid="stTextInput"] label p,
+div[data-testid="stSelectbox"] label p,
+div[data-testid="stFileUploader"] label p {
+    font-size: 1.18rem !important;
+    font-weight: 700 !important;
+}
+div[data-testid="stTextInput"] input {
+    font-size: 1.15rem !important;
+    min-height: 54px !important;
+}
+.metric-number {
+    font-size: 2.15rem !important;
+}
+.metric-label {
+    font-size: 1.15rem !important;
+}
+.plan-title {
+    font-size: 1.75rem !important;
+}
+.plan-price {
+    font-size: 1.35rem !important;
+}
+
+@media (max-width: 700px) {
+    h1 { font-size: 2.75rem !important; }
+    h2 { font-size: 2.15rem !important; }
+    h3 { font-size: 1.7rem !important; }
+    div[data-testid="stRadio"] label p {
+        font-size: 1.18rem !important;
+    }
+}
 </style>
 """, unsafe_allow_html=True)
 
