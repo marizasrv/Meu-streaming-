@@ -180,6 +180,28 @@ div[data-testid="stTextInput"] input {
         font-size: 1.18rem !important;
     }
 }
+
+/* BOTÃO DE ASSINATURA KIWIFY - VISÍVEL NO CELULAR */
+div[data-testid="stLinkButton"] a {
+    background: linear-gradient(90deg, #6d28d9, #8b5cf6) !important;
+    color: #ffffff !important;
+    border: 2px solid #f2d675 !important;
+    border-radius: 16px !important;
+    min-height: 62px !important;
+    font-size: 1.22rem !important;
+    font-weight: 800 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+}
+div[data-testid="stLinkButton"] a p,
+div[data-testid="stLinkButton"] a span {
+    color: #ffffff !important;
+    font-size: 1.22rem !important;
+    font-weight: 800 !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -825,7 +847,7 @@ elif menu == "💎 Planos":
         st.markdown("""
         <div class="plan-card">
             <div class="plan-title">💎 Plano Premium</div>
-            <div class="plan-price">Valor será definido antes de ativar a cobrança</div>
+            <div class="plan-price">R$ 30,00 por mês</div>
             <p>• Conteúdos exclusivos</p>
             <p>• Área Premium</p>
             <p>• Novidades para assinantes</p>
@@ -836,7 +858,7 @@ elif menu == "💎 Planos":
 
         if checkout_url:
             st.link_button(
-                "💳 Assinar Premium pela Kiwify",
+                "💳 Assinar Premium — R$ 30/mês",
                 checkout_url,
                 use_container_width=True
             )
