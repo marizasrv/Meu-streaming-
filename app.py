@@ -193,9 +193,13 @@ def sair_da_conta():
     st.rerun()
 
 
+def mudar_menu(destino):
+    # Callback seguro: altera o menu antes de o radio ser reconstruído.
+    st.session_state["menu_principal"] = destino
+
+
 def abrir_minha_conta():
-    # Callback do botão: roda antes de o menu ser reconstruído.
-    st.session_state["menu_principal"] = "👤 Entrar / Minha conta"
+    mudar_menu("👤 Entrar / Minha conta")
 
 
 def listar_videos():
@@ -472,9 +476,12 @@ elif menu == "👤 Entrar / Minha conta":
         st.write(f"**Plano atual:** {st.session_state.plano_atual}")
         st.caption("A cobrança ainda não está ativada. O próximo passo será conectar o pagamento.")
 
-        if st.button("💎 Ver planos", key="ver_planos_conta"):
-            st.session_state["menu_principal"] = "💎 Planos"
-            st.rerun()
+        st.button(
+            "💎 Ver planos",
+            key="ver_planos_conta",
+            on_click=mudar_menu,
+            args=("💎 Planos",)
+        )
 
         if st.button("🚪 Sair da conta"):
             sair_da_conta()
@@ -566,9 +573,12 @@ elif menu == "💎 Planos":
 
     if not st.session_state.usuario_logado:
         st.info("Entre ou crie uma conta para contratar um plano.")
-        if st.button("👤 Entrar / Criar conta", key="planos_ir_login"):
-            st.session_state["menu_principal"] = "👤 Entrar / Minha conta"
-            st.rerun()
+        st.button(
+            "👤 Entrar / Criar conta",
+            key="planos_ir_login",
+            on_click=mudar_menu,
+            args=("👤 Entrar / Minha conta",)
+        )
     else:
         st.markdown("""
         <div class="plan-card">
@@ -601,9 +611,12 @@ elif menu == "🔒 Premium":
 
     if not st.session_state.usuario_logado:
         st.warning("Entre na sua conta para acessar a área Premium.")
-        if st.button("👤 Entrar / Criar conta", key="premium_ir_login"):
-            st.session_state["menu_principal"] = "👤 Entrar / Minha conta"
-            st.rerun()
+        st.button(
+            "👤 Entrar / Criar conta",
+            key="premium_ir_login",
+            on_click=mudar_menu,
+            args=("👤 Entrar / Minha conta",)
+        )
     elif st.session_state.plano_atual != "Premium":
         st.markdown("""
         <div class="lock-card">
@@ -612,9 +625,12 @@ elif menu == "🔒 Premium":
         </div>
         """, unsafe_allow_html=True)
 
-        if st.button("💎 Ver plano Premium", key="premium_ver_planos"):
-            st.session_state["menu_principal"] = "💎 Planos"
-            st.rerun()
+        st.button(
+            "💎 Ver plano Premium",
+            key="premium_ver_planos",
+            on_click=mudar_menu,
+            args=("💎 Planos",)
+        )
     else:
         st.success("💎 Premium ativo!")
         st.write("Aqui aparecerão os vídeos exclusivos para assinantes.")
