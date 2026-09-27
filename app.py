@@ -91,6 +91,30 @@ div[data-testid="stAlert"] {
 video {
     border-radius: 16px !important;
 }
+.plan-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(242,214,117,0.28);
+    border-radius: 20px;
+    padding: 18px;
+    margin: 10px 0 14px 0;
+}
+.plan-title {
+    font-size: 1.45rem;
+    font-weight: 800;
+    margin-bottom: 6px;
+}
+.plan-price {
+    color: #f2d675 !important;
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+.lock-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px dashed rgba(242,214,117,0.40);
+    border-radius: 20px;
+    padding: 22px;
+    text-align: center;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -115,6 +139,9 @@ if "usuario_logado" not in st.session_state:
 
 if "usuario_id" not in st.session_state:
     st.session_state.usuario_id = None
+
+if "plano_atual" not in st.session_state:
+    st.session_state.plano_atual = "Grátis"
 
 
 def novo_cliente_auth():
@@ -301,6 +328,8 @@ menu = st.sidebar.radio(
         "🆕 Novidades",
         "❤️ Minha Lista",
         "👤 Entrar / Minha conta",
+        "💎 Planos",
+        "🔒 Premium",
         "📤 Enviar vídeo",
         "🧸 Infantil",
         "🎬 Filmes",
@@ -440,7 +469,12 @@ elif menu == "👤 Entrar / Minha conta":
     if st.session_state.usuario_logado:
         st.success("✅ Você está conectado!")
         st.write(f"**E-mail:** {st.session_state.usuario_logado}")
-        st.caption("Sua conta está pronta para receber os planos de assinatura na próxima atualização.")
+        st.write(f"**Plano atual:** {st.session_state.plano_atual}")
+        st.caption("A cobrança ainda não está ativada. O próximo passo será conectar o pagamento.")
+
+        if st.button("💎 Ver planos", key="ver_planos_conta"):
+            st.session_state["menu_principal"] = "💎 Planos"
+            st.rerun()
 
         if st.button("🚪 Sair da conta"):
             sair_da_conta()
@@ -526,6 +560,64 @@ elif menu == "👤 Entrar / Minha conta":
                             st.info("Esse e-mail já tem uma conta. Use a aba Entrar.")
                         else:
                             st.error(f"Não consegui criar a conta: {mensagem}")
+
+elif menu == "💎 Planos":
+    st.subheader("💎 Planos da Mundo da Luna TV")
+
+    if not st.session_state.usuario_logado:
+        st.info("Entre ou crie uma conta para contratar um plano.")
+        if st.button("👤 Entrar / Criar conta", key="planos_ir_login"):
+            st.session_state["menu_principal"] = "👤 Entrar / Minha conta"
+            st.rerun()
+    else:
+        st.markdown("""
+        <div class="plan-card">
+            <div class="plan-title">🌙 Plano Grátis</div>
+            <div class="plan-price">R$ 0</div>
+            <p>• Conteúdos gratuitos</p>
+            <p>• Minha Lista</p>
+            <p>• Continuar assistindo</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="plan-card">
+            <div class="plan-title">💎 Plano Premium</div>
+            <div class="plan-price">Valor será definido antes de ativar a cobrança</div>
+            <p>• Conteúdos exclusivos</p>
+            <p>• Área Premium</p>
+            <p>• Novidades para assinantes</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        if st.button("💎 Quero assinar o Premium", key="quero_premium"):
+            st.info(
+                "A tela Premium já está pronta. O pagamento ainda não foi ativado, "
+                "então nenhum valor será cobrado agora."
+            )
+
+elif menu == "🔒 Premium":
+    st.subheader("🔒 Área Premium")
+
+    if not st.session_state.usuario_logado:
+        st.warning("Entre na sua conta para acessar a área Premium.")
+        if st.button("👤 Entrar / Criar conta", key="premium_ir_login"):
+            st.session_state["menu_principal"] = "👤 Entrar / Minha conta"
+            st.rerun()
+    elif st.session_state.plano_atual != "Premium":
+        st.markdown("""
+        <div class="lock-card">
+            <h3>🔒 Conteúdo Premium bloqueado</h3>
+            <p>Essa área será liberada automaticamente quando sua assinatura Premium estiver ativa.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        if st.button("💎 Ver plano Premium", key="premium_ver_planos"):
+            st.session_state["menu_principal"] = "💎 Planos"
+            st.rerun()
+    else:
+        st.success("💎 Premium ativo!")
+        st.write("Aqui aparecerão os vídeos exclusivos para assinantes.")
 
 elif menu == "📤 Enviar vídeo":
     st.subheader("📤 Enviar novo vídeo")
