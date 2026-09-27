@@ -15,7 +15,7 @@ st.markdown("""
     background:
         radial-gradient(circle at top right, rgba(255,215,0,0.12), transparent 26%),
         radial-gradient(circle at bottom left, rgba(198,132,255,0.16), transparent 30%),
-        linear-gradient(180deg, #2b124c 0%, #3d1a6e 46%, #1f0f33 100%);
+        linear-gradient(180deg, #160825 0%, #24103f 46%, #0d0717 100%);
     color: white;
 }
 .block-container {
@@ -26,7 +26,7 @@ h1, h2, h3, p, label, .stMarkdown {
     color: white !important;
 }
 div[data-testid="stSidebar"] {
-    background: #241038;
+    background: #13081f;
 }
 div[data-testid="stButton"] button {
     width: 100%;
@@ -45,7 +45,7 @@ div[data-testid="stAlert"] {
     border-radius: 16px;
 }
 [data-testid="stFileUploaderDropzone"] {
-    background: #4b216f;
+    background: #2b123f;
     border: 1px solid #8b5cf6;
     border-radius: 16px;
 }
@@ -53,7 +53,7 @@ div[data-testid="stAlert"] {
     padding: 18px;
     border: 1px solid rgba(242,214,117,0.30);
     border-radius: 22px;
-    background: rgba(255,255,255,0.04);
+    background: rgba(255,255,255,0.025);
     margin-bottom: 18px;
 }
 .gold-line {
@@ -72,7 +72,7 @@ div[data-testid="stAlert"] {
     margin: 14px 0 20px 0;
 }
 .metric-card {
-    background: rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.04);
     border: 1px solid rgba(242,214,117,0.22);
     border-radius: 16px;
     padding: 12px 10px;
@@ -92,7 +92,7 @@ video {
     border-radius: 16px !important;
 }
 .plan-card {
-    background: rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.04);
     border: 1px solid rgba(242,214,117,0.28);
     border-radius: 20px;
     padding: 18px;
@@ -109,7 +109,7 @@ video {
     font-weight: 700;
 }
 .lock-card {
-    background: rgba(255,255,255,0.05);
+    background: rgba(255,255,255,0.035);
     border: 1px dashed rgba(242,214,117,0.40);
     border-radius: 20px;
     padding: 22px;
