@@ -190,6 +190,7 @@ def fazer_cadastro(email, senha):
 def sair_da_conta():
     st.session_state.usuario_logado = None
     st.session_state.usuario_id = None
+    st.session_state.plano_atual = "Grátis"
     st.rerun()
 
 
@@ -282,7 +283,16 @@ def ultimo_assistido(videos):
     return max(assistidos, key=lambda v: v.get("ultimo_assistido_at", ""))
 
 
-def mostrar_card(item, contexto):
+def listar_assistidos_recentes(videos, limite=10):
+    assistidos = [v for v in videos if v.get("ultimo_assistido_at")]
+    assistidos.sort(
+        key=lambda v: v.get("ultimo_assistido_at", ""),
+        reverse=True
+    )
+    return assistidos[:limite]
+
+
+def mostrar_card(item, contexto, em_minha_lista=False):
     if item.get("capa_url"):
         st.image(item["capa_url"], use_container_width=True)
 
@@ -308,7 +318,12 @@ def mostrar_card(item, contexto):
 
     with col2:
         favorito = bool(item.get("favorito", False))
-        texto = "💖 Na Minha Lista" if favorito else "🤍 Minha Lista"
+
+        if em_minha_lista and favorito:
+            texto = "🗑️ Remover"
+        else:
+            texto = "💖 Na Minha Lista" if favorito else "🤍 Minha Lista"
+
         if st.button(texto, key=f"fav_{contexto}_{item['id']}"):
             alternar_favorito(item)
 
@@ -331,6 +346,7 @@ menu = st.sidebar.radio(
         "🔎 Buscar",
         "🆕 Novidades",
         "❤️ Minha Lista",
+        "🕒 Assistidos recentemente",
         "👤 Entrar / Minha conta",
         "💎 Planos",
         "🔒 Premium",
@@ -465,7 +481,21 @@ elif menu == "❤️ Minha Lista":
         cols = st.columns(2)
         for i, item in enumerate(favoritos):
             with cols[i % 2]:
-                mostrar_card(item, f"favoritos_{i}")
+                mostrar_card(item, f"favoritos_{i}", em_minha_lista=True)
+
+elif menu == "🕒 Assistidos recentemente":
+    st.subheader("🕒 Assistidos recentemente")
+
+    recentes = listar_assistidos_recentes(videos, limite=10)
+
+    if not recentes:
+        st.info("Você ainda não assistiu a nenhum vídeo.")
+    else:
+        st.caption("Os vídeos assistidos mais recentemente aparecem primeiro.")
+        cols = st.columns(2)
+        for i, item in enumerate(recentes):
+            with cols[i % 2]:
+                mostrar_card(item, f"recentes_{i}")
 
 elif menu == "👤 Entrar / Minha conta":
     st.subheader("👤 Minha conta")
