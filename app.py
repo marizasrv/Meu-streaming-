@@ -166,6 +166,11 @@ def sair_da_conta():
     st.rerun()
 
 
+def abrir_minha_conta():
+    # Callback do botão: roda antes de o menu ser reconstruído.
+    st.session_state["menu_principal"] = "👤 Entrar / Minha conta"
+
+
 def listar_videos():
     try:
         resp = (
@@ -314,13 +319,17 @@ videos = listar_videos()
 
 if menu == "🏠 Início":
     if st.session_state.usuario_logado:
-        if st.button("👤 Minha conta", key="atalho_minha_conta"):
-            st.session_state.menu_principal = "👤 Entrar / Minha conta"
-            st.rerun()
+        st.button(
+            "👤 Minha conta",
+            key="atalho_minha_conta",
+            on_click=abrir_minha_conta
+        )
     else:
-        if st.button("👤 Entrar / Criar conta", key="atalho_login_home"):
-            st.session_state.menu_principal = "👤 Entrar / Minha conta"
-            st.rerun()
+        st.button(
+            "👤 Entrar / Criar conta",
+            key="atalho_login_home",
+            on_click=abrir_minha_conta
+        )
 
     total = len(videos)
     infantil = len([v for v in videos if v.get("categoria") == "Infantil"])
