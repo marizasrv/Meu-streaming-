@@ -212,8 +212,17 @@ if "usuario_logado" not in st.session_state:
 if "usuario_id" not in st.session_state:
     st.session_state.usuario_id = None
 
+if "usuario_access_token" not in st.session_state:
+    st.session_state.usuario_access_token = None
+
+if "usuario_refresh_token" not in st.session_state:
+    st.session_state.usuario_refresh_token = None
+
 if "plano_atual" not in st.session_state:
     st.session_state.plano_atual = "Grátis"
+
+if "status_assinatura" not in st.session_state:
+    st.session_state.status_assinatura = "inativo"
 
 
 def novo_cliente_auth():
@@ -223,6 +232,90 @@ def novo_cliente_auth():
         st.secrets["SUPABASE_URL"],
         st.secrets["SUPABASE_KEY"]
     )
+
+
+def cliente_usuario_autenticado():
+    if not st.session_state.usuario_access_token or not st.session_state.usuario_refresh_token:
+        return None
+
+    cliente = novo_cliente_auth()
+    cliente.auth.set_session(
+        st.session_state.usuario_access_token,
+        st.session_state.usuario_refresh_token
+    )
+    return cliente
+
+
+def carregar_plano_usuario():
+    if not st.session_state.usuario_id:
+        st.session_state.plano_atual = "Grátis"
+        st.session_state.status_assinatura = "inativo"
+        return
+
+    try:
+        cliente = cliente_usuario_autenticado()
+        if cliente is None:
+            return
+
+        resp = (
+            cliente.table("assinaturas")
+            .select("plano,status")
+            .eq("user_id", st.session_state.usuario_id)
+            .limit(1)
+            .execute()
+        )
+
+        dados = (resp.data or [])
+        if dados:
+            item = dados[0]
+            st.session_state.plano_atual = item.get("plano") or "Grátis"
+            st.session_state.status_assinatura = item.get("status") or "inativo"
+        else:
+            st.session_state.plano_atual = "Grátis"
+            st.session_state.status_assinatura = "inativo"
+    except Exception:
+        # Mantém o app funcionando mesmo antes da tabela de assinaturas ser criada.
+        st.session_state.plano_atual = "Grátis"
+        st.session_state.status_assinatura = "inativo"
+
+
+def cliente_admin_assinaturas():
+    try:
+        chave = str(st.secrets.get("SUPABASE_SERVICE_ROLE_KEY", "")).strip()
+    except Exception:
+        chave = ""
+
+    if not chave:
+        return None
+
+    return create_client(st.secrets["SUPABASE_URL"], chave)
+
+
+def ativar_plano_admin(email, plano, status):
+    admin = cliente_admin_assinaturas()
+    if admin is None:
+        raise RuntimeError(
+            "Falta configurar SUPABASE_SERVICE_ROLE_KEY nos Secrets do Streamlit."
+        )
+
+    busca = (
+        admin.table("assinaturas")
+        .select("user_id,email")
+        .ilike("email", email.strip())
+        .limit(1)
+        .execute()
+    )
+
+    itens = busca.data or []
+    if not itens:
+        raise RuntimeError("Não encontrei uma conta cadastrada com esse e-mail.")
+
+    user_id = itens[0]["user_id"]
+
+    admin.table("assinaturas").update({
+        "plano": plano,
+        "status": status
+    }).eq("user_id", user_id).execute()
 
 
 def fazer_login(email, senha):
@@ -235,6 +328,12 @@ def fazer_login(email, senha):
     if resposta.user:
         st.session_state.usuario_logado = resposta.user.email
         st.session_state.usuario_id = str(resposta.user.id)
+
+        if resposta.session:
+            st.session_state.usuario_access_token = resposta.session.access_token
+            st.session_state.usuario_refresh_token = resposta.session.refresh_token
+
+        carregar_plano_usuario()
         return True
     return False
 
@@ -251,6 +350,9 @@ def fazer_cadastro(email, senha):
     if resposta.session and resposta.user:
         st.session_state.usuario_logado = resposta.user.email
         st.session_state.usuario_id = str(resposta.user.id)
+        st.session_state.usuario_access_token = resposta.session.access_token
+        st.session_state.usuario_refresh_token = resposta.session.refresh_token
+        carregar_plano_usuario()
         return "logado"
 
     if resposta.user:
@@ -262,7 +364,10 @@ def fazer_cadastro(email, senha):
 def sair_da_conta():
     st.session_state.usuario_logado = None
     st.session_state.usuario_id = None
+    st.session_state.usuario_access_token = None
+    st.session_state.usuario_refresh_token = None
     st.session_state.plano_atual = "Grátis"
+    st.session_state.status_assinatura = "inativo"
     st.rerun()
 
 
@@ -573,10 +678,16 @@ elif menu == "👤 Entrar / Minha conta":
     st.subheader("👤 Minha conta")
 
     if st.session_state.usuario_logado:
+        carregar_plano_usuario()
+
         st.success("✅ Você está conectado!")
         st.write(f"**E-mail:** {st.session_state.usuario_logado}")
         st.write(f"**Plano atual:** {st.session_state.plano_atual}")
-        st.caption("A cobrança ainda não está ativada. O próximo passo será conectar o pagamento.")
+        st.write(f"**Status:** {st.session_state.status_assinatura}")
+
+        if st.button("🔄 Atualizar meu plano", key="atualizar_plano_conta"):
+            carregar_plano_usuario()
+            st.rerun()
 
         st.button(
             "💎 Ver planos",
@@ -682,6 +793,17 @@ elif menu == "💎 Planos":
             args=("👤 Entrar / Minha conta",)
         )
     else:
+        carregar_plano_usuario()
+
+        st.info(
+            f"Seu plano atual é **{st.session_state.plano_atual}** "
+            f"({st.session_state.status_assinatura})."
+        )
+
+        if st.button("🔄 Já paguei — atualizar meu plano", key="planos_atualizar"):
+            carregar_plano_usuario()
+            st.rerun()
+
         st.markdown("""
         <div class="plan-card">
             <div class="plan-title">🌙 Plano Grátis</div>
@@ -726,6 +848,9 @@ elif menu == "💎 Planos":
 elif menu == "🔒 Premium":
     st.subheader("🔒 Área Premium")
 
+    if st.session_state.usuario_logado:
+        carregar_plano_usuario()
+
     if not st.session_state.usuario_logado:
         st.warning("Entre na sua conta para acessar a área Premium.")
         st.button(
@@ -734,7 +859,10 @@ elif menu == "🔒 Premium":
             on_click=mudar_menu,
             args=("👤 Entrar / Minha conta",)
         )
-    elif st.session_state.plano_atual != "Premium":
+    elif not (
+        st.session_state.plano_atual == "Premium"
+        and st.session_state.status_assinatura == "ativo"
+    ):
         st.markdown("""
         <div class="lock-card">
             <h3>🔒 Conteúdo Premium bloqueado</h3>
@@ -837,7 +965,7 @@ elif menu in ["🧸 Infantil", "🎬 Filmes", "📺 Séries"]:
                 mostrar_card(item, f"categoria_{categoria_atual}_{i}")
 
 elif menu == "🗑️ Gerenciar":
-    st.subheader("🗑️ Gerenciar vídeos")
+    st.subheader("🗑️ Gerenciar")
 
     senha = st.text_input(
         "Senha de administrador",
@@ -847,11 +975,56 @@ elif menu == "🗑️ Gerenciar":
 
     if senha != st.secrets["ADMIN_PASSWORD"]:
         st.info("Digite a senha de administrador.")
-    elif not videos:
-        st.info("Não há vídeos cadastrados.")
     else:
-        for item in videos:
-            st.markdown("---")
-            st.write(f"**{item.get('nome', 'Sem título')}** — {item.get('categoria', '')}")
-            if st.button("Excluir", key=f"excluir_{item['id']}"):
-                excluir_video(item)
+        st.subheader("💳 Gerenciar assinaturas")
+        st.caption(
+            "Depois de conferir o pagamento no Mercado Pago, "
+            "você pode liberar ou retirar o Premium por aqui."
+        )
+
+        email_assinante = st.text_input(
+            "E-mail do assinante",
+            key="admin_email_assinante",
+            placeholder="cliente@exemplo.com"
+        )
+
+        plano_admin = st.selectbox(
+            "Plano",
+            ["Grátis", "Premium"],
+            key="admin_plano_assinante"
+        )
+
+        status_admin = st.selectbox(
+            "Status",
+            ["ativo", "inativo"],
+            key="admin_status_assinante"
+        )
+
+        if st.button("💾 Salvar assinatura", key="admin_salvar_assinatura"):
+            if not email_assinante.strip():
+                st.warning("Digite o e-mail do assinante.")
+            else:
+                try:
+                    ativar_plano_admin(
+                        email_assinante,
+                        plano_admin,
+                        status_admin
+                    )
+                    st.success("✅ Assinatura atualizada!")
+                except Exception as e:
+                    st.error(f"Não consegui atualizar a assinatura: {e}")
+
+        st.markdown("---")
+        st.subheader("🎞️ Gerenciar vídeos")
+
+        if not videos:
+            st.info("Não há vídeos cadastrados.")
+        else:
+            for item in videos:
+                st.markdown("---")
+                st.write(
+                    f"**{item.get('nome', 'Sem título')}** — "
+                    f"{item.get('categoria', '')}"
+                )
+                if st.button("Excluir", key=f"excluir_{item['id']}"):
+                    excluir_video(item)
