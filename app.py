@@ -1,5 +1,6 @@
 import streamlit as st
 from supabase import create_client, Client
+from datetime import datetime, timezone
 import uuid
 
 st.set_page_config(
@@ -93,6 +94,7 @@ video {
 </style>
 """, unsafe_allow_html=True)
 
+
 @st.cache_resource
 def get_supabase() -> Client:
     return create_client(
@@ -100,8 +102,10 @@ def get_supabase() -> Client:
         st.secrets["SUPABASE_KEY"]
     )
 
+
 supabase = get_supabase()
 BUCKET = "videos"
+
 
 def listar_videos():
     try:
@@ -116,6 +120,7 @@ def listar_videos():
         st.error(f"Erro ao carregar os vídeos: {e}")
         return []
 
+
 def upload_arquivo(arquivo, pasta):
     ext = arquivo.name.rsplit(".", 1)[-1].lower()
     nome_unico = f"{pasta}/{uuid.uuid4().hex}.{ext}"
@@ -128,6 +133,7 @@ def upload_arquivo(arquivo, pasta):
 
     url = supabase.storage.from_(BUCKET).get_public_url(nome_unico)
     return nome_unico, url
+
 
 def excluir_video(item):
     try:
@@ -146,30 +152,74 @@ def excluir_video(item):
     except Exception as e:
         st.error(f"Não consegui excluir: {e}")
 
-if "ultimo_assistido_id" not in st.session_state:
-    st.session_state.ultimo_assistido_id = None
 
-def mostrar_card(item):
+def alternar_favorito(item):
+    try:
+        novo_valor = not bool(item.get("favorito", False))
+        (
+            supabase.table("videos")
+            .update({"favorito": novo_valor})
+            .eq("id", item["id"])
+            .execute()
+        )
+        st.rerun()
+    except Exception as e:
+        st.error(f"Não consegui atualizar Minha Lista: {e}")
+
+
+def registrar_assistido(item):
+    try:
+        agora = datetime.now(timezone.utc).isoformat()
+        (
+            supabase.table("videos")
+            .update({"ultimo_assistido_at": agora})
+            .eq("id", item["id"])
+            .execute()
+        )
+    except Exception as e:
+        st.warning(f"O vídeo abriu, mas não consegui salvar o histórico: {e}")
+
+
+def ultimo_assistido(videos):
+    assistidos = [v for v in videos if v.get("ultimo_assistido_at")]
+    if not assistidos:
+        return None
+    return max(assistidos, key=lambda v: v.get("ultimo_assistido_at", ""))
+
+
+def mostrar_card(item, contexto):
     if item.get("capa_url"):
         st.image(item["capa_url"], use_container_width=True)
 
     st.markdown(f"### ✨ {item.get('nome', 'Sem título')}")
     st.caption(f"🌟 {item.get('categoria', '')}")
 
-    chave = f"aberto_{item['id']}"
-    if chave not in st.session_state:
-        st.session_state[chave] = False
+    col1, col2 = st.columns([3, 2])
 
-    if not st.session_state[chave]:
-        if st.button("▶ Assistir", key=f"assistir_{item['id']}"):
-            st.session_state[chave] = True
-            st.session_state.ultimo_assistido_id = item["id"]
-            st.rerun()
-    else:
-        st.video(item["video_url"])
-        if st.button("✖ Fechar vídeo", key=f"fechar_{item['id']}"):
+    with col1:
+        chave = f"aberto_{contexto}_{item['id']}"
+        if chave not in st.session_state:
             st.session_state[chave] = False
-            st.rerun()
+
+        if not st.session_state[chave]:
+            if st.button("▶ Assistir", key=f"assistir_{contexto}_{item['id']}"):
+                registrar_assistido(item)
+                st.session_state[chave] = True
+                st.rerun()
+        else:
+            if st.button("✖ Fechar vídeo", key=f"fechar_{contexto}_{item['id']}"):
+                st.session_state[chave] = False
+                st.rerun()
+
+    with col2:
+        favorito = bool(item.get("favorito", False))
+        texto = "💖 Na Minha Lista" if favorito else "🤍 Minha Lista"
+        if st.button(texto, key=f"fav_{contexto}_{item['id']}"):
+            alternar_favorito(item)
+
+    if st.session_state.get(f"aberto_{contexto}_{item['id']}", False):
+        st.video(item["video_url"])
+
 
 st.markdown("""
 <div class="hero">
@@ -185,6 +235,7 @@ menu = st.sidebar.radio(
         "🏠 Início",
         "🔎 Buscar",
         "🆕 Novidades",
+        "❤️ Minha Lista",
         "📤 Enviar vídeo",
         "🧸 Infantil",
         "🎬 Filmes",
@@ -222,22 +273,18 @@ if menu == "🏠 Início":
     </div>
     """, unsafe_allow_html=True)
 
-    if st.session_state.ultimo_assistido_id is not None:
-        ultimo = next(
-            (v for v in videos if v["id"] == st.session_state.ultimo_assistido_id),
-            None
-        )
-        if ultimo:
-            st.subheader("▶ Continuar assistindo")
-            mostrar_card(ultimo)
-            st.markdown("---")
+    ultimo = ultimo_assistido(videos)
+    if ultimo:
+        st.subheader("▶ Continuar assistindo")
+        mostrar_card(ultimo, "continuar")
+        st.markdown("---")
 
     st.subheader("✨ Destaques")
 
     if not videos:
         st.info("Ainda não há vídeos. Abra 📤 Enviar vídeo para começar.")
     else:
-        mostrar_card(videos[0])
+        mostrar_card(videos[0], "destaque")
 
         if len(videos) > 1:
             st.markdown("---")
@@ -245,7 +292,7 @@ if menu == "🏠 Início":
             cols = st.columns(2)
             for i, item in enumerate(videos[1:5]):
                 with cols[i % 2]:
-                    mostrar_card(item)
+                    mostrar_card(item, f"ultimos_{i}")
 
 elif menu == "🔎 Buscar":
     st.subheader("🔎 Buscar vídeos")
@@ -277,7 +324,7 @@ elif menu == "🔎 Buscar":
         cols = st.columns(2)
         for i, item in enumerate(filtrados):
             with cols[i % 2]:
-                mostrar_card(item)
+                mostrar_card(item, f"busca_{i}")
 
 elif menu == "🆕 Novidades":
     st.subheader("🆕 Novidades")
@@ -288,7 +335,20 @@ elif menu == "🆕 Novidades":
         cols = st.columns(2)
         for i, item in enumerate(videos[:10]):
             with cols[i % 2]:
-                mostrar_card(item)
+                mostrar_card(item, f"novidades_{i}")
+
+elif menu == "❤️ Minha Lista":
+    st.subheader("❤️ Minha Lista")
+
+    favoritos = [v for v in videos if bool(v.get("favorito", False))]
+
+    if not favoritos:
+        st.info("Sua lista ainda está vazia. Toque em 🤍 Minha Lista em qualquer vídeo.")
+    else:
+        cols = st.columns(2)
+        for i, item in enumerate(favoritos):
+            with cols[i % 2]:
+                mostrar_card(item, f"favoritos_{i}")
 
 elif menu == "📤 Enviar vídeo":
     st.subheader("📤 Enviar novo vídeo")
@@ -346,7 +406,8 @@ elif menu == "📤 Enviar vídeo":
                             "video_url": video_url,
                             "video_path": video_path,
                             "capa_url": capa_url,
-                            "capa_path": capa_path
+                            "capa_path": capa_path,
+                            "favorito": False
                         }).execute()
 
                         st.success("✅ Vídeo salvo permanentemente!")
@@ -371,7 +432,7 @@ elif menu in ["🧸 Infantil", "🎬 Filmes", "📺 Séries"]:
         cols = st.columns(2)
         for i, item in enumerate(itens):
             with cols[i % 2]:
-                mostrar_card(item)
+                mostrar_card(item, f"categoria_{categoria_atual}_{i}")
 
 elif menu == "🗑️ Gerenciar":
     st.subheader("🗑️ Gerenciar vídeos")
