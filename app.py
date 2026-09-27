@@ -131,6 +131,13 @@ supabase = get_supabase()
 BUCKET = "videos"
 
 
+def link_plano_mercado_pago():
+    try:
+        return str(st.secrets.get("MERCADO_PAGO_PLAN_URL", "")).strip()
+    except Exception:
+        return ""
+
+
 # -----------------------------
 # LOGIN / CADASTRO DE USUÁRIOS
 # -----------------------------
@@ -630,10 +637,25 @@ elif menu == "💎 Planos":
         </div>
         """, unsafe_allow_html=True)
 
-        if st.button("💎 Quero assinar o Premium", key="quero_premium"):
+        mp_url = link_plano_mercado_pago()
+
+        if mp_url:
+            st.link_button(
+                "💳 Assinar Premium com Mercado Pago",
+                mp_url,
+                use_container_width=True
+            )
+            st.caption(
+                "O pagamento acontece no ambiente do Mercado Pago. "
+                "A liberação automática do Premium será adicionada na próxima etapa."
+            )
+        else:
             st.info(
-                "A tela Premium já está pronta. O pagamento ainda não foi ativado, "
-                "então nenhum valor será cobrado agora."
+                "💳 O botão de pagamento já está preparado. "
+                "Falta apenas adicionar o link do seu Plano de Assinatura do Mercado Pago."
+            )
+            st.caption(
+                "Nenhuma cobrança será feita enquanto o link do Mercado Pago não estiver configurado."
             )
 
 elif menu == "🔒 Premium":
@@ -651,7 +673,7 @@ elif menu == "🔒 Premium":
         st.markdown("""
         <div class="lock-card">
             <h3>🔒 Conteúdo Premium bloqueado</h3>
-            <p>Essa área será liberada automaticamente quando sua assinatura Premium estiver ativa.</p>
+            <p>Essa área será liberada quando sua assinatura Premium for confirmada no sistema.</p>
         </div>
         """, unsafe_allow_html=True)
 
