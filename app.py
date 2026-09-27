@@ -107,65 +107,6 @@ supabase = get_supabase()
 BUCKET = "videos"
 
 
-# -----------------------------
-# LOGIN / CADASTRO DE USUÁRIOS
-# -----------------------------
-if "usuario_logado" not in st.session_state:
-    st.session_state.usuario_logado = None
-
-if "usuario_id" not in st.session_state:
-    st.session_state.usuario_id = None
-
-
-def novo_cliente_auth():
-    # Cliente separado para login, evitando misturar a sessão
-    # de um usuário com outro.
-    return create_client(
-        st.secrets["SUPABASE_URL"],
-        st.secrets["SUPABASE_KEY"]
-    )
-
-
-def fazer_login(email, senha):
-    auth = novo_cliente_auth()
-    resposta = auth.auth.sign_in_with_password({
-        "email": email.strip(),
-        "password": senha
-    })
-
-    if resposta.user:
-        st.session_state.usuario_logado = resposta.user.email
-        st.session_state.usuario_id = str(resposta.user.id)
-        return True
-    return False
-
-
-def fazer_cadastro(email, senha):
-    auth = novo_cliente_auth()
-    resposta = auth.auth.sign_up({
-        "email": email.strip(),
-        "password": senha
-    })
-
-    # Se a confirmação por e-mail estiver desativada,
-    # o Supabase pode criar a sessão imediatamente.
-    if resposta.session and resposta.user:
-        st.session_state.usuario_logado = resposta.user.email
-        st.session_state.usuario_id = str(resposta.user.id)
-        return "logado"
-
-    if resposta.user:
-        return "confirmar_email"
-
-    return "erro"
-
-
-def sair_da_conta():
-    st.session_state.usuario_logado = None
-    st.session_state.usuario_id = None
-    st.rerun()
-
-
 def listar_videos():
     try:
         resp = (
@@ -295,7 +236,6 @@ menu = st.sidebar.radio(
         "🔎 Buscar",
         "🆕 Novidades",
         "❤️ Minha Lista",
-        "👤 Entrar / Minha conta",
         "📤 Enviar vídeo",
         "🧸 Infantil",
         "🎬 Filmes",
@@ -303,11 +243,6 @@ menu = st.sidebar.radio(
         "🗑️ Gerenciar"
     ]
 )
-
-if st.session_state.usuario_logado:
-    st.sidebar.success(f"👤 {st.session_state.usuario_logado}")
-else:
-    st.sidebar.caption("👤 Visitante — faça login para sua conta")
 
 videos = listar_videos()
 
@@ -414,99 +349,6 @@ elif menu == "❤️ Minha Lista":
         for i, item in enumerate(favoritos):
             with cols[i % 2]:
                 mostrar_card(item, f"favoritos_{i}")
-
-elif menu == "👤 Entrar / Minha conta":
-    st.subheader("👤 Minha conta")
-
-    if st.session_state.usuario_logado:
-        st.success("✅ Você está conectado!")
-        st.write(f"**E-mail:** {st.session_state.usuario_logado}")
-        st.caption("Sua conta está pronta para receber os planos de assinatura na próxima atualização.")
-
-        if st.button("🚪 Sair da conta"):
-            sair_da_conta()
-
-    else:
-        aba_login, aba_cadastro = st.tabs(["🔑 Entrar", "✨ Criar conta"])
-
-        with aba_login:
-            st.write("Entre com seu e-mail e senha.")
-            email_login = st.text_input(
-                "E-mail",
-                key="email_login",
-                placeholder="seuemail@exemplo.com"
-            )
-            senha_login = st.text_input(
-                "Senha",
-                type="password",
-                key="senha_login"
-            )
-
-            if st.button("🔑 Entrar na Mundo da Luna TV", key="botao_login"):
-                if not email_login.strip() or not senha_login:
-                    st.warning("Digite o e-mail e a senha.")
-                else:
-                    try:
-                        if fazer_login(email_login, senha_login):
-                            st.success("✅ Login realizado!")
-                            st.rerun()
-                        else:
-                            st.error("Não consegui entrar. Confira o e-mail e a senha.")
-                    except Exception as e:
-                        mensagem = str(e)
-                        if "Invalid login credentials" in mensagem:
-                            st.error("E-mail ou senha incorretos.")
-                        elif "Email not confirmed" in mensagem:
-                            st.warning("Confirme seu e-mail antes de entrar.")
-                        else:
-                            st.error(f"Não consegui entrar: {mensagem}")
-
-        with aba_cadastro:
-            st.write("Crie uma conta gratuita para testar.")
-            email_cadastro = st.text_input(
-                "Seu e-mail",
-                key="email_cadastro",
-                placeholder="seuemail@exemplo.com"
-            )
-            senha_cadastro = st.text_input(
-                "Crie uma senha",
-                type="password",
-                key="senha_cadastro"
-            )
-            senha_confirmacao = st.text_input(
-                "Repita a senha",
-                type="password",
-                key="senha_confirmacao"
-            )
-
-            if st.button("✨ Criar minha conta", key="botao_cadastro"):
-                if not email_cadastro.strip():
-                    st.warning("Digite seu e-mail.")
-                elif len(senha_cadastro) < 6:
-                    st.warning("A senha precisa ter pelo menos 6 caracteres.")
-                elif senha_cadastro != senha_confirmacao:
-                    st.warning("As duas senhas estão diferentes.")
-                else:
-                    try:
-                        resultado = fazer_cadastro(email_cadastro, senha_cadastro)
-
-                        if resultado == "logado":
-                            st.success("✅ Conta criada! Você já está conectado.")
-                            st.rerun()
-                        elif resultado == "confirmar_email":
-                            st.success("✅ Conta criada!")
-                            st.info(
-                                "📧 Se o Supabase pedir confirmação, abra seu e-mail "
-                                "e toque no link de confirmação. Depois volte aqui para entrar."
-                            )
-                        else:
-                            st.error("Não consegui criar a conta.")
-                    except Exception as e:
-                        mensagem = str(e)
-                        if "already registered" in mensagem.lower():
-                            st.info("Esse e-mail já tem uma conta. Use a aba Entrar.")
-                        else:
-                            st.error(f"Não consegui criar a conta: {mensagem}")
 
 elif menu == "📤 Enviar vídeo":
     st.subheader("📤 Enviar novo vídeo")
