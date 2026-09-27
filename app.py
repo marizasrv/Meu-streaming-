@@ -301,7 +301,8 @@ menu = st.sidebar.radio(
         "🎬 Filmes",
         "📺 Séries",
         "🗑️ Gerenciar"
-    ]
+    ],
+    key="menu_principal"
 )
 
 if st.session_state.usuario_logado:
@@ -312,6 +313,15 @@ else:
 videos = listar_videos()
 
 if menu == "🏠 Início":
+    if st.session_state.usuario_logado:
+        if st.button("👤 Minha conta", key="atalho_minha_conta"):
+            st.session_state.menu_principal = "👤 Entrar / Minha conta"
+            st.rerun()
+    else:
+        if st.button("👤 Entrar / Criar conta", key="atalho_login_home"):
+            st.session_state.menu_principal = "👤 Entrar / Minha conta"
+            st.rerun()
+
     total = len(videos)
     infantil = len([v for v in videos if v.get("categoria") == "Infantil"])
     filmes = len([v for v in videos if v.get("categoria") == "Filmes"])
