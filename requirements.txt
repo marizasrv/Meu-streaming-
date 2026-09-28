@@ -1,2 +1,8 @@
-streamlit
-supabase
+streamlit>=1.40,<2
+supabase>=2,<3
+streamlit-js-eval==1.0.0
+Pillow>=10
+moviepy>=2,<3
+edge-tts>=6.1
+imageio-ffmpeg>=0.5
+
