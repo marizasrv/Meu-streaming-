@@ -1,7 +1,13 @@
 import streamlit as st
 from supabase import create_client, Client
 from datetime import datetime, timezone
+from streamlit_js_eval import streamlit_js_eval
 import uuid
+import json
+import time
+import hmac
+import hashlib
+import base64
 
 st.set_page_config(
     page_title="Mundo da Luna TV",
@@ -217,6 +223,99 @@ def get_supabase() -> Client:
 supabase = get_supabase()
 BUCKET = "videos"
 
+# -----------------------------
+# LOGIN PERSISTENTE NO NAVEGADOR
+# -----------------------------
+# O token salvo no navegador contém apenas user_id, e-mail e validade.
+# Ele é assinado no servidor para impedir alterações.
+LOGIN_STORAGE_KEY = "mundo_luna_login_v1"
+
+def _segredo_login():
+    try:
+        segredo = str(st.secrets.get("LOGIN_SESSION_SECRET", "")).strip()
+        if not segredo:
+            # Fallback para não derrubar o app enquanto o novo Secret ainda não foi criado.
+            segredo = str(st.secrets.get("ADMIN_PASSWORD", "")).strip()
+        return segredo
+    except Exception:
+        return ""
+
+def _b64url_encode(data: bytes) -> str:
+    return base64.urlsafe_b64encode(data).decode("utf-8").rstrip("=")
+
+def _b64url_decode(texto: str) -> bytes:
+    padding = "=" * (-len(texto) % 4)
+    return base64.urlsafe_b64decode(texto + padding)
+
+def criar_token_login(user_id: str, email: str, dias: int = 30) -> str | None:
+    segredo = _segredo_login()
+    if not segredo:
+        return None
+
+    payload = {
+        "uid": str(user_id),
+        "email": str(email).strip().lower(),
+        "exp": int(time.time()) + (dias * 24 * 60 * 60),
+    }
+    payload_json = json.dumps(payload, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    corpo = _b64url_encode(payload_json)
+    assinatura = hmac.new(
+        segredo.encode("utf-8"),
+        corpo.encode("utf-8"),
+        hashlib.sha256,
+    ).digest()
+    return f"{corpo}.{_b64url_encode(assinatura)}"
+
+def validar_token_login(token: str):
+    segredo = _segredo_login()
+    if not segredo or not token or "." not in token:
+        return None
+
+    try:
+        corpo, assinatura_recebida = token.split(".", 1)
+        assinatura_esperada = hmac.new(
+            segredo.encode("utf-8"),
+            corpo.encode("utf-8"),
+            hashlib.sha256,
+        ).digest()
+        assinatura_recebida_bytes = _b64url_decode(assinatura_recebida)
+
+        if not hmac.compare_digest(assinatura_esperada, assinatura_recebida_bytes):
+            return None
+
+        payload = json.loads(_b64url_decode(corpo).decode("utf-8"))
+        if int(payload.get("exp", 0)) < int(time.time()):
+            return None
+        if not payload.get("uid") or not payload.get("email"):
+            return None
+        return payload
+    except Exception:
+        return None
+
+def agendar_salvar_login_navegador(token: str):
+    if token:
+        st.session_state["_login_token_para_salvar"] = token
+
+def agendar_remover_login_navegador():
+    st.session_state["_remover_login_browser"] = True
+
+def executar_pendencias_browser():
+    token = st.session_state.pop("_login_token_para_salvar", None)
+    if token:
+        js_token = json.dumps(token)
+        streamlit_js_eval(
+            js_expressions=f"localStorage.setItem('{LOGIN_STORAGE_KEY}', {js_token}); true",
+            want_output=False,
+            key=f"salvar_login_{hashlib.sha1(token.encode()).hexdigest()[:10]}",
+        )
+
+    if st.session_state.pop("_remover_login_browser", False):
+        streamlit_js_eval(
+            js_expressions=f"localStorage.removeItem('{LOGIN_STORAGE_KEY}'); true",
+            want_output=False,
+            key=f"remover_login_{int(time.time())}",
+        )
+
 
 def link_plano_pagamento():
     try:
@@ -279,19 +378,30 @@ def carregar_plano_usuario():
         return
 
     try:
-        cliente = cliente_usuario_autenticado()
-        if cliente is None:
-            return
+        # Usa a chave administrativa quando disponível. Isso permite restaurar
+        # o plano mesmo depois que o Streamlit reiniciar a sessão do navegador.
+        admin = cliente_admin_assinaturas()
+        if admin is not None:
+            resp = (
+                admin.table("assinaturas")
+                .select("plano,status")
+                .eq("user_id", st.session_state.usuario_id)
+                .limit(1)
+                .execute()
+            )
+        else:
+            cliente = cliente_usuario_autenticado()
+            if cliente is None:
+                return
+            resp = (
+                cliente.table("assinaturas")
+                .select("plano,status")
+                .eq("user_id", st.session_state.usuario_id)
+                .limit(1)
+                .execute()
+            )
 
-        resp = (
-            cliente.table("assinaturas")
-            .select("plano,status")
-            .eq("user_id", st.session_state.usuario_id)
-            .limit(1)
-            .execute()
-        )
-
-        dados = (resp.data or [])
+        dados = resp.data or []
         if dados:
             item = dados[0]
             st.session_state.plano_atual = item.get("plano") or "Grátis"
@@ -300,7 +410,6 @@ def carregar_plano_usuario():
             st.session_state.plano_atual = "Grátis"
             st.session_state.status_assinatura = "inativo"
     except Exception:
-        # Mantém o app funcionando mesmo antes da tabela de assinaturas ser criada.
         st.session_state.plano_atual = "Grátis"
         st.session_state.status_assinatura = "inativo"
 
@@ -363,6 +472,10 @@ def fazer_login(email, senha):
             st.session_state.usuario_access_token = resposta.session.access_token
             st.session_state.usuario_refresh_token = resposta.session.refresh_token
 
+        token_login = criar_token_login(st.session_state.usuario_id, st.session_state.usuario_logado)
+        if token_login:
+            agendar_salvar_login_navegador(token_login)
+
         carregar_plano_usuario()
         return True
     return False
@@ -382,6 +495,9 @@ def fazer_cadastro(email, senha):
         st.session_state.usuario_id = str(resposta.user.id)
         st.session_state.usuario_access_token = resposta.session.access_token
         st.session_state.usuario_refresh_token = resposta.session.refresh_token
+        token_login = criar_token_login(st.session_state.usuario_id, st.session_state.usuario_logado)
+        if token_login:
+            agendar_salvar_login_navegador(token_login)
         carregar_plano_usuario()
         return "logado"
 
@@ -392,6 +508,7 @@ def fazer_cadastro(email, senha):
 
 
 def sair_da_conta():
+    agendar_remover_login_navegador()
     st.session_state.usuario_logado = None
     st.session_state.usuario_id = None
     st.session_state.usuario_access_token = None
@@ -408,6 +525,41 @@ def mudar_menu(destino):
 
 def abrir_minha_conta():
     mudar_menu("👤 Entrar / Minha conta")
+
+
+def restaurar_login_do_navegador():
+    if st.session_state.usuario_logado:
+        return
+
+    # Na primeira execução do componente, o valor pode vir como None.
+    # Quando o navegador responder, o Streamlit executa o script novamente.
+    token_salvo = streamlit_js_eval(
+        js_expressions=f"localStorage.getItem('{LOGIN_STORAGE_KEY}') || '__SEM_LOGIN__'",
+        want_output=True,
+        key="ler_login_persistente",
+    )
+
+    if token_salvo is None:
+        return
+
+    if token_salvo == "__SEM_LOGIN__":
+        return
+
+    payload = validar_token_login(str(token_salvo))
+    if not payload:
+        # Token inválido ou expirado: limpa o navegador.
+        streamlit_js_eval(
+            js_expressions=f"localStorage.removeItem('{LOGIN_STORAGE_KEY}'); true",
+            want_output=False,
+            key="limpar_login_invalido",
+        )
+        return
+
+    st.session_state.usuario_logado = payload["email"]
+    st.session_state.usuario_id = payload["uid"]
+    st.session_state.usuario_access_token = None
+    st.session_state.usuario_refresh_token = None
+    carregar_plano_usuario()
 
 
 def listar_videos():
@@ -537,6 +689,10 @@ def mostrar_card(item, contexto, em_minha_lista=False):
     if st.session_state.get(f"aberto_{contexto}_{item['id']}", False):
         st.video(item["video_url"])
 
+
+# Aplica gravação/remoção pendente do login no navegador e tenta restaurar a conta.
+executar_pendencias_browser()
+restaurar_login_do_navegador()
 
 st.markdown("""
 <div class="hero">
