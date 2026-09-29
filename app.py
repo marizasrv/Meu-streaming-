@@ -146,26 +146,30 @@ div[data-testid="stAlert"] {
 }
 .metric-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    margin: 14px 0 20px 0;
+    grid-template-columns: repeat(4, minmax(82px, 1fr));
+    gap: 7px;
+    margin: 8px 0 12px 0;
+    overflow-x: auto;
+    padding-bottom: 2px;
 }
 .metric-card {
-    background: rgba(255,255,255,0.04);
+    background: rgba(255,255,255,0.035);
     border: 1px solid rgba(242,214,117,0.22);
-    border-radius: 16px;
-    padding: 12px 10px;
+    border-radius: 13px;
+    padding: 8px 6px;
     text-align: center;
+    min-width: 82px;
 }
 .metric-number {
-    font-size: 1.8rem;
+    font-size: 1.35rem;
     font-weight: 800;
-    line-height: 1.1;
+    line-height: 1.05;
 }
 .metric-label {
     color: #f2d675;
-    font-size: 0.95rem;
-    margin-top: 4px;
+    font-size: 0.76rem;
+    margin-top: 2px;
+    white-space: nowrap;
 }
 video {
     border-radius: 16px !important;
@@ -253,6 +257,18 @@ div[data-testid="stButton"] button p {
 [class*="st-key-cardacoes_"] {
     margin-top: -0.05rem !important;
     margin-bottom: 0.15rem !important;
+}
+
+/* Botão compacto da conta na tela inicial */
+[class*="st-key-atalho_conta_home"] div[data-testid="stButton"] button {
+    min-height: 40px !important;
+    padding: 0.28rem 0.75rem !important;
+    border-radius: 13px !important;
+}
+[class*="st-key-atalho_conta_home"] div[data-testid="stButton"] button p {
+    font-size: 0.96rem !important;
+    font-weight: 800 !important;
+    white-space: nowrap !important;
 }
 div[data-testid="stLinkButton"] a {
     min-height: 58px !important;
@@ -1059,18 +1075,30 @@ videos = listar_videos()
 if menu == "🏠 Início":
     videos_inicio = videos_gratis(videos)
 
-    if st.session_state.usuario_logado:
-        st.button(
-            "👤 Minha conta",
-            key="atalho_minha_conta",
-            on_click=abrir_minha_conta
+    try:
+        conta_box = st.container(
+            key="atalho_conta_home",
+            width=210,
+            border=False,
         )
-    else:
-        st.button(
-            "👤 Entrar / Criar conta",
-            key="atalho_login_home",
-            on_click=abrir_minha_conta
-        )
+    except TypeError:
+        conta_box = st.container(key="atalho_conta_home")
+
+    with conta_box:
+        if st.session_state.usuario_logado:
+            st.button(
+                "👤 Minha conta",
+                key="atalho_minha_conta",
+                on_click=abrir_minha_conta,
+                use_container_width=True,
+            )
+        else:
+            st.button(
+                "👤 Entrar / Criar conta",
+                key="atalho_login_home",
+                on_click=abrir_minha_conta,
+                use_container_width=True,
+            )
 
     total = len(videos_inicio)
     infantil = len([v for v in videos_inicio if categoria_base(v) == "Infantil"])
