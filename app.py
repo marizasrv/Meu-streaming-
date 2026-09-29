@@ -672,6 +672,16 @@ section[data-testid="stSidebar"] .status-plano {
     }
 }
 
+
+/* Página Criar vídeo com IA */
+@media (max-width: 640px) {
+    [class*="st-key-gerar_video_ia"] button {
+        min-height: 46px !important;
+        border-radius: 14px !important;
+        font-weight: 800 !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -2037,6 +2047,93 @@ elif menu in ["🧸 Infantil", "🎬 Filmes", "📺 Séries"]:
         for i, item in enumerate(itens):
             with cols[i % 2]:
                 mostrar_card(item, f"categoria_{categoria_atual}_{i}")
+
+
+elif menu == "🎬 Criar vídeo com IA":
+    st.markdown("## 🎬 Criar vídeo com IA")
+    st.caption("Envie uma imagem, descreva o movimento e prepare o vídeo da Luna.")
+
+    st.info(
+        "Nesta primeira etapa, a página já fica pronta dentro do app. "
+        "Na próxima atualização conectamos a geração real de vídeo por IA."
+    )
+
+    imagem_video = st.file_uploader(
+        "🖼️ Envie a imagem que vai ganhar movimento",
+        type=["png", "jpg", "jpeg", "webp"],
+        key="upload_imagem_video_ia",
+    )
+
+    if imagem_video is not None:
+        st.image(
+            imagem_video,
+            caption="Imagem escolhida",
+            use_container_width=True,
+        )
+
+    prompt_video = st.text_area(
+        "✨ Descreva o movimento",
+        placeholder=(
+            "Exemplo: Luna caminha devagar pela floresta encantada, "
+            "pisca naturalmente, o cabelo balança suavemente e o coelhinho mexe as orelhas."
+        ),
+        height=120,
+        key="prompt_video_ia",
+    )
+
+    duracao_video = st.select_slider(
+        "⏱️ Duração desejada",
+        options=[5, 6, 8, 10],
+        value=5,
+        format_func=lambda x: f"{x} segundos",
+        key="duracao_video_ia",
+    )
+
+    movimento_camera = st.selectbox(
+        "🎥 Movimento da câmera",
+        [
+            "Câmera parada",
+            "Zoom suave",
+            "Movimento cinematográfico leve",
+            "Panorâmica suave",
+        ],
+        key="camera_video_ia",
+    )
+
+    preservar_personagem = st.checkbox(
+        "🧒 Preservar o mesmo rosto, roupa e aparência da personagem",
+        value=True,
+        key="preservar_personagem_video_ia",
+    )
+
+    st.markdown("### Prévia do comando")
+    prompt_final = prompt_video.strip()
+
+    if preservar_personagem:
+        prompt_final += (
+            "\nPreservar rigorosamente a mesma personagem, rosto, cabelo, roupa, "
+            "cores e proporções da imagem de referência."
+        )
+
+    prompt_final += f"\nDuração aproximada: {duracao_video} segundos."
+    prompt_final += f"\nCâmera: {movimento_camera}."
+
+    st.code(prompt_final if prompt_final.strip() else "Seu comando aparecerá aqui.", language="text")
+
+    if st.button(
+        "✨ Gerar vídeo com IA",
+        key="gerar_video_ia",
+        use_container_width=True,
+    ):
+        if imagem_video is None:
+            st.warning("Envie uma imagem primeiro.")
+        elif not prompt_video.strip():
+            st.warning("Escreva o movimento que você quer no vídeo.")
+        else:
+            st.success(
+                "A tela está pronta. Na próxima atualização conectamos este botão "
+                "a um gerador de vídeo por IA."
+            )
 
 elif menu == "🗑️ Gerenciar":
     st.subheader("🗑️ Gerenciar")
