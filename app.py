@@ -2117,10 +2117,66 @@ elif menu == "🎬 Criar vídeo com IA":
         elif not prompt_video.strip():
             st.warning("Escreva o movimento que você quer no vídeo.")
         else:
-            st.info(
-                "A área está pronta. O próximo passo é conectar este botão "
-                "ao gerador de vídeo por IA para criar o vídeo de verdade."
-            )
+            try:
+                from huggingface_hub import InferenceClient
+
+                hf_token = st.secrets.get("HF_TOKEN", "")
+                if not hf_token:
+                    st.error(
+                        "Falta a chave HF_TOKEN nos Secrets do Streamlit. "
+                        "Adicione sua chave do Hugging Face para liberar a geração."
+                    )
+                else:
+                    with st.spinner("🎬 Criando o vídeo com IA... isso pode levar alguns minutos."):
+                        cliente_video = InferenceClient(
+                            provider="auto",
+                            api_key=hf_token,
+                        )
+
+                        imagem_bytes = imagem_video.getvalue()
+
+                        video_bytes = cliente_video.image_to_video(
+                            imagem_bytes,
+                            model="Wan-AI/Wan2.2-I2V-A14B",
+                            prompt=prompt_final,
+                            negative_prompt=(
+                                "personagem diferente, rosto alterado, roupa diferente, "
+                                "mãos deformadas, olhos deformados, baixa qualidade, "
+                                "movimento brusco, câmera tremendo, texto, marca d'água"
+                            ),
+                        )
+
+                        st.session_state["video_ia_gerado"] = video_bytes
+                        st.session_state["video_ia_nome"] = "mundo_da_luna_video_ia.mp4"
+
+                    st.success("✅ Vídeo criado!")
+            except ImportError:
+                st.error(
+                    "A biblioteca huggingface_hub ainda não está instalada. "
+                    "Adicione huggingface_hub>=0.35.0 ao requirements.txt do GitHub."
+                )
+            except Exception as e:
+                st.error(
+                    "Não consegui gerar o vídeo agora. "
+                    "Confira a chave HF_TOKEN e se sua conta tem acesso/créditos para o modelo."
+                )
+                with st.expander("Ver detalhe técnico"):
+                    st.code(str(e), language="text")
+
+    if st.session_state.get("video_ia_gerado"):
+        st.markdown("### 🎥 Seu vídeo")
+        st.video(st.session_state["video_ia_gerado"])
+        st.download_button(
+            "⬇️ Baixar vídeo",
+            data=st.session_state["video_ia_gerado"],
+            file_name=st.session_state.get(
+                "video_ia_nome",
+                "mundo_da_luna_video_ia.mp4",
+            ),
+            mime="video/mp4",
+            use_container_width=True,
+            key="baixar_video_ia",
+        )
 
 elif menu == "🗑️ Gerenciar":
     st.subheader("🗑️ Gerenciar")
