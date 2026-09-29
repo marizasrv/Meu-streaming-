@@ -332,6 +332,26 @@ div[data-testid="stLinkButton"] a span {
     font-weight: 800 !important;
 }
 
+
+/* Cabeçalho principal mais compacto no celular */
+@media (max-width: 640px) {
+    .hero-luna {
+        padding: 18px 18px 16px 18px !important;
+        border-radius: 22px !important;
+        margin-bottom: 10px !important;
+    }
+    .hero-luna .hero-title {
+        font-size: 2.15rem !important;
+        line-height: 1.02 !important;
+        margin-bottom: 10px !important;
+    }
+    .hero-luna .hero-subtitle {
+        font-size: 1rem !important;
+        line-height: 1.35 !important;
+        margin-top: 4px !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -1039,8 +1059,8 @@ restaurar_login_do_navegador()
 
 st.markdown("""
 <div class="hero">
-<h1>🌙 Mundo da Luna TV ✨</h1>
-<p class="magic">⭐ Histórias mágicas, aventuras e sonhos em um só lugar ⭐</p>
+<h1 class="hero-title">🌙 Mundo da Luna TV ✨</h1>
+<p class="magic"><span class="hero-subtitle">⭐ Histórias mágicas, aventuras e sonhos em um só lugar ⭐</span></p>
 </div>
 <div class="gold-line"></div>
 """, unsafe_allow_html=True)
