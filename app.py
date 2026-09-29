@@ -32,8 +32,50 @@ st.markdown("""
 h1, h2, h3, p, label, .stMarkdown {
     color: white !important;
 }
+/* MENU LILÁS — inspirado nas roupas da Luna */
+section[data-testid="stSidebar"],
 div[data-testid="stSidebar"] {
-    background: #13081f;
+    background: linear-gradient(180deg, #9B7AD3 0%, #8462C2 48%, #6F4BAA 100%) !important;
+    border-right: 1px solid rgba(242,214,117,0.35) !important;
+}
+section[data-testid="stSidebar"] > div,
+div[data-testid="stSidebarContent"] {
+    background: transparent !important;
+}
+/* Texto do menu sempre legível */
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] h3,
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] span,
+section[data-testid="stSidebar"] .stMarkdown {
+    color: #FFFFFF !important;
+}
+/* Opções do menu em cartões lilás */
+section[data-testid="stSidebar"] div[role="radiogroup"] label {
+    background: rgba(78, 45, 125, 0.18) !important;
+    border: 1px solid rgba(255,255,255,0.16) !important;
+    border-radius: 14px !important;
+    padding: 8px 10px !important;
+    margin-bottom: 5px !important;
+}
+section[data-testid="stSidebar"] div[role="radiogroup"] label:hover {
+    background: rgba(78, 45, 125, 0.34) !important;
+}
+/* Opção selecionada */
+section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) {
+    background: #6843A5 !important;
+    border: 1px solid #F2D675 !important;
+    box-shadow: 0 0 0 1px rgba(242,214,117,0.18) inset !important;
+}
+section[data-testid="stSidebar"] input[type="radio"] {
+    accent-color: #F2D675 !important;
+}
+/* Caixa de usuário no rodapé do menu */
+section[data-testid="stSidebar"] div[data-testid="stAlert"] {
+    background: rgba(53, 28, 87, 0.24) !important;
+    border: 1px solid rgba(255,255,255,0.18) !important;
 }
 div[data-testid="stButton"] button {
     width: 100%;
@@ -741,6 +783,74 @@ def mostrar_card(item, contexto, em_minha_lista=False, compacto=False):
         st.video(item["video_url"])
 
 
+def mostrar_card_horizontal(item, contexto):
+    """Card compacto para fileiras horizontais da Área Premium."""
+    if item.get("capa_url"):
+        st.image(item["capa_url"], use_container_width=True)
+
+    nome = str(item.get("nome") or "Sem título")
+    st.markdown(f"**✨ {nome}**")
+    st.caption(f"💎 Premium • 🌟 {categoria_base(item)}")
+
+    chave = f"aberto_{contexto}_{item['id']}"
+    if chave not in st.session_state:
+        st.session_state[chave] = False
+
+    if not st.session_state[chave]:
+        if st.button(
+            "▶ Assistir",
+            key=f"assistir_{contexto}_{item['id']}",
+            use_container_width=True,
+        ):
+            registrar_assistido(item)
+            st.session_state[chave] = True
+            st.rerun()
+    else:
+        if st.button(
+            "✖ Fechar",
+            key=f"fechar_{contexto}_{item['id']}",
+            use_container_width=True,
+        ):
+            st.session_state[chave] = False
+            st.rerun()
+
+    favorito = bool(item.get("favorito", False))
+    texto = "💖 Na Lista" if favorito else "🤍 Minha Lista"
+    if st.button(
+        texto,
+        key=f"fav_{contexto}_{item['id']}",
+        use_container_width=True,
+    ):
+        alternar_favorito(item)
+
+    if st.session_state.get(chave, False):
+        st.video(item["video_url"])
+
+
+def mostrar_fileira_premium(titulo, itens, contexto, limite=12):
+    """Mostra uma fileira horizontal rolável de vídeos Premium."""
+    itens = list(itens)[:limite]
+    if not itens:
+        return
+
+    st.markdown(f"### {titulo}")
+
+    try:
+        # Streamlit 1.62+: no celular, wrap=False mantém uma única fileira
+        # e permite deslizar horizontalmente para ver os próximos cards.
+        cols = st.columns(len(itens), gap="small", wrap=False)
+        for i, (col, item) in enumerate(zip(cols, itens)):
+            with col:
+                mostrar_card_horizontal(item, f"{contexto}_{i}")
+    except TypeError:
+        # Compatibilidade caso o projeto esteja usando uma versão antiga
+        # do Streamlit que ainda não tenha o parâmetro wrap.
+        cols = st.columns(2)
+        for i, item in enumerate(itens):
+            with cols[i % 2]:
+                mostrar_card(item, f"{contexto}_{i}", compacto=True)
+
+
 # Aplica gravação/remoção pendente do login no navegador e tenta restaurar a conta.
 executar_pendencias_browser()
 restaurar_login_do_navegador()
@@ -1146,12 +1256,38 @@ elif menu == "🔒 Premium":
         if not exclusivos:
             st.info("Ainda não há vídeos exclusivos. Envie um vídeo e marque o acesso como Premium.")
         else:
-            st.caption("Conteúdos exclusivos disponíveis somente para assinantes Premium ativos.")
-            st.caption("🎬 Capas menores para navegar mais rápido, como em um catálogo de streaming.")
-            cols = st.columns(2)
-            for i, item in enumerate(exclusivos):
-                with cols[i % 2]:
-                    mostrar_card(item, f"premium_{i}", compacto=True)
+            st.caption("Deslize as fileiras para o lado para ver mais vídeos. 💜")
+
+            # Novidades: mantém a ordem retornada pelo banco (mais recentes primeiro).
+            mostrar_fileira_premium(
+                "✨ Novidades",
+                exclusivos,
+                "premium_novidades",
+                limite=12,
+            )
+
+            infantil_premium = [v for v in exclusivos if categoria_base(v) == "Infantil"]
+            filmes_premium = [v for v in exclusivos if categoria_base(v) == "Filmes"]
+            series_premium = [v for v in exclusivos if categoria_base(v) == "Séries"]
+
+            mostrar_fileira_premium(
+                "🧸 Infantil",
+                infantil_premium,
+                "premium_infantil",
+                limite=12,
+            )
+            mostrar_fileira_premium(
+                "🎬 Filmes",
+                filmes_premium,
+                "premium_filmes",
+                limite=12,
+            )
+            mostrar_fileira_premium(
+                "📺 Séries",
+                series_premium,
+                "premium_series",
+                limite=12,
+            )
 
 elif menu == "📤 Enviar vídeo":
     st.subheader("📤 Enviar novo vídeo")
