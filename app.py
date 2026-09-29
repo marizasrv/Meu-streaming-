@@ -2294,6 +2294,18 @@ elif menu == "🎬 Criar vídeo com IA":
         ):
             st.rerun()
 
+    try:
+        fal_configurado = bool(
+            str(st.secrets.get("FAL_API_KEY", "")).strip()
+        )
+    except Exception:
+        fal_configurado = False
+
+    if fal_configurado:
+        st.caption("🟢 Provedor alternativo de vídeo: fal.ai configurado")
+    else:
+        st.caption("🟣 Provedor alternativo fal.ai: ainda não configurado")
+
     pacotes = links_pacotes_creditos()
     links_configurados = any(pacotes.values())
 
@@ -2547,24 +2559,32 @@ elif menu == "🎬 Criar vídeo com IA":
                 from huggingface_hub import InferenceClient
 
                 hf_token = str(st.secrets.get("HF_TOKEN", "")).strip()
+                fal_api_key = str(st.secrets.get("FAL_API_KEY", "")).strip()
 
-                if not hf_token:
-                    st.error(
-                        "Falta a chave HF_TOKEN nos Secrets do Streamlit."
+                hf_provider = str(
+                    st.secrets.get("HF_VIDEO_PROVIDER", "auto")
+                ).strip() or "auto"
+
+                hf_model = str(
+                    st.secrets.get(
+                        "HF_VIDEO_MODEL",
+                        "Wan-AI/Wan2.2-I2V-A14B"
                     )
+                ).strip() or "Wan-AI/Wan2.2-I2V-A14B"
 
+                fal_model = str(
+                    st.secrets.get(
+                        "FAL_VIDEO_MODEL",
+                        "Wan-AI/Wan2.2-I2V-A14B"
+                    )
+                ).strip() or "Wan-AI/Wan2.2-I2V-A14B"
+
+                if not hf_token and not fal_api_key:
+                    st.error(
+                        "Falta configurar um provedor de vídeo. "
+                        "Adicione HF_TOKEN ou FAL_API_KEY nos Secrets."
+                    )
                 else:
-                    hf_provider = str(
-                        st.secrets.get("HF_VIDEO_PROVIDER", "auto")
-                    ).strip() or "auto"
-
-                    hf_model = str(
-                        st.secrets.get(
-                            "HF_VIDEO_MODEL",
-                            "Wan-AI/Wan2.2-I2V-A14B"
-                        )
-                    ).strip() or "Wan-AI/Wan2.2-I2V-A14B"
-
                     passos = {
                         "Rápida": 20,
                         "Equilibrada": 30,
@@ -2581,34 +2601,27 @@ elif menu == "🎬 Criar vídeo com IA":
                         "cenário completamente diferente"
                     )
 
-                    with st.spinner(
-                        "🎬 Criando o vídeo com IA... "
-                        "isso pode levar alguns minutos."
-                    ):
+                    imagem_bytes = imagem_video.getvalue()
+                    provedor_usado = None
 
-                        cliente_video = InferenceClient(
-                            provider=hf_provider,
-                            token=hf_token,
-                            timeout=600,
-                        )
-
-                        imagem_bytes = imagem_video.getvalue()
-
+                    def gerar_video_provedor(cliente, modelo):
+                        """
+                        Tenta primeiro com os controles de qualidade.
+                        Se o provedor não aceitar algum parâmetro,
+                        repete em modo compatível.
+                        """
                         try:
-                            video_bytes = cliente_video.image_to_video(
+                            return cliente.image_to_video(
                                 imagem_bytes,
-                                model=hf_model,
+                                model=modelo,
                                 prompt=prompt_final,
                                 negative_prompt=negativo,
                                 num_inference_steps=passos,
                             )
-
-                        except Exception as erro1:
-
-                            mensagem = str(erro1).lower()
-
-                            erro_parametro = any(
-                                palavra in mensagem
+                        except Exception as erro_param:
+                            mensagem_param = str(erro_param).lower()
+                            parametro_incompativel = any(
+                                palavra in mensagem_param
                                 for palavra in [
                                     "unsupported",
                                     "unexpected",
@@ -2618,21 +2631,95 @@ elif menu == "🎬 Criar vídeo com IA":
                                 ]
                             )
 
-                            if not erro_parametro:
+                            if not parametro_incompativel:
                                 raise
 
                             st.info(
-                                "🔄 Tentando novamente "
-                                "em modo compatível..."
+                                "🔄 Ajustando os parâmetros para "
+                                "o provedor de vídeo..."
                             )
 
-                            video_bytes = (
-                                cliente_video.image_to_video(
-                                    imagem_bytes,
-                                    model=hf_model,
-                                    prompt=prompt_final,
-                                )
+                            return cliente.image_to_video(
+                                imagem_bytes,
+                                model=modelo,
+                                prompt=prompt_final,
                             )
+
+                    with st.spinner(
+                        "🎬 Criando o vídeo com IA... "
+                        "isso pode levar alguns minutos."
+                    ):
+                        video_bytes = None
+                        erro_hf = None
+
+                        # 1) Tenta primeiro pelo Hugging Face, quando configurado.
+                        if hf_token:
+                            try:
+                                cliente_hf = InferenceClient(
+                                    provider=hf_provider,
+                                    token=hf_token,
+                                    timeout=600,
+                                )
+
+                                video_bytes = gerar_video_provedor(
+                                    cliente_hf,
+                                    hf_model,
+                                )
+                                provedor_usado = "Hugging Face"
+
+                            except Exception as erro_primario:
+                                erro_hf = erro_primario
+                                msg_hf = str(erro_primario).lower()
+
+                                sem_creditos_hf = (
+                                    "402" in str(erro_primario)
+                                    or "payment required" in msg_hf
+                                    or "depleted" in msg_hf
+                                    or "monthly included credits" in msg_hf
+                                    or "billing" in msg_hf
+                                    or "quota" in msg_hf
+                                )
+
+                                # 2) Se os créditos HF acabaram e existe chave fal.ai,
+                                # tenta o mesmo modelo diretamente no fal.ai.
+                                if sem_creditos_hf and fal_api_key:
+                                    st.info(
+                                        "🔄 Os créditos do Hugging Face acabaram. "
+                                        "Tentando o provedor alternativo fal.ai..."
+                                    )
+
+                                    cliente_fal = InferenceClient(
+                                        provider="fal-ai",
+                                        api_key=fal_api_key,
+                                        timeout=600,
+                                    )
+
+                                    video_bytes = gerar_video_provedor(
+                                        cliente_fal,
+                                        fal_model,
+                                    )
+                                    provedor_usado = "fal.ai"
+                                else:
+                                    raise
+
+                        # Se não há HF_TOKEN mas existe FAL_API_KEY,
+                        # usa fal.ai diretamente.
+                        elif fal_api_key:
+                            st.info(
+                                "🎬 Usando o provedor alternativo fal.ai."
+                            )
+
+                            cliente_fal = InferenceClient(
+                                provider="fal-ai",
+                                api_key=fal_api_key,
+                                timeout=600,
+                            )
+
+                            video_bytes = gerar_video_provedor(
+                                cliente_fal,
+                                fal_model,
+                            )
+                            provedor_usado = "fal.ai"
 
                         if not video_bytes:
                             raise RuntimeError(
@@ -2647,8 +2734,8 @@ elif menu == "🎬 Criar vídeo com IA":
                             "video_ia_nome"
                         ] = "mundo_da_luna_video_ia.mp4"
 
-                    # Só usa o crédito depois
-                    # que o vídeo realmente foi criado.
+                    # Só usa o crédito do Mundo da Luna
+                    # depois que o vídeo realmente foi criado.
                     if consumir_credito_video():
                         st.success(
                             "✅ Vídeo criado! "
@@ -2657,19 +2744,22 @@ elif menu == "🎬 Criar vídeo com IA":
                     else:
                         st.success("✅ Vídeo criado!")
 
+                    if provedor_usado:
+                        st.caption(
+                            f"🎬 Provedor usado: {provedor_usado}"
+                        )
+
                     st.caption(
                         f"💎 Saldo atual: "
                         f"{saldo_creditos_video() or 0} crédito(s)"
                     )
 
             except ImportError:
-
                 st.error(
                     "Falta instalar huggingface_hub."
                 )
 
             except Exception as e:
-
                 erro = str(e)
                 erro_lower = erro.lower()
 
@@ -2678,17 +2768,40 @@ elif menu == "🎬 Criar vídeo com IA":
                     "Nenhum crédito foi descontado."
                 )
 
-                if (
+                sem_creditos = (
                     "402" in erro
-                    or "credit" in erro_lower
+                    or "payment required" in erro_lower
+                    or "depleted" in erro_lower
+                    or "monthly included credits" in erro_lower
                     or "billing" in erro_lower
                     or "quota" in erro_lower
                     or "payment" in erro_lower
-                ):
+                )
+
+                if sem_creditos:
                     st.warning(
-                        "💳 O provedor de IA está "
-                        "pedindo saldo/créditos."
+                        "💳 Os créditos do provedor de IA acabaram."
                     )
+
+                    try:
+                        tem_fal = bool(
+                            str(
+                                st.secrets.get(
+                                    "FAL_API_KEY",
+                                    ""
+                                )
+                            ).strip()
+                        )
+                    except Exception:
+                        tem_fal = False
+
+                    if not tem_fal:
+                        st.info(
+                            "🔄 O app já está preparado para tentar "
+                            "fal.ai automaticamente. Para habilitar essa "
+                            "alternativa, adicione FAL_API_KEY nos Secrets. "
+                            "O fal.ai pode exigir saldo próprio."
+                        )
 
                 elif (
                     "401" in erro
@@ -2697,7 +2810,8 @@ elif menu == "🎬 Criar vídeo com IA":
                     or "forbidden" in erro_lower
                 ):
                     st.warning(
-                        "🔑 Confira o HF_TOKEN."
+                        "🔑 A chave do provedor foi recusada. "
+                        "Confira HF_TOKEN ou FAL_API_KEY."
                     )
 
                 elif (
