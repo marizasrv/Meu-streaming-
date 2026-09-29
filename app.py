@@ -644,6 +644,34 @@ section[data-testid="stSidebar"] .status-plano {
     }
 }
 
+
+/* CORREÇÃO: estes cards são HTML próprio (.metric-card), não widgets Streamlit */
+@media (max-width: 640px) {
+    .metric-grid {
+        grid-template-columns: repeat(4, minmax(70px, 1fr)) !important;
+        gap: 5px !important;
+        margin-top: 5px !important;
+        margin-bottom: 9px !important;
+    }
+
+    .metric-card {
+        min-width: 70px !important;
+        padding: 6px 3px !important;
+        border-radius: 12px !important;
+    }
+
+    .metric-number {
+        font-size: 1.45rem !important;
+        line-height: 1 !important;
+    }
+
+    .metric-label {
+        font-size: 0.70rem !important;
+        line-height: 1.05 !important;
+        margin-top: 3px !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
