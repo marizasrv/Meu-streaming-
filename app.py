@@ -1196,7 +1196,7 @@ if menu == "🏠 Início":
     if not videos_inicio:
         st.info("Ainda não há vídeos gratuitos. Abra 📤 Enviar vídeo para começar.")
     else:
-        st.caption("Deslize as fileiras para o lado para ver mais vídeos. 💜")
+        st.caption("Deslize para o lado para ver mais vídeos. 💜")
 
         mostrar_fileira_catalogo(
             "✨ Novidades",
@@ -1531,7 +1531,7 @@ elif menu == "🔒 Premium":
         if not exclusivos:
             st.info("Ainda não há vídeos exclusivos. Envie um vídeo e marque o acesso como Premium.")
         else:
-            st.caption("Deslize as fileiras para o lado para ver mais vídeos. 💜")
+            st.caption("Deslize para o lado para ver mais vídeos. 💜")
 
             # Novidades: mantém a ordem retornada pelo banco (mais recentes primeiro).
             mostrar_fileira_premium(
