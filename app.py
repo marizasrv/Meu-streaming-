@@ -1464,6 +1464,8 @@ menu = st.sidebar.radio(
         "🎬 Filmes",
         "📺 Séries",
         "🎬 Criar vídeo com IA",
+        "🎮 Jogos",
+        "📚 Atividades escolares",
         "🗑️ Gerenciar"
     ],
     key="menu_principal",
