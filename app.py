@@ -621,6 +621,29 @@ section[data-testid="stSidebar"] .status-plano {
     }
 }
 
+
+/* Cards de estatísticas mais compactos no celular */
+@media (max-width: 640px) {
+    [class*="st-key-estat_"] {
+        min-height: 108px !important;
+        padding: 0.45rem 0.35rem !important;
+        border-radius: 18px !important;
+    }
+
+    [class*="st-key-estat_"] h3,
+    [class*="st-key-estat_"] div[data-testid="stMetricValue"] {
+        font-size: 1.85rem !important;
+        line-height: 1 !important;
+        margin-bottom: 0.10rem !important;
+    }
+
+    [class*="st-key-estat_"] p,
+    [class*="st-key-estat_"] div[data-testid="stMetricLabel"] {
+        font-size: 0.76rem !important;
+        line-height: 1.08 !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
