@@ -556,6 +556,19 @@ section[data-testid="stSidebar"] .status-plano {
     }
 }
 
+
+/* Reduz o grande espaço vazio antes da legenda "Deslize..." */
+@media (max-width: 640px) {
+    div[data-testid="stCaptionContainer"] {
+        margin-top: -1.15rem !important;
+    }
+
+    hr {
+        margin-top: 0.35rem !important;
+        margin-bottom: 0.35rem !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
