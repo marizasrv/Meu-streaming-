@@ -333,22 +333,25 @@ div[data-testid="stLinkButton"] a span {
 }
 
 
-/* Cabeçalho principal mais compacto no celular */
+/* Cabeçalho principal super compacto no celular */
 @media (max-width: 640px) {
     .hero-luna {
-        padding: 18px 18px 16px 18px !important;
-        border-radius: 22px !important;
-        margin-bottom: 10px !important;
+        padding: 12px 14px 12px 14px !important;
+        border-radius: 18px !important;
+        margin-bottom: 6px !important;
+        min-height: 0 !important;
     }
     .hero-luna .hero-title {
-        font-size: 2.15rem !important;
-        line-height: 1.02 !important;
-        margin-bottom: 10px !important;
+        font-size: 1.65rem !important;
+        line-height: 1.0 !important;
+        margin: 0 0 6px 0 !important;
+        display: block !important;
     }
     .hero-luna .hero-subtitle {
-        font-size: 1rem !important;
-        line-height: 1.35 !important;
-        margin-top: 4px !important;
+        font-size: 0.86rem !important;
+        line-height: 1.22 !important;
+        margin: 0 !important;
+        display: block !important;
     }
 }
 
