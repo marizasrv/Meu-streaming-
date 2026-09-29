@@ -569,6 +569,58 @@ section[data-testid="stSidebar"] .status-plano {
     }
 }
 
+
+/* CORREÇÃO: captions normais voltam ao espaçamento correto */
+@media (max-width: 640px) {
+    div[data-testid="stCaptionContainer"] {
+        margin-top: 0.12rem !important;
+        margin-bottom: 0.18rem !important;
+    }
+
+    div[data-testid="stCaptionContainer"] p {
+        font-size: 0.88rem !important;
+        line-height: 1.22 !important;
+    }
+
+    /* Somente a dica de deslizar fica compacta */
+    .dica-deslize {
+        color: rgba(255,255,255,0.62);
+        font-size: 0.78rem;
+        line-height: 1.15;
+        margin-top: 0.15rem;
+        margin-bottom: 0.12rem;
+    }
+}
+
+
+/* Categoria do card: separada do título para nunca sobrepor o texto */
+.categoria-card {
+    display: block;
+    clear: both;
+    color: rgba(255,255,255,0.62) !important;
+    font-size: 0.82rem !important;
+    line-height: 1.25 !important;
+    margin-top: 0.18rem !important;
+    margin-bottom: 0.22rem !important;
+    min-height: 1.05rem;
+}
+
+.titulo-card {
+    margin-bottom: 0.12rem !important;
+}
+
+@media (max-width: 640px) {
+    .categoria-card {
+        font-size: 0.78rem !important;
+        margin-top: 0.16rem !important;
+        margin-bottom: 0.18rem !important;
+    }
+
+    .titulo-card {
+        margin-bottom: 0.10rem !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -1074,9 +1126,15 @@ def mostrar_card(item, contexto, em_minha_lista=False, compacto=False):
         st.markdown(f"### ✨ {item.get('nome', 'Sem título')}")
     categoria_visivel = categoria_base(item)
     if video_premium(item):
-        st.caption(f"💎 Premium • 🌟 {categoria_visivel}")
+        st.markdown(
+            f'<div class="categoria-card">💎 Premium • 🌟 {categoria_visivel}</div>',
+            unsafe_allow_html=True,
+        )
     else:
-        st.caption(f"🌟 {categoria_visivel}")
+        st.markdown(
+            f'<div class="categoria-card">🌟 {categoria_visivel}</div>',
+            unsafe_allow_html=True,
+        )
 
     col1, col2 = st.columns([3, 2])
 
@@ -1126,7 +1184,10 @@ def mostrar_card_horizontal(item, contexto, novo=False):
         f"""<div class="titulo-card">✨ {nome}</div>""",
         unsafe_allow_html=True,
     )
-    st.caption(f"💎 Premium • 🌟 {categoria_base(item)}")
+    st.markdown(
+        f'<div class="categoria-card">💎 Premium • 🌟 {categoria_base(item)}</div>',
+        unsafe_allow_html=True,
+    )
 
     chave = f"aberto_{contexto}_{item['id']}"
     if chave not in st.session_state:
@@ -1220,9 +1281,15 @@ def mostrar_card_catalogo(item, contexto, novo=False):
 
     categoria_visivel = categoria_base(item)
     if video_premium(item):
-        st.caption(f"💎 Premium • 🌟 {categoria_visivel}")
+        st.markdown(
+            f'<div class="categoria-card">💎 Premium • 🌟 {categoria_visivel}</div>',
+            unsafe_allow_html=True,
+        )
     else:
-        st.caption(f"🌟 {categoria_visivel}")
+        st.markdown(
+            f'<div class="categoria-card">🌟 {categoria_visivel}</div>',
+            unsafe_allow_html=True,
+        )
 
     chave = f"aberto_{contexto}_{item['id']}"
     if chave not in st.session_state:
@@ -1446,7 +1513,10 @@ if menu == "🏠 Início":
     if not videos_inicio:
         st.info("Ainda não há vídeos gratuitos. Abra 📤 Enviar vídeo para começar.")
     else:
-        st.caption("Deslize para o lado para ver mais vídeos. 💜")
+        st.markdown(
+            '<div class="dica-deslize">Deslize para o lado para ver mais vídeos. 💜</div>',
+            unsafe_allow_html=True,
+        )
 
         mostrar_fileira_catalogo(
             "✨ Novidades",
@@ -1782,7 +1852,10 @@ elif menu == "🔒 Premium":
         if not exclusivos:
             st.info("Ainda não há vídeos exclusivos. Envie um vídeo e marque o acesso como Premium.")
         else:
-            st.caption("Deslize para o lado para ver mais vídeos. 💜")
+            st.markdown(
+            '<div class="dica-deslize">Deslize para o lado para ver mais vídeos. 💜</div>',
+            unsafe_allow_html=True,
+        )
 
             # Novidades: mantém a ordem retornada pelo banco (mais recentes primeiro).
             mostrar_fileira_premium(
