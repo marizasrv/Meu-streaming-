@@ -673,10 +673,10 @@ section[data-testid="stSidebar"] .status-plano {
 }
 
 
-/* Página Criar vídeo com IA */
+/* Botão da área Criar vídeo com IA */
 @media (max-width: 640px) {
     [class*="st-key-gerar_video_ia"] button {
-        min-height: 46px !important;
+        min-height: 48px !important;
         border-radius: 14px !important;
         font-weight: 800 !important;
     }
@@ -1453,6 +1453,7 @@ menu = st.sidebar.radio(
         "🧸 Infantil",
         "🎬 Filmes",
         "📺 Séries",
+        "🎬 Criar vídeo com IA",
         "🗑️ Gerenciar"
     ],
     key="menu_principal",
@@ -2051,74 +2052,60 @@ elif menu in ["🧸 Infantil", "🎬 Filmes", "📺 Séries"]:
 
 elif menu == "🎬 Criar vídeo com IA":
     st.markdown("## 🎬 Criar vídeo com IA")
-    st.caption("Envie uma imagem, descreva o movimento e prepare o vídeo da Luna.")
-
-    st.info(
-        "Nesta primeira etapa, a página já fica pronta dentro do app. "
-        "Na próxima atualização conectamos a geração real de vídeo por IA."
-    )
+    st.caption("Transforme uma imagem em um vídeo com movimento usando IA.")
 
     imagem_video = st.file_uploader(
-        "🖼️ Envie a imagem que vai ganhar movimento",
+        "🖼️ Envie a imagem",
         type=["png", "jpg", "jpeg", "webp"],
         key="upload_imagem_video_ia",
     )
 
     if imagem_video is not None:
-        st.image(
-            imagem_video,
-            caption="Imagem escolhida",
-            use_container_width=True,
-        )
+        st.image(imagem_video, use_container_width=True)
 
     prompt_video = st.text_area(
-        "✨ Descreva o movimento",
+        "✨ Como você quer o movimento?",
         placeholder=(
-            "Exemplo: Luna caminha devagar pela floresta encantada, "
-            "pisca naturalmente, o cabelo balança suavemente e o coelhinho mexe as orelhas."
+            "Exemplo: Luna caminha devagar pela floresta, pisca naturalmente, "
+            "o cabelo se move suavemente e o coelhinho mexe as orelhas."
         ),
         height=120,
         key="prompt_video_ia",
     )
 
-    duracao_video = st.select_slider(
-        "⏱️ Duração desejada",
-        options=[5, 6, 8, 10],
-        value=5,
-        format_func=lambda x: f"{x} segundos",
-        key="duracao_video_ia",
-    )
+    col1, col2 = st.columns(2)
+    with col1:
+        duracao_video = st.selectbox(
+            "⏱️ Duração",
+            [5, 6, 8, 10],
+            format_func=lambda x: f"{x} segundos",
+            key="duracao_video_ia",
+        )
+    with col2:
+        camera_video = st.selectbox(
+            "🎥 Câmera",
+            ["Parada", "Zoom suave", "Movimento leve", "Panorâmica suave"],
+            key="camera_video_ia",
+        )
 
-    movimento_camera = st.selectbox(
-        "🎥 Movimento da câmera",
-        [
-            "Câmera parada",
-            "Zoom suave",
-            "Movimento cinematográfico leve",
-            "Panorâmica suave",
-        ],
-        key="camera_video_ia",
-    )
-
-    preservar_personagem = st.checkbox(
-        "🧒 Preservar o mesmo rosto, roupa e aparência da personagem",
+    preservar = st.checkbox(
+        "🧒 Preservar rosto, roupa e aparência da personagem",
         value=True,
-        key="preservar_personagem_video_ia",
+        key="preservar_video_ia",
     )
 
-    st.markdown("### Prévia do comando")
     prompt_final = prompt_video.strip()
-
-    if preservar_personagem:
+    if preservar and prompt_final:
         prompt_final += (
             "\nPreservar rigorosamente a mesma personagem, rosto, cabelo, roupa, "
             "cores e proporções da imagem de referência."
         )
+    if prompt_final:
+        prompt_final += f"\nDuração: {duracao_video} segundos. Câmera: {camera_video}."
 
-    prompt_final += f"\nDuração aproximada: {duracao_video} segundos."
-    prompt_final += f"\nCâmera: {movimento_camera}."
-
-    st.code(prompt_final if prompt_final.strip() else "Seu comando aparecerá aqui.", language="text")
+    if prompt_final:
+        with st.expander("📝 Ver comando completo"):
+            st.code(prompt_final, language="text")
 
     if st.button(
         "✨ Gerar vídeo com IA",
@@ -2130,9 +2117,9 @@ elif menu == "🎬 Criar vídeo com IA":
         elif not prompt_video.strip():
             st.warning("Escreva o movimento que você quer no vídeo.")
         else:
-            st.success(
-                "A tela está pronta. Na próxima atualização conectamos este botão "
-                "a um gerador de vídeo por IA."
+            st.info(
+                "A área está pronta. O próximo passo é conectar este botão "
+                "ao gerador de vídeo por IA para criar o vídeo de verdade."
             )
 
 elif menu == "🗑️ Gerenciar":
