@@ -231,6 +231,20 @@ div[data-testid="stButton"] button p {
     font-weight: 800 !important;
     white-space: nowrap !important;
 }
+
+/* Títulos compactos dos cards */
+.titulo-card {
+    width: 190px;
+    font-size: 1.02rem;
+    font-weight: 800;
+    line-height: 1.22;
+    color: #FFFFFF;
+    margin: 0.35rem 0 0.15rem 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
 div[data-testid="stLinkButton"] a {
     min-height: 58px !important;
     font-size: 1.22rem !important;
@@ -832,7 +846,11 @@ def mostrar_card_horizontal(item, contexto):
         st.image(item["capa_url"], width=190)
 
     nome = str(item.get("nome") or "Sem título")
-    st.markdown(f"**✨ {nome}**")
+    # Título compacto: menor e com no máximo 2 linhas.
+    st.markdown(
+        f"""<div class="titulo-card">✨ {nome}</div>""",
+        unsafe_allow_html=True,
+    )
     st.caption(f"💎 Premium • 🌟 {categoria_base(item)}")
 
     chave = f"aberto_{contexto}_{item['id']}"
@@ -911,7 +929,11 @@ def mostrar_card_catalogo(item, contexto):
         st.image(item["capa_url"], width=190)
 
     nome = str(item.get("nome") or "Sem título")
-    st.markdown(f"**✨ {nome}**")
+    # Título compacto: menor e com no máximo 2 linhas.
+    st.markdown(
+        f"""<div class="titulo-card">✨ {nome}</div>""",
+        unsafe_allow_html=True,
+    )
 
     categoria_visivel = categoria_base(item)
     if video_premium(item):
