@@ -692,11 +692,17 @@ def videos_premium(lista):
     return [v for v in lista if video_premium(v)]
 
 
-def mostrar_card(item, contexto, em_minha_lista=False):
+def mostrar_card(item, contexto, em_minha_lista=False, compacto=False):
     if item.get("capa_url"):
-        st.image(item["capa_url"], use_container_width=True)
+        if compacto:
+            st.image(item["capa_url"], width=280)
+        else:
+            st.image(item["capa_url"], use_container_width=True)
 
-    st.markdown(f"### ✨ {item.get('nome', 'Sem título')}")
+    if compacto:
+        st.markdown(f"#### ✨ {item.get('nome', 'Sem título')}")
+    else:
+        st.markdown(f"### ✨ {item.get('nome', 'Sem título')}")
     categoria_visivel = categoria_base(item)
     if video_premium(item):
         st.caption(f"💎 Premium • 🌟 {categoria_visivel}")
@@ -1141,10 +1147,11 @@ elif menu == "🔒 Premium":
             st.info("Ainda não há vídeos exclusivos. Envie um vídeo e marque o acesso como Premium.")
         else:
             st.caption("Conteúdos exclusivos disponíveis somente para assinantes Premium ativos.")
+            st.caption("🎬 Capas menores para navegar mais rápido, como em um catálogo de streaming.")
             cols = st.columns(2)
             for i, item in enumerate(exclusivos):
                 with cols[i % 2]:
-                    mostrar_card(item, f"premium_{i}")
+                    mostrar_card(item, f"premium_{i}", compacto=True)
 
 elif menu == "📤 Enviar vídeo":
     st.subheader("📤 Enviar novo vídeo")
