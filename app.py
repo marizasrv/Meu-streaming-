@@ -440,6 +440,17 @@ div[data-testid="stLinkButton"] a span {
     }
 }
 
+
+/* Menos espaço entre o fim de um card e o título da próxima seção */
+@media (max-width: 640px) {
+    .secao-titulo-compacto {
+        margin-top: 0.08rem !important;
+    }
+    [class*="st-key-cardacoes_"] {
+        margin-bottom: 0 !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
