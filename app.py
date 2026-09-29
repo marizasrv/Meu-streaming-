@@ -657,12 +657,51 @@ def listar_assistidos_recentes(videos, limite=10):
     return assistidos[:limite]
 
 
+# -------------------------------------------------
+# VÍDEOS GRÁTIS E PREMIUM SEM ALTERAR A TABELA SQL
+# -------------------------------------------------
+# Para não exigir uma nova coluna no Supabase, vídeos Premium são
+# identificados pelo prefixo "Premium::" dentro do campo categoria.
+# Exemplo: "Premium::Infantil". Vídeos antigos continuam gratuitos.
+PREMIUM_PREFIX = "Premium::"
+
+
+def video_premium(item):
+    categoria = str(item.get("categoria") or "")
+    return categoria.startswith(PREMIUM_PREFIX)
+
+
+def categoria_base(item):
+    categoria = str(item.get("categoria") or "")
+    if categoria.startswith(PREMIUM_PREFIX):
+        return categoria[len(PREMIUM_PREFIX):]
+    return categoria
+
+
+def categoria_para_salvar(categoria, acesso):
+    if acesso == "Premium":
+        return f"{PREMIUM_PREFIX}{categoria}"
+    return categoria
+
+
+def videos_gratis(lista):
+    return [v for v in lista if not video_premium(v)]
+
+
+def videos_premium(lista):
+    return [v for v in lista if video_premium(v)]
+
+
 def mostrar_card(item, contexto, em_minha_lista=False):
     if item.get("capa_url"):
         st.image(item["capa_url"], use_container_width=True)
 
     st.markdown(f"### ✨ {item.get('nome', 'Sem título')}")
-    st.caption(f"🌟 {item.get('categoria', '')}")
+    categoria_visivel = categoria_base(item)
+    if video_premium(item):
+        st.caption(f"💎 Premium • 🌟 {categoria_visivel}")
+    else:
+        st.caption(f"🌟 {categoria_visivel}")
 
     col1, col2 = st.columns([3, 2])
 
@@ -736,6 +775,8 @@ else:
 videos = listar_videos()
 
 if menu == "🏠 Início":
+    videos_inicio = videos_gratis(videos)
+
     if st.session_state.usuario_logado:
         st.button(
             "👤 Minha conta",
@@ -749,10 +790,10 @@ if menu == "🏠 Início":
             on_click=abrir_minha_conta
         )
 
-    total = len(videos)
-    infantil = len([v for v in videos if v.get("categoria") == "Infantil"])
-    filmes = len([v for v in videos if v.get("categoria") == "Filmes"])
-    series = len([v for v in videos if v.get("categoria") == "Séries"])
+    total = len(videos_inicio)
+    infantil = len([v for v in videos_inicio if categoria_base(v) == "Infantil"])
+    filmes = len([v for v in videos_inicio if categoria_base(v) == "Filmes"])
+    series = len([v for v in videos_inicio if categoria_base(v) == "Séries"])
 
     render_html(f"""
     <div class="metric-grid">
@@ -775,7 +816,7 @@ if menu == "🏠 Início":
     </div>
     """)
 
-    ultimo = ultimo_assistido(videos)
+    ultimo = ultimo_assistido(videos_inicio)
     if ultimo:
         st.subheader("▶ Continuar assistindo")
         mostrar_card(ultimo, "continuar")
@@ -783,16 +824,16 @@ if menu == "🏠 Início":
 
     st.subheader("✨ Destaques")
 
-    if not videos:
-        st.info("Ainda não há vídeos. Abra 📤 Enviar vídeo para começar.")
+    if not videos_inicio:
+        st.info("Ainda não há vídeos gratuitos. Abra 📤 Enviar vídeo para começar.")
     else:
-        mostrar_card(videos[0], "destaque")
+        mostrar_card(videos_inicio[0], "destaque")
 
-        if len(videos) > 1:
+        if len(videos_inicio) > 1:
             st.markdown("---")
             st.subheader("🎞️ Últimos adicionados")
             cols = st.columns(2)
-            for i, item in enumerate(videos[1:5]):
+            for i, item in enumerate(videos_inicio[1:5]):
                 with cols[i % 2]:
                     mostrar_card(item, f"ultimos_{i}")
 
@@ -805,7 +846,7 @@ elif menu == "🔎 Buscar":
         ["Todas", "Infantil", "Filmes", "Séries"]
     )
 
-    filtrados = videos
+    filtrados = videos_gratis(videos)
 
     if termo.strip():
         termo_lower = termo.lower().strip()
@@ -817,7 +858,7 @@ elif menu == "🔎 Buscar":
     if categoria_busca != "Todas":
         filtrados = [
             v for v in filtrados
-            if v.get("categoria") == categoria_busca
+            if categoria_base(v) == categoria_busca
         ]
 
     if not filtrados:
@@ -830,19 +871,23 @@ elif menu == "🔎 Buscar":
 
 elif menu == "🆕 Novidades":
     st.subheader("🆕 Novidades")
+    novidades = videos_gratis(videos)
 
-    if not videos:
+    if not novidades:
         st.info("Ainda não há novidades.")
     else:
         cols = st.columns(2)
-        for i, item in enumerate(videos[:10]):
+        for i, item in enumerate(novidades[:10]):
             with cols[i % 2]:
                 mostrar_card(item, f"novidades_{i}")
 
 elif menu == "❤️ Minha Lista":
     st.subheader("❤️ Minha Lista")
 
-    favoritos = [v for v in videos if bool(v.get("favorito", False))]
+    favoritos = [
+        v for v in videos_gratis(videos)
+        if bool(v.get("favorito", False))
+    ]
 
     if not favoritos:
         st.info("Sua lista ainda está vazia. Toque em 🤍 Minha Lista em qualquer vídeo.")
@@ -855,7 +900,7 @@ elif menu == "❤️ Minha Lista":
 elif menu == "🕒 Assistidos recentemente":
     st.subheader("🕒 Assistidos recentemente")
 
-    recentes = listar_assistidos_recentes(videos, limite=10)
+    recentes = listar_assistidos_recentes(videos_gratis(videos), limite=10)
 
     if not recentes:
         st.info("Você ainda não assistiu a nenhum vídeo.")
@@ -1090,7 +1135,16 @@ elif menu == "🔒 Premium":
         )
     else:
         st.success("💎 Premium ativo!")
-        st.write("Aqui aparecerão os vídeos exclusivos para assinantes.")
+        exclusivos = videos_premium(videos)
+
+        if not exclusivos:
+            st.info("Ainda não há vídeos exclusivos. Envie um vídeo e marque o acesso como Premium.")
+        else:
+            st.caption("Conteúdos exclusivos disponíveis somente para assinantes Premium ativos.")
+            cols = st.columns(2)
+            for i, item in enumerate(exclusivos):
+                with cols[i % 2]:
+                    mostrar_card(item, f"premium_{i}")
 
 elif menu == "📤 Enviar vídeo":
     st.subheader("📤 Enviar novo vídeo")
@@ -1109,6 +1163,17 @@ elif menu == "📤 Enviar vídeo":
             "Categoria",
             ["Infantil", "Filmes", "Séries"]
         )
+
+        acesso = st.selectbox(
+            "Quem pode assistir?",
+            ["Grátis", "Premium"],
+            help="Grátis aparece nas áreas normais. Premium aparece somente na Área Premium."
+        )
+
+        if acesso == "Premium":
+            st.info("💎 Este vídeo ficará disponível somente para assinantes Premium ativos.")
+        else:
+            st.caption("🌙 Este vídeo ficará disponível nas áreas gratuitas do app.")
 
         capa = st.file_uploader(
             "Escolha uma capa",
@@ -1144,7 +1209,7 @@ elif menu == "📤 Enviar vídeo":
 
                         supabase.table("videos").insert({
                             "nome": nome.strip() if nome.strip() else video.name,
-                            "categoria": categoria,
+                            "categoria": categoria_para_salvar(categoria, acesso),
                             "video_url": video_url,
                             "video_path": video_path,
                             "capa_url": capa_url,
@@ -1166,7 +1231,10 @@ elif menu in ["🧸 Infantil", "🎬 Filmes", "📺 Séries"]:
 
     st.subheader(menu)
 
-    itens = [v for v in videos if v.get("categoria") == categoria_atual]
+    itens = [
+        v for v in videos_gratis(videos)
+        if categoria_base(v) == categoria_atual
+    ]
 
     if not itens:
         st.info("Ainda não há vídeos nessa categoria.")
@@ -1234,9 +1302,10 @@ elif menu == "🗑️ Gerenciar":
         else:
             for item in videos:
                 st.markdown("---")
+                acesso_item = "💎 Premium" if video_premium(item) else "🌙 Grátis"
                 st.write(
                     f"**{item.get('nome', 'Sem título')}** — "
-                    f"{item.get('categoria', '')}"
+                    f"{categoria_base(item)} — {acesso_item}"
                 )
                 if st.button("Excluir", key=f"excluir_{item['id']}"):
                     excluir_video(item)
