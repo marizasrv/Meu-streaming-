@@ -682,6 +682,16 @@ section[data-testid="stSidebar"] .status-plano {
     }
 }
 
+
+/* Jogos e atividades */
+@media (max-width: 640px) {
+    [class*="st-key-conferir_"] button {
+        min-height: 44px !important;
+        border-radius: 14px !important;
+        font-weight: 800 !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -2177,6 +2187,96 @@ elif menu == "🎬 Criar vídeo com IA":
             use_container_width=True,
             key="baixar_video_ia",
         )
+
+
+elif menu == "🎮 Jogos":
+    st.markdown("## 🎮 Jogos")
+    st.caption("Joguinhos simples e educativos do Mundo da Luna.")
+
+    faixa = st.selectbox(
+        "👧 Escolha a faixa etária",
+        ["4–5 anos", "6–7 anos", "8–9 anos"],
+        key="faixa_jogos",
+    )
+
+    st.markdown("### 🧠 Jogo da memória")
+    st.info(
+        "Em breve: cartas com Luna, coelhinho, castelo, estrelas e objetos mágicos."
+    )
+
+    st.markdown("### 🔤 Complete a palavra")
+    palavra = st.radio(
+        "Qual palavra completa: C__ELHO?",
+        ["AO", "OE", "OU"],
+        key="jogo_palavra",
+        horizontal=True,
+    )
+    if st.button("✅ Conferir resposta", key="conferir_palavra", use_container_width=True):
+        if palavra == "OE":
+            st.success("Muito bem! A palavra é COELHO 🐰")
+        else:
+            st.warning("Quase! Tente novamente 💜")
+
+    st.markdown("### 🔢 Contando estrelas")
+    resposta_numero = st.number_input(
+        "Quantas estrelas aparecem aqui? ⭐ ⭐ ⭐ ⭐",
+        min_value=0,
+        max_value=10,
+        step=1,
+        key="contar_estrelas",
+    )
+    if st.button("⭐ Conferir estrelas", key="conferir_estrelas", use_container_width=True):
+        if resposta_numero == 4:
+            st.success("Acertou! São 4 estrelas ⭐⭐⭐⭐")
+        else:
+            st.warning("Conte de novo com calma 😊")
+
+elif menu == "📚 Atividades escolares":
+    st.markdown("## 📚 Atividades escolares")
+    st.caption("Atividades educativas para aprender brincando.")
+
+    idade = st.selectbox(
+        "🎒 Faixa etária",
+        ["4–5 anos", "6–7 anos", "8–9 anos"],
+        key="idade_atividades",
+    )
+
+    materia = st.selectbox(
+        "📘 Matéria",
+        [
+            "Alfabetização",
+            "Leitura",
+            "Matemática",
+            "Cores e formas",
+            "Animais",
+            "Atividade para colorir",
+        ],
+        key="materia_atividades",
+    )
+
+    st.markdown("### ✏️ Atividade do dia")
+
+    if materia == "Alfabetização":
+        st.write("Complete as letras: **L _ N A**")
+        st.write("Circule as vogais da palavra **LUNA**.")
+    elif materia == "Leitura":
+        st.write("Leia a frase: **Luna encontrou um coelhinho na floresta.**")
+        st.write("Pergunta: quem Luna encontrou?")
+    elif materia == "Matemática":
+        st.write("🍎🍎 + 🍎 = ?")
+        st.write("Conte os objetos e responda.")
+    elif materia == "Cores e formas":
+        st.write("Encontre um objeto **roxo** e uma forma **redonda**.")
+    elif materia == "Animais":
+        st.write("🐰 Qual animal aparece ao lado da Luna?")
+        st.write("Escreva o nome do animal.")
+    else:
+        st.write("🎨 Escolha uma cena da Luna e pinte com suas cores favoritas.")
+
+    st.info(
+        "Na próxima atualização podemos adicionar atividades para baixar em PDF "
+        "e mais jogos interativos."
+    )
 
 elif menu == "🗑️ Gerenciar":
     st.subheader("🗑️ Gerenciar")
