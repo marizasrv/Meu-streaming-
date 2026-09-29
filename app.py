@@ -514,6 +514,18 @@ section[data-testid="stSidebar"] .status-plano {
     }
 }
 
+
+/* Aproxima Minha conta do selo Premium na tela inicial */
+@media (max-width: 640px) {
+    [class*="st-key-atalho_conta_home"] {
+        margin-bottom: -0.10rem !important;
+    }
+    .status-plano {
+        margin-top: 0.05rem !important;
+        margin-bottom: 0.22rem !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
