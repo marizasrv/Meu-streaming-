@@ -736,6 +736,7 @@ def listar_assistidos_recentes(videos, limite=10):
 # identificados pelo prefixo "Premium::" dentro do campo categoria.
 # Exemplo: "Premium::Infantil". Vídeos antigos continuam gratuitos.
 PREMIUM_PREFIX = "Premium::"
+CARD_WIDTH = 190  # largura dos cards horizontais no celular
 
 
 def video_premium(item):
@@ -816,7 +817,7 @@ def mostrar_card(item, contexto, em_minha_lista=False, compacto=False):
 def mostrar_card_horizontal(item, contexto):
     """Card compacto para fileiras horizontais da Área Premium."""
     if item.get("capa_url"):
-        st.image(item["capa_url"], use_container_width=True)
+        st.image(item["capa_url"], width=190)
 
     nome = str(item.get("nome") or "Sem título")
     st.markdown(f"**✨ {nome}**")
@@ -858,7 +859,7 @@ def mostrar_card_horizontal(item, contexto):
 
 
 def mostrar_fileira_premium(titulo, itens, contexto, limite=12):
-    """Mostra uma fileira horizontal rolável de vídeos Premium."""
+    """Fileira horizontal com cards realmente pequenos (190 px)."""
     itens = list(itens)[:limite]
     if not itens:
         return
@@ -866,25 +867,25 @@ def mostrar_fileira_premium(titulo, itens, contexto, limite=12):
     st.markdown(f"### {titulo}")
 
     try:
-        # Streamlit 1.62+: no celular, wrap=False mantém uma única fileira
-        # e permite deslizar horizontalmente para ver os próximos cards.
-        quantidade_colunas = max(len(itens), 3)
-        cols = st.columns(quantidade_colunas, gap="xsmall", wrap=False)
+        # Streamlit atual: cada card recebe largura fixa de 190 px.
+        # A fileira não quebra e pode ser deslizada horizontalmente no celular.
+        fileira = st.container(horizontal=True, wrap=False, gap="xsmall")
+        for i, item in enumerate(itens):
+            card = fileira.container(width=190, border=False)
+            with card:
+                mostrar_card_horizontal(item, f"{contexto}_{i}")
+    except TypeError:
+        # Compatibilidade com versões antigas do Streamlit.
+        cols = st.columns(max(len(itens), 3), gap="xsmall", wrap=False)
         for i, (col, item) in enumerate(zip(cols, itens)):
             with col:
                 mostrar_card_horizontal(item, f"{contexto}_{i}")
-    except TypeError:
-        # Compatibilidade caso o projeto esteja usando uma versão antiga
-        # do Streamlit que ainda não tenha o parâmetro wrap.
-        cols = st.columns(2)
-        for i, item in enumerate(itens):
-            with cols[i % 2]:
-                mostrar_card(item, f"{contexto}_{i}", compacto=True)
+
 
 def mostrar_card_catalogo(item, contexto):
     """Card compacto para fileiras horizontais da tela inicial."""
     if item.get("capa_url"):
-        st.image(item["capa_url"], use_container_width=True)
+        st.image(item["capa_url"], width=190)
 
     nome = str(item.get("nome") or "Sem título")
     st.markdown(f"**✨ {nome}**")
@@ -931,7 +932,7 @@ def mostrar_card_catalogo(item, contexto):
 
 
 def mostrar_fileira_catalogo(titulo, itens, contexto, limite=12):
-    """Fileira horizontal rolável para a tela inicial."""
+    """Fileira horizontal da tela inicial com cards de 190 px."""
     itens = list(itens)[:limite]
     if not itens:
         return
@@ -939,16 +940,16 @@ def mostrar_fileira_catalogo(titulo, itens, contexto, limite=12):
     st.markdown(f"### {titulo}")
 
     try:
-        quantidade_colunas = max(len(itens), 3)
-        cols = st.columns(quantidade_colunas, gap="xsmall", wrap=False)
+        fileira = st.container(horizontal=True, wrap=False, gap="xsmall")
+        for i, item in enumerate(itens):
+            card = fileira.container(width=190, border=False)
+            with card:
+                mostrar_card_catalogo(item, f"{contexto}_{i}")
+    except TypeError:
+        cols = st.columns(max(len(itens), 3), gap="xsmall", wrap=False)
         for i, (col, item) in enumerate(zip(cols, itens)):
             with col:
                 mostrar_card_catalogo(item, f"{contexto}_{i}")
-    except TypeError:
-        cols = st.columns(2)
-        for i, item in enumerate(itens):
-            with cols[i % 2]:
-                mostrar_card(item, f"{contexto}_{i}", compacto=True)
 
 
 # Aplica gravação/remoção pendente do login no navegador e tenta restaurar a conta.
@@ -1035,7 +1036,12 @@ if menu == "🏠 Início":
     ultimo = ultimo_assistido(videos_inicio)
     if ultimo:
         st.subheader("▶ Continuar assistindo")
-        mostrar_card(ultimo, "continuar_home", compacto=True)
+        try:
+            continuar = st.container(width=240, border=False)
+            with continuar:
+                mostrar_card_catalogo(ultimo, "continuar_home")
+        except TypeError:
+            mostrar_card(ultimo, "continuar_home", compacto=True)
         st.markdown("---")
 
     if not videos_inicio:
