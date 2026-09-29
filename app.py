@@ -708,6 +708,16 @@ section[data-testid="stSidebar"] .status-plano {
     font-weight: 800 !important;
 }
 
+
+/* Atualização completa: vídeo IA, jogos e atividades */
+[class*="st-key-gerar_video_ia"] button,
+[class*="st-key-conferir_atividade_"] button,
+[class*="st-key-baixar_atividade_"] button {
+    min-height: 52px !important;
+    border-radius: 16px !important;
+    font-weight: 800 !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -2080,7 +2090,7 @@ elif menu in ["🧸 Infantil", "🎬 Filmes", "📺 Séries"]:
 
 elif menu == "🎬 Criar vídeo com IA":
     st.markdown("## 🎬 Criar vídeo com IA")
-    st.caption("Transforme uma imagem em um vídeo com movimento usando IA.")
+    st.caption("Transforme uma imagem em vídeo e escolha como cada elemento deve se mover.")
 
     imagem_video = st.file_uploader(
         "🖼️ Envie a imagem",
@@ -2091,20 +2101,27 @@ elif menu == "🎬 Criar vídeo com IA":
     if imagem_video is not None:
         st.image(imagem_video, use_container_width=True)
 
+    modo_video = st.radio(
+        "⚙️ Modo de criação",
+        ["Simples", "Avançado"],
+        horizontal=True,
+        key="modo_video_ia",
+    )
+
     prompt_video = st.text_area(
-        "✨ Como você quer o movimento?",
+        "✨ O que deve acontecer na cena?",
         placeholder=(
             "Exemplo: Luna caminha devagar pela floresta, pisca naturalmente, "
             "o cabelo se move suavemente e o coelhinho mexe as orelhas."
         ),
-        height=120,
+        height=115,
         key="prompt_video_ia",
     )
 
     col1, col2 = st.columns(2)
     with col1:
         duracao_video = st.selectbox(
-            "⏱️ Duração",
+            "⏱️ Duração desejada",
             [5, 6, 8, 10],
             format_func=lambda x: f"{x} segundos",
             key="duracao_video_ia",
@@ -2112,9 +2129,102 @@ elif menu == "🎬 Criar vídeo com IA":
     with col2:
         camera_video = st.selectbox(
             "🎥 Câmera",
-            ["Parada", "Zoom suave", "Movimento leve", "Panorâmica suave"],
+            [
+                "Parada",
+                "Zoom suave",
+                "Aproximar lentamente",
+                "Afastar lentamente",
+                "Movimento leve",
+                "Panorâmica suave",
+                "Acompanhar personagem",
+            ],
             key="camera_video_ia",
         )
+
+    intensidade = "Leve"
+    expressao = "Natural"
+    olhos = "Piscar naturalmente"
+    cabelo = "Movimento suave"
+    secundario = "Movimento leve"
+    ambiente = "Sem efeito extra"
+    formato = "YouTube 16:9"
+    qualidade = "Equilibrada"
+
+    if modo_video == "Avançado":
+        st.markdown("### 🎭 Atuação e movimentos")
+
+        c1, c2 = st.columns(2)
+        with c1:
+            intensidade = st.selectbox(
+                "💫 Intensidade",
+                ["Muito leve", "Leve", "Média", "Forte"],
+                index=1,
+                key="intensidade_video_ia",
+            )
+            expressao = st.selectbox(
+                "🙂 Expressão",
+                ["Natural", "Feliz", "Sorrindo", "Surpresa", "Curiosa", "Séria"],
+                key="expressao_video_ia",
+            )
+            olhos = st.selectbox(
+                "👀 Olhos",
+                [
+                    "Piscar naturalmente",
+                    "Olhar para frente",
+                    "Olhar para o lado suavemente",
+                    "Acompanhar algo com os olhos",
+                ],
+                key="olhos_video_ia",
+            )
+        with c2:
+            cabelo = st.selectbox(
+                "💇 Cabelo/roupa",
+                [
+                    "Quase parado",
+                    "Movimento suave",
+                    "Brisa leve",
+                    "Vento moderado",
+                ],
+                index=1,
+                key="cabelo_video_ia",
+            )
+            secundario = st.selectbox(
+                "🐰 Personagem secundário",
+                [
+                    "Quase parado",
+                    "Movimento leve",
+                    "Piscar e mexer a cabeça",
+                    "Mexer orelhas/patas suavemente",
+                ],
+                index=1,
+                key="secundario_video_ia",
+            )
+            ambiente = st.selectbox(
+                "🌬️ Ambiente",
+                [
+                    "Sem efeito extra",
+                    "Folhas mexendo suavemente",
+                    "Partículas mágicas discretas",
+                    "Luzes mágicas suaves",
+                    "Brisa suave",
+                ],
+                key="ambiente_video_ia",
+            )
+
+        c3, c4 = st.columns(2)
+        with c3:
+            formato = st.selectbox(
+                "📐 Formato desejado",
+                ["YouTube 16:9", "TikTok/Reels 9:16", "Quadrado 1:1"],
+                key="formato_video_ia",
+            )
+        with c4:
+            qualidade = st.selectbox(
+                "🎞️ Qualidade",
+                ["Rápida", "Equilibrada", "Melhor qualidade"],
+                index=1,
+                key="qualidade_video_ia",
+            )
 
     preservar = st.checkbox(
         "🧒 Preservar rosto, roupa e aparência da personagem",
@@ -2122,18 +2232,42 @@ elif menu == "🎬 Criar vídeo com IA":
         key="preservar_video_ia",
     )
 
-    prompt_final = prompt_video.strip()
-    if preservar and prompt_final:
-        prompt_final += (
-            "\nPreservar rigorosamente a mesma personagem, rosto, cabelo, roupa, "
-            "cores e proporções da imagem de referência."
-        )
-    if prompt_final:
-        prompt_final += f"\nDuração: {duracao_video} segundos. Câmera: {camera_video}."
+    partes_prompt = []
+    if prompt_video.strip():
+        partes_prompt.append(prompt_video.strip())
 
-    if prompt_final:
-        with st.expander("📝 Ver comando completo"):
-            st.code(prompt_final, language="text")
+    if modo_video == "Avançado":
+        partes_prompt.append(f"Intensidade do movimento: {intensidade}.")
+        partes_prompt.append(f"Expressão facial: {expressao}.")
+        partes_prompt.append(f"Olhos: {olhos}.")
+        partes_prompt.append(f"Cabelo e roupa: {cabelo}.")
+        partes_prompt.append(f"Personagem secundário: {secundario}.")
+        partes_prompt.append(f"Ambiente: {ambiente}.")
+        partes_prompt.append(f"Formato visual desejado: {formato}.")
+
+    partes_prompt.append(f"Câmera: {camera_video}.")
+    partes_prompt.append(f"Duração desejada: cerca de {duracao_video} segundos.")
+
+    if preservar:
+        partes_prompt.append(
+            "Preservar rigorosamente o mesmo rosto, cabelo, roupa, cores, "
+            "idade aparente, proporções e identidade visual dos personagens da imagem de referência."
+        )
+
+    partes_prompt.append(
+        "Movimentos naturais e cinematográficos, sem deformações, sem trocar personagens, "
+        "sem alterar o cenário principal e sem movimentos bruscos."
+    )
+
+    prompt_final = "\n".join(partes_prompt)
+
+    with st.expander("📝 Ver comando completo"):
+        st.code(prompt_final, language="text")
+
+    st.caption(
+        "ℹ️ A geração real depende do acesso/créditos do provedor de IA. "
+        "Se a conta não tiver saldo ou o modelo estiver indisponível, o app mostrará o motivo."
+    )
 
     if st.button(
         "✨ Gerar vídeo com IA",
@@ -2155,10 +2289,17 @@ elif menu == "🎬 Criar vídeo com IA":
                         "Adicione sua chave do Hugging Face para liberar a geração."
                     )
                 else:
+                    passos = {
+                        "Rápida": 20,
+                        "Equilibrada": 30,
+                        "Melhor qualidade": 40,
+                    }.get(qualidade, 30)
+
                     with st.spinner("🎬 Criando o vídeo com IA... isso pode levar alguns minutos."):
                         cliente_video = InferenceClient(
                             provider="auto",
                             api_key=hf_token,
+                            timeout=300,
                         )
 
                         imagem_bytes = imagem_video.getvalue()
@@ -2169,9 +2310,11 @@ elif menu == "🎬 Criar vídeo com IA":
                             prompt=prompt_final,
                             negative_prompt=(
                                 "personagem diferente, rosto alterado, roupa diferente, "
-                                "mãos deformadas, olhos deformados, baixa qualidade, "
-                                "movimento brusco, câmera tremendo, texto, marca d'água"
+                                "mudança de idade, mãos deformadas, olhos deformados, membros extras, "
+                                "baixa qualidade, movimento brusco, câmera tremendo, texto, legenda, "
+                                "marca d'água, cenário completamente diferente"
                             ),
+                            num_inference_steps=passos,
                         )
 
                         st.session_state["video_ia_gerado"] = video_bytes
@@ -2184,12 +2327,19 @@ elif menu == "🎬 Criar vídeo com IA":
                     "Adicione huggingface_hub>=0.35.0 ao requirements.txt do GitHub."
                 )
             except Exception as e:
+                erro = str(e)
                 st.error(
-                    "Não consegui gerar o vídeo agora. "
-                    "Confira a chave HF_TOKEN e se sua conta tem acesso/créditos para o modelo."
+                    "Não consegui gerar o vídeo agora. A tela e os comandos estão funcionando, "
+                    "mas a geração depende do provedor de IA, do modelo e dos créditos da conta."
                 )
-                with st.expander("Ver detalhe técnico"):
-                    st.code(str(e), language="text")
+                if "402" in erro or "credit" in erro.lower() or "billing" in erro.lower():
+                    st.warning("💳 Parece ser falta de créditos/saldo no provedor.")
+                elif "401" in erro or "403" in erro:
+                    st.warning("🔑 Parece ser problema de permissão ou da chave HF_TOKEN.")
+                elif "provider" in erro.lower() or "model" in erro.lower():
+                    st.warning("🤖 O modelo/provedor pode estar temporariamente indisponível.")
+                with st.expander("🔧 Ver detalhe técnico"):
+                    st.code(erro, language="text")
 
     if st.session_state.get("video_ia_gerado"):
         st.markdown("### 🎥 Seu vídeo")
@@ -2373,7 +2523,7 @@ elif menu == "🎮 Jogos":
 
 elif menu == "📚 Atividades escolares":
     st.markdown("## 📚 Atividades escolares")
-    st.caption("Atividades educativas para aprender brincando.")
+    st.caption("Atividades educativas por idade, com correção na hora e opção para baixar.")
 
     idade = st.selectbox(
         "🎒 Faixa etária",
@@ -2396,27 +2546,117 @@ elif menu == "📚 Atividades escolares":
 
     st.markdown("### ✏️ Atividade do dia")
 
-    if materia == "Alfabetização":
-        st.write("Complete as letras: **L _ N A**")
-        st.write("Circule as vogais da palavra **LUNA**.")
-    elif materia == "Leitura":
-        st.write("Leia a frase: **Luna encontrou um coelhinho na floresta.**")
-        st.write("Pergunta: quem Luna encontrou?")
-    elif materia == "Matemática":
-        st.write("🍎🍎 + 🍎 = ?")
-        st.write("Conte os objetos e responda.")
-    elif materia == "Cores e formas":
-        st.write("Encontre um objeto **roxo** e uma forma **redonda**.")
-    elif materia == "Animais":
-        st.write("🐰 Qual animal aparece ao lado da Luna?")
-        st.write("Escreva o nome do animal.")
-    else:
-        st.write("🎨 Escolha uma cena da Luna e pinte com suas cores favoritas.")
+    atividade_baixar = ""
+    resposta_correta = None
 
-    st.info(
-        "Na próxima atualização podemos adicionar atividades para baixar em PDF "
-        "e mais jogos interativos."
+    if materia == "Alfabetização":
+        if idade == "4–5 anos":
+            st.write("Complete a palavra: **L _ N A**")
+            resposta = st.text_input("Digite a letra que falta:", key="resp_alf_45").strip().upper()
+            resposta_correta = resposta == "U"
+            atividade_baixar = "ALFABETIZAÇÃO 4–5 ANOS\nComplete: L _ N A\nCircule as vogais da palavra LUNA."
+        elif idade == "6–7 anos":
+            st.write("Complete a palavra: **C _ E L H O**")
+            resposta = st.text_input("Digite a letra que falta:", key="resp_alf_67").strip().upper()
+            resposta_correta = resposta == "O"
+            atividade_baixar = "ALFABETIZAÇÃO 6–7 ANOS\nComplete: C _ E L H O\nSepare a palavra COELHO em sílabas."
+        else:
+            st.write("Escreva uma frase usando as palavras **Luna**, **livro** e **floresta**.")
+            resposta = st.text_area("Sua frase:", key="resp_alf_89")
+            resposta_correta = len(resposta.strip().split()) >= 5
+            atividade_baixar = "ALFABETIZAÇÃO 8–9 ANOS\nEscreva uma frase usando: Luna, livro e floresta."
+
+    elif materia == "Leitura":
+        texto_leitura = (
+            "Luna abriu seu livro mágico. Uma luz roxa apareceu e, de repente, "
+            "ela e o coelhinho chegaram a uma floresta encantada."
+        )
+        st.info(texto_leitura)
+        pergunta = "Onde Luna e o coelhinho chegaram?"
+        st.write(f"**Pergunta:** {pergunta}")
+        resposta = st.text_input("Resposta:", key=f"resp_leitura_{idade}")
+        resposta_correta = "floresta" in resposta.lower()
+        atividade_baixar = (
+            f"LEITURA {idade}\n\n{texto_leitura}\n\n"
+            f"Pergunta: {pergunta}\nResposta: ________________________"
+        )
+
+    elif materia == "Matemática":
+        if idade == "4–5 anos":
+            st.write("⭐ ⭐ + ⭐ = ?")
+            correta = 3
+        elif idade == "6–7 anos":
+            st.write("🐰 Luna encontrou 4 cenouras e ganhou mais 3. Quantas cenouras ela tem?")
+            correta = 7
+        else:
+            st.write("🏰 No castelo havia 12 estrelas. 5 apagaram. Quantas ficaram acesas?")
+            correta = 7
+
+        resposta = st.number_input(
+            "Sua resposta:",
+            min_value=0,
+            max_value=100,
+            step=1,
+            key=f"resp_mat_{idade}",
+        )
+        resposta_correta = int(resposta) == correta
+        atividade_baixar = f"MATEMÁTICA {idade}\nResolva a atividade mostrada no app.\nResposta: __________"
+
+    elif materia == "Cores e formas":
+        st.write("🟣 Qual é a cor deste círculo?")
+        resposta = st.radio(
+            "Escolha:",
+            ["Roxo", "Amarelo", "Verde"],
+            key=f"resp_cores_{idade}",
+            horizontal=True,
+        )
+        resposta_correta = resposta == "Roxo"
+        atividade_baixar = f"CORES E FORMAS {idade}\nPinte um círculo de roxo e desenhe um quadrado amarelo."
+
+    elif materia == "Animais":
+        st.write("🐰 Qual é o animal que acompanha Luna?")
+        resposta = st.radio(
+            "Escolha:",
+            ["Coelho", "Gato", "Cachorro"],
+            key=f"resp_animais_{idade}",
+            horizontal=True,
+        )
+        resposta_correta = resposta == "Coelho"
+        atividade_baixar = f"ANIMAIS {idade}\nEscreva o nome do animal que acompanha Luna: __________________"
+
+    else:
+        st.write("🎨 Desenhe Luna, o coelhinho e um castelo. Depois pinte do seu jeito.")
+        st.write("⭐ Desafio: acrescente 5 estrelas no céu.")
+        atividade_baixar = (
+            f"ATIVIDADE PARA COLORIR {idade}\n\n"
+            "Desenhe Luna, o coelhinho e um castelo.\n"
+            "Acrescente 5 estrelas no céu e pinte a cena."
+        )
+
+    if materia != "Atividade para colorir":
+        if st.button(
+            "✅ Conferir atividade",
+            key=f"conferir_atividade_{idade}_{materia}",
+            use_container_width=True,
+        ):
+            if resposta_correta:
+                st.success("🎉 Muito bem! Resposta correta!")
+            else:
+                st.warning("💜 Quase! Tente novamente.")
+
+    st.download_button(
+        "⬇️ Baixar atividade",
+        data=atividade_baixar.encode("utf-8"),
+        file_name=f"atividade_{materia.lower().replace(' ', '_')}_{idade.replace('–','-')}.txt",
+        mime="text/plain",
+        use_container_width=True,
+        key=f"baixar_atividade_{idade}_{materia}",
     )
+
+    st.caption(
+        "💡 Na próxima etapa também dá para transformar essas atividades em folhas PDF ilustradas."
+    )
+
 
 elif menu == "🗑️ Gerenciar":
     st.subheader("🗑️ Gerenciar")
