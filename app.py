@@ -379,6 +379,40 @@ div[data-testid="stLinkButton"] a span {
     }
 }
 
+
+/* Menu lateral compacto no celular */
+@media (max-width: 640px) {
+    section[data-testid="stSidebar"] div[role="radiogroup"] {
+        gap: 0 !important;
+    }
+    section[data-testid="stSidebar"] div[role="radiogroup"] label {
+        border-radius: 11px !important;
+        padding: 5px 8px !important;
+        margin-bottom: 3px !important;
+        min-height: 42px !important;
+    }
+    section[data-testid="stSidebar"] div[role="radiogroup"] label p,
+    section[data-testid="stSidebar"] div[role="radiogroup"] label span {
+        font-size: 0.90rem !important;
+        line-height: 1.08 !important;
+    }
+    section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked),
+    section[data-testid="stSidebar"] div[role="radiogroup"] label[data-baseweb="radio"]:has(input:checked) {
+        border-width: 2px !important;
+        transform: translateX(1px) !important;
+    }
+    section[data-testid="stSidebar"] div[role="radiogroup"] input[type="radio"] {
+        transform: scale(0.88);
+    }
+    section[data-testid="stSidebar"] [data-testid="stWidgetLabel"] p {
+        font-size: 1.05rem !important;
+        margin-bottom: 0.25rem !important;
+    }
+    section[data-testid="stSidebar"] div[data-testid="stAlert"] {
+        padding: 0.45rem 0.6rem !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -1119,7 +1153,8 @@ menu = st.sidebar.radio(
         "📺 Séries",
         "🗑️ Gerenciar"
     ],
-    key="menu_principal"
+    key="menu_principal",
+    width="content"
 )
 
 if st.session_state.usuario_logado:
