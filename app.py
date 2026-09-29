@@ -493,6 +493,27 @@ section[data-testid="stSidebar"] .status-plano {
     }
 }
 
+
+/* Botão Voltar bem compacto nas páginas internas */
+[class*="st-key-botao_voltar_inicio"] button {
+    min-height: 34px !important;
+    height: 34px !important;
+    padding: 0.12rem 0.48rem !important;
+    border-radius: 10px !important;
+}
+[class*="st-key-botao_voltar_inicio"] button p {
+    font-size: 0.80rem !important;
+    font-weight: 800 !important;
+    white-space: nowrap !important;
+}
+@media (max-width: 640px) {
+    [class*="st-key-botao_voltar_inicio"] {
+        width: 92px !important;
+        max-width: 92px !important;
+        margin-bottom: 0.20rem !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
