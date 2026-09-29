@@ -2535,68 +2535,183 @@ elif menu == "🎬 Criar vídeo com IA":
             try:
                 from huggingface_hub import InferenceClient
 
-                hf_token = st.secrets.get("HF_TOKEN", "")
+                hf_token = str(st.secrets.get("HF_TOKEN", "")).strip()
+
                 if not hf_token:
                     st.error(
-                        "Falta a chave HF_TOKEN nos Secrets do Streamlit. "
-                        "Adicione sua chave do Hugging Face para liberar a geração."
+                        "Falta a chave HF_TOKEN nos Secrets do Streamlit."
                     )
+
                 else:
+                    hf_provider = str(
+                        st.secrets.get("HF_VIDEO_PROVIDER", "auto")
+                    ).strip() or "auto"
+
+                    hf_model = str(
+                        st.secrets.get(
+                            "HF_VIDEO_MODEL",
+                            "Wan-AI/Wan2.2-I2V-A14B"
+                        )
+                    ).strip() or "Wan-AI/Wan2.2-I2V-A14B"
+
                     passos = {
                         "Rápida": 20,
                         "Equilibrada": 30,
                         "Melhor qualidade": 40,
                     }.get(qualidade, 30)
 
-                    with st.spinner("🎬 Criando o vídeo com IA... isso pode levar alguns minutos."):
+                    negativo = (
+                        "personagem diferente, rosto alterado, "
+                        "roupa diferente, mudança de idade, "
+                        "mãos deformadas, olhos deformados, "
+                        "membros extras, baixa qualidade, "
+                        "movimento brusco, câmera tremendo, "
+                        "texto, legenda, marca d'água, "
+                        "cenário completamente diferente"
+                    )
+
+                    with st.spinner(
+                        "🎬 Criando o vídeo com IA... "
+                        "isso pode levar alguns minutos."
+                    ):
+
                         cliente_video = InferenceClient(
-                            provider="auto",
-                            api_key=hf_token,
-                            timeout=300,
+                            provider=hf_provider,
+                            token=hf_token,
+                            timeout=600,
                         )
 
                         imagem_bytes = imagem_video.getvalue()
 
-                        video_bytes = cliente_video.image_to_video(
-                            imagem_bytes,
-                            model="Wan-AI/Wan2.2-I2V-A14B",
-                            prompt=prompt_final,
-                            negative_prompt=(
-                                "personagem diferente, rosto alterado, roupa diferente, "
-                                "mudança de idade, mãos deformadas, olhos deformados, membros extras, "
-                                "baixa qualidade, movimento brusco, câmera tremendo, texto, legenda, "
-                                "marca d'água, cenário completamente diferente"
-                            ),
-                            num_inference_steps=passos,
-                        )
+                        try:
+                            video_bytes = cliente_video.image_to_video(
+                                imagem_bytes,
+                                model=hf_model,
+                                prompt=prompt_final,
+                                negative_prompt=negativo,
+                                num_inference_steps=passos,
+                            )
 
-                        st.session_state["video_ia_gerado"] = video_bytes
-                        st.session_state["video_ia_nome"] = "mundo_da_luna_video_ia.mp4"
+                        except Exception as erro1:
 
+                            mensagem = str(erro1).lower()
+
+                            erro_parametro = any(
+                                palavra in mensagem
+                                for palavra in [
+                                    "unsupported",
+                                    "unexpected",
+                                    "parameter",
+                                    "num_inference_steps",
+                                    "negative_prompt",
+                                ]
+                            )
+
+                            if not erro_parametro:
+                                raise
+
+                            st.info(
+                                "🔄 Tentando novamente "
+                                "em modo compatível..."
+                            )
+
+                            video_bytes = (
+                                cliente_video.image_to_video(
+                                    imagem_bytes,
+                                    model=hf_model,
+                                    prompt=prompt_final,
+                                )
+                            )
+
+                        if not video_bytes:
+                            raise RuntimeError(
+                                "O provedor não retornou o vídeo."
+                            )
+
+                        st.session_state[
+                            "video_ia_gerado"
+                        ] = video_bytes
+
+                        st.session_state[
+                            "video_ia_nome"
+                        ] = "mundo_da_luna_video_ia.mp4"
+
+                    # Só usa o crédito depois
+                    # que o vídeo realmente foi criado.
                     if consumir_credito_video():
-                        st.success("✅ Vídeo criado! Foi usado 1 crédito.")
+                        st.success(
+                            "✅ Vídeo criado! "
+                            "Foi usado 1 crédito."
+                        )
                     else:
                         st.success("✅ Vídeo criado!")
-                    st.caption(f"💎 Saldo atual: {saldo_creditos_video() or 0} crédito(s)")
+
+                    st.caption(
+                        f"💎 Saldo atual: "
+                        f"{saldo_creditos_video() or 0} crédito(s)"
+                    )
+
             except ImportError:
+
                 st.error(
-                    "A biblioteca huggingface_hub ainda não está instalada. "
-                    "Adicione huggingface_hub>=0.35.0 ao requirements.txt do GitHub."
+                    "Falta instalar huggingface_hub."
                 )
+
             except Exception as e:
+
                 erro = str(e)
+                erro_lower = erro.lower()
+
                 st.error(
-                    "Não consegui gerar o vídeo agora. A tela e os comandos estão funcionando, "
-                    "mas a geração depende do provedor de IA, do modelo e dos créditos da conta."
+                    "Não consegui gerar o vídeo agora. "
+                    "Nenhum crédito foi descontado."
                 )
-                if "402" in erro or "credit" in erro.lower() or "billing" in erro.lower():
-                    st.warning("💳 Parece ser falta de créditos/saldo no provedor.")
-                elif "401" in erro or "403" in erro:
-                    st.warning("🔑 Parece ser problema de permissão ou da chave HF_TOKEN.")
-                elif "provider" in erro.lower() or "model" in erro.lower():
-                    st.warning("🤖 O modelo/provedor pode estar temporariamente indisponível.")
-                with st.expander("🔧 Ver detalhe técnico"):
-                    st.code(erro, language="text")
+
+                if (
+                    "402" in erro
+                    or "credit" in erro_lower
+                    or "billing" in erro_lower
+                    or "quota" in erro_lower
+                    or "payment" in erro_lower
+                ):
+                    st.warning(
+                        "💳 O provedor de IA está "
+                        "pedindo saldo/créditos."
+                    )
+
+                elif (
+                    "401" in erro
+                    or "403" in erro
+                    or "unauthorized" in erro_lower
+                    or "forbidden" in erro_lower
+                ):
+                    st.warning(
+                        "🔑 Confira o HF_TOKEN."
+                    )
+
+                elif (
+                    "provider" in erro_lower
+                    or "model" in erro_lower
+                    or "unavailable" in erro_lower
+                ):
+                    st.warning(
+                        "🤖 O modelo ou provedor "
+                        "está indisponível agora."
+                    )
+
+                elif (
+                    "timeout" in erro_lower
+                    or "timed out" in erro_lower
+                ):
+                    st.warning(
+                        "⏳ A geração demorou demais. "
+                        "Tente novamente."
+                    )
+
+                with st.expander(
+                    "🔧 Ver detalhe técnico"
+                ):
+                    st.code(erro)
 
     if st.session_state.get("video_ia_gerado"):
         st.markdown("### 🎥 Seu vídeo")
