@@ -219,6 +219,18 @@ div[data-testid="stButton"] button p {
     font-size: 1.22rem !important;
     font-weight: 800 !important;
 }
+
+/* Botões compactos somente dentro dos cards do catálogo */
+[class*="st-key-cardacoes_"] div[data-testid="stButton"] button {
+    min-height: 42px !important;
+    padding: 0.35rem 0.55rem !important;
+    border-radius: 12px !important;
+}
+[class*="st-key-cardacoes_"] div[data-testid="stButton"] button p {
+    font-size: 0.92rem !important;
+    font-weight: 800 !important;
+    white-space: nowrap !important;
+}
 div[data-testid="stLinkButton"] a {
     min-height: 58px !important;
     font-size: 1.22rem !important;
@@ -827,32 +839,43 @@ def mostrar_card_horizontal(item, contexto):
     if chave not in st.session_state:
         st.session_state[chave] = False
 
-    if not st.session_state[chave]:
-        if st.button(
-            "▶ Assistir",
-            key=f"assistir_{contexto}_{item['id']}",
-            use_container_width=True,
-        ):
-            registrar_assistido(item)
-            st.session_state[chave] = True
-            st.rerun()
-    else:
-        if st.button(
-            "✖ Fechar",
-            key=f"fechar_{contexto}_{item['id']}",
-            use_container_width=True,
-        ):
-            st.session_state[chave] = False
-            st.rerun()
+    # Área compacta de ações: 150 px de largura.
+    try:
+        acoes = st.container(
+            key=f"cardacoes_{contexto}_{item['id']}",
+            width=150,
+            border=False,
+        )
+    except TypeError:
+        acoes = st.container(key=f"cardacoes_{contexto}_{item['id']}")
 
-    favorito = bool(item.get("favorito", False))
-    texto = "💖 Na Lista" if favorito else "🤍 Minha Lista"
-    if st.button(
-        texto,
-        key=f"fav_{contexto}_{item['id']}",
-        use_container_width=True,
-    ):
-        alternar_favorito(item)
+    with acoes:
+        if not st.session_state[chave]:
+            if st.button(
+                "▶ Assistir",
+                key=f"assistir_{contexto}_{item['id']}",
+                use_container_width=True,
+            ):
+                registrar_assistido(item)
+                st.session_state[chave] = True
+                st.rerun()
+        else:
+            if st.button(
+                "✖ Fechar",
+                key=f"fechar_{contexto}_{item['id']}",
+                use_container_width=True,
+            ):
+                st.session_state[chave] = False
+                st.rerun()
+
+        favorito = bool(item.get("favorito", False))
+        texto = "💖 Na Lista" if favorito else "🤍 Minha Lista"
+        if st.button(
+            texto,
+            key=f"fav_{contexto}_{item['id']}",
+            use_container_width=True,
+        ):
+            alternar_favorito(item)
 
     if st.session_state.get(chave, False):
         st.video(item["video_url"])
@@ -900,32 +923,43 @@ def mostrar_card_catalogo(item, contexto):
     if chave not in st.session_state:
         st.session_state[chave] = False
 
-    if not st.session_state[chave]:
-        if st.button(
-            "▶ Assistir",
-            key=f"assistir_{contexto}_{item['id']}",
-            use_container_width=True,
-        ):
-            registrar_assistido(item)
-            st.session_state[chave] = True
-            st.rerun()
-    else:
-        if st.button(
-            "✖ Fechar",
-            key=f"fechar_{contexto}_{item['id']}",
-            use_container_width=True,
-        ):
-            st.session_state[chave] = False
-            st.rerun()
+    # Área compacta de ações: 150 px de largura.
+    try:
+        acoes = st.container(
+            key=f"cardacoes_{contexto}_{item['id']}",
+            width=150,
+            border=False,
+        )
+    except TypeError:
+        acoes = st.container(key=f"cardacoes_{contexto}_{item['id']}")
 
-    favorito = bool(item.get("favorito", False))
-    texto = "💖 Na Lista" if favorito else "🤍 Minha Lista"
-    if st.button(
-        texto,
-        key=f"fav_{contexto}_{item['id']}",
-        use_container_width=True,
-    ):
-        alternar_favorito(item)
+    with acoes:
+        if not st.session_state[chave]:
+            if st.button(
+                "▶ Assistir",
+                key=f"assistir_{contexto}_{item['id']}",
+                use_container_width=True,
+            ):
+                registrar_assistido(item)
+                st.session_state[chave] = True
+                st.rerun()
+        else:
+            if st.button(
+                "✖ Fechar",
+                key=f"fechar_{contexto}_{item['id']}",
+                use_container_width=True,
+            ):
+                st.session_state[chave] = False
+                st.rerun()
+
+        favorito = bool(item.get("favorito", False))
+        texto = "💖 Na Lista" if favorito else "🤍 Minha Lista"
+        if st.button(
+            texto,
+            key=f"fav_{contexto}_{item['id']}",
+            use_container_width=True,
+        ):
+            alternar_favorito(item)
 
     if st.session_state.get(chave, False):
         st.video(item["video_url"])
