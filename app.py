@@ -718,6 +718,27 @@ section[data-testid="stSidebar"] .status-plano {
     font-weight: 800 !important;
 }
 
+
+/* Crédito, download e jogo no celular */
+div[data-testid="stDownloadButton"] button {
+    width: 100% !important;
+    min-height: 54px !important;
+    border-radius: 16px !important;
+    border: 2px solid #f2d675 !important;
+    background: linear-gradient(90deg, #6d28d9, #8b5cf6) !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+}
+div[data-testid="stDownloadButton"] button p,
+div[data-testid="stDownloadButton"] button span {
+    color: #ffffff !important;
+    font-size: 1.05rem !important;
+    font-weight: 800 !important;
+}
+[class*="st-key-memoria_carta_"] {
+    min-width: 92px !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -841,6 +862,146 @@ def link_plano_pagamento():
         return url
     except Exception:
         return ""
+
+
+# -----------------------------
+# CRÉDITOS PARA VÍDEO COM IA
+# -----------------------------
+def links_pacotes_creditos():
+    """Links opcionais dos checkouts de créditos na Kiwify."""
+    try:
+        return {
+            5: str(st.secrets.get("KIWIFY_CREDITOS_5_URL", "")).strip(),
+            15: str(st.secrets.get("KIWIFY_CREDITOS_15_URL", "")).strip(),
+            30: str(st.secrets.get("KIWIFY_CREDITOS_30_URL", "")).strip(),
+        }
+    except Exception:
+        return {5: "", 15: "", 30: ""}
+
+
+def obter_carteira_creditos():
+    """
+    Cria a carteira na primeira vez e entrega 1 crédito grátis.
+    Retorna None se a tabela ainda não estiver criada.
+    """
+    if not st.session_state.get("usuario_id"):
+        return None
+
+    admin = cliente_admin_assinaturas()
+    if admin is None:
+        return None
+
+    try:
+        resp = (
+            admin.table("video_creditos")
+            .select("user_id,email,saldo,creditos_gratis_recebidos")
+            .eq("user_id", st.session_state.usuario_id)
+            .limit(1)
+            .execute()
+        )
+        dados = resp.data or []
+
+        if dados:
+            return dados[0]
+
+        nova = {
+            "user_id": st.session_state.usuario_id,
+            "email": st.session_state.usuario_logado or "",
+            "saldo": 1,
+            "creditos_gratis_recebidos": True,
+        }
+        criado = admin.table("video_creditos").insert(nova).execute()
+        itens = criado.data or []
+        return itens[0] if itens else nova
+    except Exception:
+        return None
+
+
+def saldo_creditos_video():
+    carteira = obter_carteira_creditos()
+    if not carteira:
+        return None
+    try:
+        return max(0, int(carteira.get("saldo", 0)))
+    except Exception:
+        return 0
+
+
+def consumir_credito_video():
+    """
+    Desconta 1 crédito somente depois de uma geração bem-sucedida.
+    """
+    if not st.session_state.get("usuario_id"):
+        return False
+
+    admin = cliente_admin_assinaturas()
+    if admin is None:
+        return False
+
+    carteira = obter_carteira_creditos()
+    if not carteira:
+        return False
+
+    saldo = int(carteira.get("saldo", 0) or 0)
+    if saldo <= 0:
+        return False
+
+    admin.table("video_creditos").update({
+        "saldo": saldo - 1,
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }).eq("user_id", st.session_state.usuario_id).execute()
+
+    return True
+
+
+def adicionar_creditos_admin(email, quantidade):
+    """
+    Permite ao administrador adicionar créditos manualmente depois de
+    conferir uma compra na Kiwify. Mais tarde o webhook pode automatizar isso.
+    """
+    admin = cliente_admin_assinaturas()
+    if admin is None:
+        raise RuntimeError("Falta SUPABASE_SECRET_KEY nos Secrets.")
+
+    busca = (
+        admin.table("video_creditos")
+        .select("user_id,email,saldo")
+        .ilike("email", email.strip())
+        .limit(1)
+        .execute()
+    )
+    itens = busca.data or []
+
+    if not itens:
+        # Busca o user_id na tabela de assinaturas, que o app já usa.
+        conta = (
+            admin.table("assinaturas")
+            .select("user_id,email")
+            .ilike("email", email.strip())
+            .limit(1)
+            .execute()
+        )
+        contas = conta.data or []
+        if not contas:
+            raise RuntimeError("Não encontrei uma conta cadastrada com esse e-mail.")
+
+        item = contas[0]
+        admin.table("video_creditos").insert({
+            "user_id": item["user_id"],
+            "email": item.get("email") or email.strip(),
+            "saldo": int(quantidade),
+            "creditos_gratis_recebidos": True,
+        }).execute()
+        return
+
+    item = itens[0]
+    novo_saldo = int(item.get("saldo", 0) or 0) + int(quantidade)
+
+    admin.table("video_creditos").update({
+        "saldo": novo_saldo,
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }).eq("user_id", item["user_id"]).execute()
+
 
 
 # -----------------------------
@@ -2090,7 +2251,93 @@ elif menu in ["🧸 Infantil", "🎬 Filmes", "📺 Séries"]:
 
 elif menu == "🎬 Criar vídeo com IA":
     st.markdown("## 🎬 Criar vídeo com IA")
+
     st.caption("Transforme uma imagem em vídeo e escolha como cada elemento deve se mover.")
+
+    st.markdown("### 💎 Créditos de vídeo")
+
+    if not st.session_state.usuario_logado:
+        st.info(
+            "🎁 Crie uma conta ou entre para receber **1 crédito grátis** "
+            "e poder guardar seu saldo."
+        )
+        st.button(
+            "👤 Entrar / Criar conta",
+            key="video_ir_login",
+            on_click=mudar_menu,
+            args=("👤 Entrar / Minha conta",),
+            use_container_width=True,
+        )
+        saldo_video = 0
+    else:
+        saldo_video = saldo_creditos_video()
+
+        if saldo_video is None:
+            st.warning(
+                "A área de créditos está pronta, mas falta criar a tabela "
+                "`video_creditos` no Supabase. Use o arquivo SQL que acompanha esta atualização."
+            )
+            saldo_video = 0
+        else:
+            st.success(f"💎 Seus créditos de vídeo: **{saldo_video}**")
+            if saldo_video == 1:
+                st.caption("🎁 Este pode ser o seu crédito grátis de boas-vindas.")
+
+    pacotes = links_pacotes_creditos()
+    links_configurados = any(pacotes.values())
+
+    with st.expander("💳 Comprar mais créditos"):
+        st.write("Escolha um pacote. O pagamento pode abrir na Kiwify em outra aba.")
+
+        precos_exemplo = {5: "5 créditos", 15: "15 créditos", 30: "30 créditos"}
+
+        for qtd in (5, 15, 30):
+            url = pacotes.get(qtd, "")
+            if url:
+                render_html(
+                    f"""
+                    <a href="{url}" target="_blank" rel="noopener noreferrer"
+                       style="
+                           display:flex;
+                           align-items:center;
+                           justify-content:center;
+                           width:100%;
+                           min-height:54px;
+                           box-sizing:border-box;
+                           margin:8px 0;
+                           padding:0.65rem 1rem;
+                           border-radius:15px;
+                           border:2px solid #f2d675;
+                           background:linear-gradient(90deg,#6d28d9,#8b5cf6);
+                           color:#fff;
+                           font-size:1.05rem;
+                           font-weight:800;
+                           text-decoration:none;
+                           text-align:center;
+                       ">
+                        💎 Comprar {precos_exemplo[qtd]}
+                    </a>
+                    """
+                )
+            else:
+                st.button(
+                    f"💎 Comprar {precos_exemplo[qtd]}",
+                    key=f"pacote_creditos_{qtd}_sem_link",
+                    disabled=True,
+                    use_container_width=True,
+                )
+
+        if not links_configurados:
+            st.caption(
+                "Para liberar os botões de compra, adicione nos Secrets: "
+                "KIWIFY_CREDITOS_5_URL, KIWIFY_CREDITOS_15_URL e KIWIFY_CREDITOS_30_URL."
+            )
+        else:
+            st.caption(
+                "Depois do pagamento, os créditos precisam ser adicionados pelo webhook "
+                "ou pelo painel Gerenciar. Nesta versão deixei o painel administrativo pronto."
+            )
+
 
     imagem_video = st.file_uploader(
         "🖼️ Envie a imagem",
@@ -2274,7 +2521,13 @@ elif menu == "🎬 Criar vídeo com IA":
         key="gerar_video_ia",
         use_container_width=True,
     ):
-        if imagem_video is None:
+        if not st.session_state.usuario_logado:
+            st.warning("Entre ou crie uma conta para gerar vídeo com IA.")
+        elif saldo_creditos_video() is None:
+            st.warning("Configure primeiro a tabela de créditos no Supabase.")
+        elif saldo_creditos_video() <= 0:
+            st.warning("💎 Você está sem créditos. Abra 'Comprar mais créditos' para escolher um pacote.")
+        elif imagem_video is None:
             st.warning("Envie uma imagem primeiro.")
         elif not prompt_video.strip():
             st.warning("Escreva o movimento que você quer no vídeo.")
@@ -2320,7 +2573,11 @@ elif menu == "🎬 Criar vídeo com IA":
                         st.session_state["video_ia_gerado"] = video_bytes
                         st.session_state["video_ia_nome"] = "mundo_da_luna_video_ia.mp4"
 
-                    st.success("✅ Vídeo criado!")
+                    if consumir_credito_video():
+                        st.success("✅ Vídeo criado! Foi usado 1 crédito.")
+                    else:
+                        st.success("✅ Vídeo criado!")
+                    st.caption(f"💎 Saldo atual: {saldo_creditos_video() or 0} crédito(s)")
             except ImportError:
                 st.error(
                     "A biblioteca huggingface_hub ainda não está instalada. "
@@ -2422,7 +2679,7 @@ elif menu == "🎮 Jogos":
     colunas_memoria = 3 if faixa != "8–9 anos" else 4
 
     for inicio in range(0, len(cartas), colunas_memoria):
-        cols = st.columns(colunas_memoria)
+        cols = st.columns(colunas_memoria, gap="small", wrap=False)
         for posicao, indice in enumerate(range(inicio, min(inicio + colunas_memoria, len(cartas)))):
             carta = cartas[indice]
             esta_aberta = indice in selecionadas or indice in pares
@@ -2645,11 +2902,12 @@ elif menu == "📚 Atividades escolares":
                 st.warning("💜 Quase! Tente novamente.")
 
     st.download_button(
-        "⬇️ Baixar atividade",
+        label="Baixar atividade",
+        icon="⬇️",
         data=atividade_baixar.encode("utf-8"),
         file_name=f"atividade_{materia.lower().replace(' ', '_')}_{idade.replace('–','-')}.txt",
         mime="text/plain",
-        use_container_width=True,
+        width="stretch",
         key=f"baixar_atividade_{idade}_{materia}",
     )
 
@@ -2707,6 +2965,40 @@ elif menu == "🗑️ Gerenciar":
                     st.success("✅ Assinatura atualizada!")
                 except Exception as e:
                     st.error(f"Não consegui atualizar a assinatura: {e}")
+
+        st.markdown("---")
+        st.subheader("💎 Gerenciar créditos de vídeo")
+        st.caption(
+            "Use esta área para adicionar créditos depois de conferir uma compra na Kiwify. "
+            "Quando o webhook de créditos estiver ligado, isso poderá ser automático."
+        )
+
+        email_creditos = st.text_input(
+            "E-mail do cliente para créditos",
+            key="admin_email_creditos",
+            placeholder="cliente@exemplo.com",
+        )
+
+        qtd_creditos = st.selectbox(
+            "Quantidade de créditos",
+            [1, 5, 15, 30],
+            index=1,
+            key="admin_qtd_creditos",
+        )
+
+        if st.button(
+            "💎 Adicionar créditos",
+            key="admin_adicionar_creditos",
+            use_container_width=True,
+        ):
+            if not email_creditos.strip():
+                st.warning("Digite o e-mail do cliente.")
+            else:
+                try:
+                    adicionar_creditos_admin(email_creditos, qtd_creditos)
+                    st.success(f"✅ {qtd_creditos} crédito(s) adicionados!")
+                except Exception as e:
+                    st.error(f"Não consegui adicionar os créditos: {e}")
 
         st.markdown("---")
         st.subheader("🎞️ Gerenciar vídeos")
