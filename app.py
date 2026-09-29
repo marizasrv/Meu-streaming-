@@ -912,10 +912,12 @@ def mostrar_card(item, contexto, em_minha_lista=False, compacto=False):
         st.video(item["video_url"])
 
 
-def mostrar_card_horizontal(item, contexto):
+def mostrar_card_horizontal(item, contexto, novo=False):
     """Card compacto para fileiras horizontais da Área Premium."""
     if item.get("capa_url"):
         st.image(item["capa_url"], width=170)
+    if novo:
+        st.badge("NOVO", icon="✨", color="violet")
 
     nome = str(item.get("nome") or "Sem título")
     # Título compacto: menor e com no máximo 2 linhas.
@@ -971,7 +973,7 @@ def mostrar_card_horizontal(item, contexto):
         st.video(item["video_url"])
 
 
-def mostrar_fileira_premium(titulo, itens, contexto, limite=12):
+def mostrar_fileira_premium(titulo, itens, contexto, limite=12, marcar_novo=False):
     """Fileira horizontal com cards realmente pequenos (190 px)."""
     itens = list(itens)[:limite]
     if not itens:
@@ -989,19 +991,21 @@ def mostrar_fileira_premium(titulo, itens, contexto, limite=12):
         for i, item in enumerate(itens):
             card = fileira.container(width=190, border=False)
             with card:
-                mostrar_card_horizontal(item, f"{contexto}_{i}")
+                mostrar_card_horizontal(item, f"{contexto}_{i}", novo=marcar_novo)
     except TypeError:
         # Compatibilidade com versões antigas do Streamlit.
         cols = st.columns(max(len(itens), 3), gap="xsmall", wrap=False)
         for i, (col, item) in enumerate(zip(cols, itens)):
             with col:
-                mostrar_card_horizontal(item, f"{contexto}_{i}")
+                mostrar_card_horizontal(item, f"{contexto}_{i}", novo=marcar_novo)
 
 
-def mostrar_card_catalogo(item, contexto):
+def mostrar_card_catalogo(item, contexto, novo=False):
     """Card compacto para fileiras horizontais da tela inicial."""
     if item.get("capa_url"):
         st.image(item["capa_url"], width=170)
+    if novo:
+        st.badge("NOVO", icon="✨", color="violet")
 
     nome = str(item.get("nome") or "Sem título")
     # Título compacto: menor e com no máximo 2 linhas.
@@ -1062,7 +1066,7 @@ def mostrar_card_catalogo(item, contexto):
         st.video(item["video_url"])
 
 
-def mostrar_fileira_catalogo(titulo, itens, contexto, limite=12):
+def mostrar_fileira_catalogo(titulo, itens, contexto, limite=12, marcar_novo=False):
     """Fileira horizontal da tela inicial com cards de 190 px."""
     itens = list(itens)[:limite]
     if not itens:
@@ -1078,12 +1082,12 @@ def mostrar_fileira_catalogo(titulo, itens, contexto, limite=12):
         for i, item in enumerate(itens):
             card = fileira.container(width=190, border=False)
             with card:
-                mostrar_card_catalogo(item, f"{contexto}_{i}")
+                mostrar_card_catalogo(item, f"{contexto}_{i}", novo=marcar_novo)
     except TypeError:
         cols = st.columns(max(len(itens), 3), gap="xsmall", wrap=False)
         for i, (col, item) in enumerate(zip(cols, itens)):
             with col:
-                mostrar_card_catalogo(item, f"{contexto}_{i}")
+                mostrar_card_catalogo(item, f"{contexto}_{i}", novo=marcar_novo)
 
 
 # Aplica gravação/remoção pendente do login no navegador e tenta restaurar a conta.
@@ -1203,6 +1207,7 @@ if menu == "🏠 Início":
             videos_inicio,
             "home_novidades",
             limite=12,
+            marcar_novo=True,
         )
 
         infantil_home = [v for v in videos_inicio if categoria_base(v) == "Infantil"]
@@ -1539,6 +1544,7 @@ elif menu == "🔒 Premium":
                 exclusivos,
                 "premium_novidades",
                 limite=12,
+                marcar_novo=True,
             )
 
             infantil_premium = [v for v in exclusivos if categoria_base(v) == "Infantil"]
