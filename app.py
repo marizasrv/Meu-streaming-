@@ -538,6 +538,24 @@ section[data-testid="stSidebar"] .status-plano {
     }
 }
 
+
+/* Aproxima a legenda "Deslize..." da seção Novidades no celular */
+@media (max-width: 640px) {
+    div[data-testid="stCaptionContainer"] {
+        margin-top: -0.10rem !important;
+        margin-bottom: -0.18rem !important;
+    }
+
+    div[data-testid="stCaptionContainer"] p {
+        font-size: 0.78rem !important;
+        line-height: 1.15 !important;
+    }
+
+    .secao-titulo-compacto {
+        margin-top: 0.02rem !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
