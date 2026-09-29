@@ -1672,6 +1672,10 @@ if st.session_state.usuario_logado:
             '<div class="status-plano gratis">🌙 Plano grátis</div>',
             unsafe_allow_html=True,
         )
+
+    saldo_sidebar = saldo_creditos_video()
+    if saldo_sidebar is not None:
+        st.sidebar.caption(f"🎬 Créditos de vídeo: {saldo_sidebar}")
 else:
     st.sidebar.caption("👤 Visitante — faça login para sua conta")
 
@@ -2282,6 +2286,13 @@ elif menu == "🎬 Criar vídeo com IA":
             st.success(f"💎 Seus créditos de vídeo: **{saldo_video}**")
             if saldo_video == 1:
                 st.caption("🎁 Este pode ser o seu crédito grátis de boas-vindas.")
+
+        if st.button(
+            "🔄 Atualizar meus créditos",
+            key="atualizar_meus_creditos_video",
+            use_container_width=True,
+        ):
+            st.rerun()
 
     pacotes = links_pacotes_creditos()
     links_configurados = any(pacotes.values())
