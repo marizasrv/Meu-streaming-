@@ -814,7 +814,10 @@ def mudar_menu(destino):
 
 
 def voltar_inicio():
-    st.session_state.menu_principal = "🏠 Início"
+    # Não altera diretamente o valor do st.radio depois que ele já foi criado.
+    # Apenas agenda o destino e deixa a alteração acontecer no próximo rerun,
+    # antes de o widget ser instanciado.
+    st.session_state["_menu_destino"] = "🏠 Início"
     st.rerun()
 
 
@@ -1226,6 +1229,10 @@ st.markdown("""
 </div>
 <div class="gold-line"></div>
 """, unsafe_allow_html=True)
+
+# Aplica navegação pendente ANTES de criar o st.radio.
+if "_menu_destino" in st.session_state:
+    st.session_state["menu_principal"] = st.session_state.pop("_menu_destino")
 
 menu = st.sidebar.radio(
     "Menu",
