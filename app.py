@@ -32,10 +32,10 @@ st.markdown("""
 h1, h2, h3, p, label, .stMarkdown {
     color: white !important;
 }
-/* MENU LILÁS — inspirado nas roupas da Luna */
+/* MENU ROXO ESCURO — elegante e com alto contraste */
 section[data-testid="stSidebar"],
 div[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #9B7AD3 0%, #8462C2 48%, #6F4BAA 100%) !important;
+    background: linear-gradient(180deg, #2A1242 0%, #211035 50%, #170A26 100%) !important;
     border-right: 1px solid rgba(242,214,117,0.35) !important;
 }
 section[data-testid="stSidebar"] > div,
@@ -54,19 +54,19 @@ section[data-testid="stSidebar"] .stMarkdown {
 }
 /* Opções do menu em cartões lilás */
 section[data-testid="stSidebar"] div[role="radiogroup"] label {
-    background: rgba(78, 45, 125, 0.18) !important;
+    background: rgba(104, 67, 157, 0.24) !important;
     border: 1px solid rgba(255,255,255,0.16) !important;
     border-radius: 14px !important;
     padding: 8px 10px !important;
     margin-bottom: 5px !important;
 }
 section[data-testid="stSidebar"] div[role="radiogroup"] label:hover {
-    background: rgba(78, 45, 125, 0.34) !important;
+    background: rgba(126, 83, 184, 0.38) !important;
 }
 /* Opção selecionada — destaque forte roxo + dourado */
 section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked),
 section[data-testid="stSidebar"] div[role="radiogroup"] label[data-baseweb="radio"]:has(input:checked) {
-    background: linear-gradient(90deg, #4B267A 0%, #63349A 55%, #7546AE 100%) !important;
+    background: linear-gradient(90deg, #5A2A8A 0%, #6B35A0 55%, #7A46B2 100%) !important;
     border: 2px solid #F6D86B !important;
     box-shadow:
         0 0 0 2px rgba(255,255,255,0.08) inset,
@@ -99,7 +99,7 @@ section[data-testid="stSidebar"] a:active {
 }
 /* Caixa de usuário no rodapé do menu */
 section[data-testid="stSidebar"] div[data-testid="stAlert"] {
-    background: rgba(53, 28, 87, 0.30) !important;
+    background: rgba(82, 49, 122, 0.34) !important;
     border: 1px solid rgba(242,214,117,0.34) !important;
 }
 section[data-testid="stSidebar"] div[data-testid="stAlert"] p,
@@ -112,12 +112,12 @@ div[data-testid="stButton"] button {
     border-radius: 14px;
     min-height: 46px;
     font-weight: 700;
-    background: linear-gradient(90deg, #7c3aed, #9f7aea);
+    background: linear-gradient(90deg, #6d28d9, #8b5cf6);
     color: white;
     border: 1px solid #d6b45f;
 }
 div[data-testid="stButton"] button:hover {
-    background: linear-gradient(90deg, #8b5cf6, #b794f4);
+    background: linear-gradient(90deg, #7c3aed, #9f7aea);
     border-color: #f2d675;
 }
 div[data-testid="stAlert"] {
@@ -868,7 +868,8 @@ def mostrar_fileira_premium(titulo, itens, contexto, limite=12):
     try:
         # Streamlit 1.62+: no celular, wrap=False mantém uma única fileira
         # e permite deslizar horizontalmente para ver os próximos cards.
-        cols = st.columns(len(itens), gap="small", wrap=False)
+        quantidade_colunas = max(len(itens), 3)
+        cols = st.columns(quantidade_colunas, gap="xsmall", wrap=False)
         for i, (col, item) in enumerate(zip(cols, itens)):
             with col:
                 mostrar_card_horizontal(item, f"{contexto}_{i}")
@@ -938,7 +939,8 @@ def mostrar_fileira_catalogo(titulo, itens, contexto, limite=12):
     st.markdown(f"### {titulo}")
 
     try:
-        cols = st.columns(len(itens), gap="small", wrap=False)
+        quantidade_colunas = max(len(itens), 3)
+        cols = st.columns(quantidade_colunas, gap="xsmall", wrap=False)
         for i, (col, item) in enumerate(zip(cols, itens)):
             with col:
                 mostrar_card_catalogo(item, f"{contexto}_{i}")
