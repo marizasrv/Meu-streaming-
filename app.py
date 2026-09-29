@@ -1203,6 +1203,11 @@ menu = st.sidebar.radio(
 
 if st.session_state.usuario_logado:
     st.sidebar.success(f"👤 {st.session_state.usuario_logado}")
+
+    if st.session_state.plano_atual == "Premium":
+        st.sidebar.markdown(":violet-badge[💎 Premium ativo]")
+    else:
+        st.sidebar.markdown(":gray-badge[🌙 Plano grátis]")
 else:
     st.sidebar.caption("👤 Visitante — faça login para sua conta")
 
@@ -1228,6 +1233,17 @@ if menu == "🏠 Início":
                 on_click=abrir_minha_conta,
                 use_container_width=True,
             )
+
+            if st.session_state.plano_atual == "Premium":
+                st.markdown(
+                    ":violet-badge[💎 Premium ativo]",
+                    width="content",
+                )
+            else:
+                st.markdown(
+                    ":gray-badge[🌙 Plano grátis]",
+                    width="content",
+                )
         else:
             st.button(
                 "👤 Entrar / Criar conta",
