@@ -526,6 +526,18 @@ section[data-testid="stSidebar"] .status-plano {
     }
 }
 
+
+/* Reduz o espaço entre os botões do card e a próxima seção */
+@media (max-width: 640px) {
+    [class*="st-key-cardacoes_"] {
+        margin-bottom: -0.18rem !important;
+    }
+
+    .secao-titulo-compacto {
+        margin-top: 0.04rem !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
