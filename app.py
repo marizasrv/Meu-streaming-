@@ -1143,7 +1143,7 @@ menu = st.sidebar.radio(
         "🔎 Buscar",
         "🆕 Novidades",
         "❤️ Minha Lista",
-        "🕒 Assistidos recentemente",
+        "🕒 Recentes",
         "👤 Entrar / Minha conta",
         "💎 Planos",
         "🔒 Premium",
@@ -1328,7 +1328,7 @@ elif menu == "❤️ Minha Lista":
             with cols[i % 2]:
                 mostrar_card(item, f"favoritos_{i}", em_minha_lista=True)
 
-elif menu == "🕒 Assistidos recentemente":
+elif menu == "🕒 Recentes":
     st.subheader("🕒 Assistidos recentemente")
 
     recentes = listar_assistidos_recentes(videos_gratis(videos), limite=10)
