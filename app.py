@@ -363,19 +363,19 @@ div[data-testid="stLinkButton"] a span {
 }
 
 
-/* Título compacto da seção Continuar assistindo */
+/* Títulos compactos das seções */
 .secao-titulo-compacto {
     color: #FFFFFF;
-    font-size: 1.75rem;
+    font-size: 1.65rem;
     font-weight: 800;
-    line-height: 1.1;
-    margin: 0.35rem 0 0.65rem 0;
+    line-height: 1.08;
+    margin: 0.30rem 0 0.55rem 0;
 }
 @media (max-width: 640px) {
     .secao-titulo-compacto {
-        font-size: 1.28rem !important;
-        line-height: 1.08 !important;
-        margin: 0.2rem 0 0.45rem 0 !important;
+        font-size: 1.22rem !important;
+        line-height: 1.06 !important;
+        margin: 0.18rem 0 0.38rem 0 !important;
     }
 }
 
@@ -977,7 +977,10 @@ def mostrar_fileira_premium(titulo, itens, contexto, limite=12):
     if not itens:
         return
 
-    st.markdown(f"### {titulo}")
+    st.markdown(
+        f'<div class="secao-titulo-compacto">{titulo}</div>',
+        unsafe_allow_html=True,
+    )
 
     try:
         # Streamlit atual: cada card recebe largura fixa de 190 px.
@@ -1065,7 +1068,10 @@ def mostrar_fileira_catalogo(titulo, itens, contexto, limite=12):
     if not itens:
         return
 
-    st.markdown(f"### {titulo}")
+    st.markdown(
+        f'<div class="secao-titulo-compacto">{titulo}</div>',
+        unsafe_allow_html=True,
+    )
 
     try:
         fileira = st.container(horizontal=True, wrap=False, gap="xsmall")
