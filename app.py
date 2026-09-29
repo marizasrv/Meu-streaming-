@@ -413,6 +413,33 @@ div[data-testid="stLinkButton"] a span {
     }
 }
 
+
+/* Selo NOVO compacto e mais próximo da capa/título */
+.selo-novo {
+    display: inline-block;
+    width: fit-content;
+    background: rgba(255, 193, 7, 0.18);
+    border: 1px solid rgba(255, 214, 80, 0.58);
+    color: #FFD54F;
+    font-size: 0.78rem;
+    font-weight: 800;
+    line-height: 1;
+    padding: 0.26rem 0.48rem;
+    border-radius: 8px;
+    margin: -0.10rem 0 0.05rem 0;
+}
+@media (max-width: 640px) {
+    .selo-novo {
+        font-size: 0.74rem;
+        padding: 0.22rem 0.42rem;
+        margin-top: -0.18rem;
+        margin-bottom: 0.02rem;
+    }
+    .titulo-card {
+        margin-top: 0.08rem !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -951,7 +978,10 @@ def mostrar_card_horizontal(item, contexto, novo=False):
     if item.get("capa_url"):
         st.image(item["capa_url"], width=170)
     if novo:
-        st.badge("NOVO", icon="✨", color="yellow")
+        st.markdown(
+            '<div class="selo-novo">✨ NOVO</div>',
+            unsafe_allow_html=True,
+        )
 
     nome = str(item.get("nome") or "Sem título")
     # Título compacto: menor e com no máximo 2 linhas.
@@ -1039,7 +1069,10 @@ def mostrar_card_catalogo(item, contexto, novo=False):
     if item.get("capa_url"):
         st.image(item["capa_url"], width=170)
     if novo:
-        st.badge("NOVO", icon="✨", color="yellow")
+        st.markdown(
+            '<div class="selo-novo">✨ NOVO</div>',
+            unsafe_allow_html=True,
+        )
 
     nome = str(item.get("nome") or "Sem título")
     # Título compacto: menor e com no máximo 2 linhas.
