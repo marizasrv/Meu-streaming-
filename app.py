@@ -362,6 +362,23 @@ div[data-testid="stLinkButton"] a span {
     }
 }
 
+
+/* Título compacto da seção Continuar assistindo */
+.secao-titulo-compacto {
+    color: #FFFFFF;
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin: 0.35rem 0 0.65rem 0;
+}
+@media (max-width: 640px) {
+    .secao-titulo-compacto {
+        font-size: 1.28rem !important;
+        line-height: 1.08 !important;
+        margin: 0.2rem 0 0.45rem 0 !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -1158,7 +1175,10 @@ if menu == "🏠 Início":
 
     ultimo = ultimo_assistido(videos_inicio)
     if ultimo:
-        st.subheader("▶ Continuar assistindo")
+        st.markdown(
+            '<div class="secao-titulo-compacto">▶ Continuar assistindo</div>',
+            unsafe_allow_html=True,
+        )
         try:
             continuar = st.container(width=240, border=False)
             with continuar:
