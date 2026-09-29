@@ -917,7 +917,7 @@ def mostrar_card_horizontal(item, contexto, novo=False):
     if item.get("capa_url"):
         st.image(item["capa_url"], width=170)
     if novo:
-        st.badge("NOVO", icon="✨", color="violet")
+        st.badge("NOVO", icon="✨", color="yellow")
 
     nome = str(item.get("nome") or "Sem título")
     # Título compacto: menor e com no máximo 2 linhas.
@@ -1005,7 +1005,7 @@ def mostrar_card_catalogo(item, contexto, novo=False):
     if item.get("capa_url"):
         st.image(item["capa_url"], width=170)
     if novo:
-        st.badge("NOVO", icon="✨", color="violet")
+        st.badge("NOVO", icon="✨", color="yellow")
 
     nome = str(item.get("nome") or "Sem título")
     # Título compacto: menor e com no máximo 2 linhas.
