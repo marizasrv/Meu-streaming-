@@ -222,28 +222,37 @@ div[data-testid="stButton"] button p {
 
 /* Botões compactos somente dentro dos cards do catálogo */
 [class*="st-key-cardacoes_"] div[data-testid="stButton"] button {
-    min-height: 42px !important;
-    padding: 0.35rem 0.55rem !important;
+    min-height: 38px !important;
+    padding: 0.28rem 0.45rem !important;
     border-radius: 12px !important;
 }
 [class*="st-key-cardacoes_"] div[data-testid="stButton"] button p {
-    font-size: 0.92rem !important;
+    font-size: 0.88rem !important;
     font-weight: 800 !important;
     white-space: nowrap !important;
 }
 
 /* Títulos compactos dos cards */
 .titulo-card {
-    width: 190px;
+    width: 170px;
     font-size: 1.02rem;
     font-weight: 800;
     line-height: 1.22;
     color: #FFFFFF;
-    margin: 0.35rem 0 0.15rem 0;
+    margin: 0.18rem 0 0.08rem 0;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+}
+
+/* Menos espaço entre título, categoria e botões dos cards */
+.titulo-card + div {
+    margin-top: 0.05rem !important;
+}
+[class*="st-key-cardacoes_"] {
+    margin-top: -0.05rem !important;
+    margin-bottom: 0.15rem !important;
 }
 div[data-testid="stLinkButton"] a {
     min-height: 58px !important;
@@ -843,7 +852,7 @@ def mostrar_card(item, contexto, em_minha_lista=False, compacto=False):
 def mostrar_card_horizontal(item, contexto):
     """Card compacto para fileiras horizontais da Área Premium."""
     if item.get("capa_url"):
-        st.image(item["capa_url"], width=190)
+        st.image(item["capa_url"], width=170)
 
     nome = str(item.get("nome") or "Sem título")
     # Título compacto: menor e com no máximo 2 linhas.
@@ -861,7 +870,7 @@ def mostrar_card_horizontal(item, contexto):
     try:
         acoes = st.container(
             key=f"cardacoes_{contexto}_{item['id']}",
-            width=150,
+            width=142,
             border=False,
         )
     except TypeError:
@@ -926,7 +935,7 @@ def mostrar_fileira_premium(titulo, itens, contexto, limite=12):
 def mostrar_card_catalogo(item, contexto):
     """Card compacto para fileiras horizontais da tela inicial."""
     if item.get("capa_url"):
-        st.image(item["capa_url"], width=190)
+        st.image(item["capa_url"], width=170)
 
     nome = str(item.get("nome") or "Sem título")
     # Título compacto: menor e com no máximo 2 linhas.
@@ -949,7 +958,7 @@ def mostrar_card_catalogo(item, contexto):
     try:
         acoes = st.container(
             key=f"cardacoes_{contexto}_{item['id']}",
-            width=150,
+            width=142,
             border=False,
         )
     except TypeError:
