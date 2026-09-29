@@ -451,6 +451,48 @@ div[data-testid="stLinkButton"] a span {
     }
 }
 
+
+/* Selo compacto do plano na Home e na sidebar */
+.status-plano {
+    display: inline-block;
+    width: fit-content;
+    border-radius: 999px;
+    padding: 0.28rem 0.58rem;
+    font-size: 0.78rem !important;
+    font-weight: 800;
+    line-height: 1;
+    margin: 0.20rem 0 0.35rem 0;
+    letter-spacing: 0.01em;
+}
+.status-plano.premium {
+    background: rgba(139, 92, 246, 0.18);
+    border: 1px solid rgba(196, 181, 253, 0.55);
+    color: #E9D5FF !important;
+}
+.status-plano.gratis {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #F3F4F6 !important;
+}
+section[data-testid="stSidebar"] .status-plano {
+    font-size: 0.72rem !important;
+    padding: 0.24rem 0.50rem;
+    margin-top: 0.15rem;
+    margin-bottom: 0.20rem;
+}
+
+
+/* Botão voltar compacto */
+@media (max-width: 640px) {
+    [class*="st-key-botao_voltar_inicio"] button,
+    button[kind="secondary"]:has(p:contains("← Voltar")) {
+        min-height: 34px !important;
+        padding: 0.20rem 0.50rem !important;
+        border-radius: 10px !important;
+        font-size: 0.82rem !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -769,6 +811,11 @@ def sair_da_conta():
 def mudar_menu(destino):
     # Callback seguro: altera o menu antes de o radio ser reconstruído.
     st.session_state["menu_principal"] = destino
+
+
+def voltar_inicio():
+    st.session_state.menu_principal = "🏠 Início"
+    st.rerun()
 
 
 def abrir_minha_conta():
@@ -1205,13 +1252,34 @@ if st.session_state.usuario_logado:
     st.sidebar.success(f"👤 {st.session_state.usuario_logado}")
 
     if st.session_state.plano_atual == "Premium":
-        st.sidebar.markdown(":violet-badge[💎 Premium ativo]")
+        st.sidebar.markdown(
+            '<div class="status-plano premium">💎 Premium ativo</div>',
+            unsafe_allow_html=True,
+        )
     else:
-        st.sidebar.markdown(":gray-badge[🌙 Plano grátis]")
+        st.sidebar.markdown(
+            '<div class="status-plano gratis">🌙 Plano grátis</div>',
+            unsafe_allow_html=True,
+        )
 else:
     st.sidebar.caption("👤 Visitante — faça login para sua conta")
 
 videos = listar_videos()
+
+
+if menu != "🏠 Início":
+    try:
+        voltar_box = st.container(width=105, border=False)
+    except TypeError:
+        voltar_box = st.container()
+
+    with voltar_box:
+        if st.button(
+            "← Voltar",
+            key="botao_voltar_inicio",
+            use_container_width=True,
+        ):
+            voltar_inicio()
 
 if menu == "🏠 Início":
     videos_inicio = videos_gratis(videos)
@@ -1236,13 +1304,13 @@ if menu == "🏠 Início":
 
             if st.session_state.plano_atual == "Premium":
                 st.markdown(
-                    ":violet-badge[💎 Premium ativo]",
-                    width="content",
+                    '<div class="status-plano premium">💎 Premium ativo</div>',
+                    unsafe_allow_html=True,
                 )
             else:
                 st.markdown(
-                    ":gray-badge[🌙 Plano grátis]",
-                    width="content",
+                    '<div class="status-plano gratis">🌙 Plano grátis</div>',
+                    unsafe_allow_html=True,
                 )
         else:
             st.button(
