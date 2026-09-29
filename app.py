@@ -692,6 +692,22 @@ section[data-testid="stSidebar"] .status-plano {
     }
 }
 
+
+/* Jogo da memória */
+[class*="st-key-memoria_carta_"] button {
+    min-height: 72px !important;
+    font-size: 2rem !important;
+    border-radius: 16px !important;
+    border: 2px solid #8b5cf6 !important;
+    font-weight: 800 !important;
+}
+[class*="st-key-memoria_novo_jogo"] button,
+[class*="st-key-memoria_continuar"] button {
+    min-height: 46px !important;
+    border-radius: 14px !important;
+    font-weight: 800 !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -2202,9 +2218,131 @@ elif menu == "🎮 Jogos":
     )
 
     st.markdown("### 🧠 Jogo da memória")
-    st.info(
-        "Em breve: cartas com Luna, coelhinho, castelo, estrelas e objetos mágicos."
+    st.caption("Encontre os pares iguais. Cada faixa etária ganha uma quantidade diferente de cartas.")
+
+    # Reinicia o jogo quando a faixa etária mudar.
+    if st.session_state.get("memoria_faixa") != faixa:
+        st.session_state["memoria_faixa"] = faixa
+        st.session_state.pop("memoria_cartas", None)
+        st.session_state.pop("memoria_selecionadas", None)
+        st.session_state.pop("memoria_pares", None)
+        st.session_state.pop("memoria_tentativas", None)
+        st.session_state.pop("memoria_erro_pendente", None)
+
+    quantidade_pares = {
+        "4–5 anos": 3,
+        "6–7 anos": 4,
+        "8–9 anos": 6,
+    }[faixa]
+
+    personagens_memoria = [
+        ("👧", "Luna"),
+        ("🐰", "Coelhinho"),
+        ("🏰", "Castelo"),
+        ("⭐", "Estrela"),
+        ("📖", "Livro mágico"),
+        ("🌙", "Lua"),
+    ][:quantidade_pares]
+
+    if "memoria_cartas" not in st.session_state:
+        import random
+
+        cartas = []
+        for emoji, nome in personagens_memoria:
+            cartas.append({"emoji": emoji, "nome": nome})
+            cartas.append({"emoji": emoji, "nome": nome})
+
+        random.shuffle(cartas)
+        st.session_state["memoria_cartas"] = cartas
+        st.session_state["memoria_selecionadas"] = []
+        st.session_state["memoria_pares"] = []
+        st.session_state["memoria_tentativas"] = 0
+        st.session_state["memoria_erro_pendente"] = False
+
+    cartas = st.session_state["memoria_cartas"]
+    selecionadas = st.session_state["memoria_selecionadas"]
+    pares = st.session_state["memoria_pares"]
+    erro_pendente = st.session_state["memoria_erro_pendente"]
+
+    st.write(
+        f"🏆 Pares encontrados: **{len(pares)}/{quantidade_pares}**  •  "
+        f"🎯 Tentativas: **{st.session_state['memoria_tentativas']}**"
     )
+
+    colunas_memoria = 3 if faixa != "8–9 anos" else 4
+
+    for inicio in range(0, len(cartas), colunas_memoria):
+        cols = st.columns(colunas_memoria)
+        for posicao, indice in enumerate(range(inicio, min(inicio + colunas_memoria, len(cartas)))):
+            carta = cartas[indice]
+            esta_aberta = indice in selecionadas or indice in pares
+            texto_carta = carta["emoji"] if esta_aberta else "❓"
+
+            with cols[posicao]:
+                clicou = st.button(
+                    texto_carta,
+                    key=f"memoria_carta_{indice}",
+                    use_container_width=True,
+                    disabled=(indice in pares or erro_pendente),
+                )
+
+                if esta_aberta:
+                    st.caption(carta["nome"])
+                else:
+                    st.caption("Carta")
+
+                if clicou and indice not in selecionadas and indice not in pares:
+                    selecionadas.append(indice)
+
+                    if len(selecionadas) == 2:
+                        st.session_state["memoria_tentativas"] += 1
+                        primeira, segunda = selecionadas
+
+                        if cartas[primeira]["nome"] == cartas[segunda]["nome"]:
+                            pares.extend([primeira, segunda])
+                            st.session_state["memoria_selecionadas"] = []
+                            st.session_state["memoria_pares"] = pares
+                            st.session_state["memoria_erro_pendente"] = False
+                            st.rerun()
+                        else:
+                            st.session_state["memoria_selecionadas"] = selecionadas
+                            st.session_state["memoria_erro_pendente"] = True
+                            st.rerun()
+                    else:
+                        st.session_state["memoria_selecionadas"] = selecionadas
+                        st.rerun()
+
+    if st.session_state["memoria_erro_pendente"]:
+        st.warning("Essas duas cartas são diferentes. Veja bem e tente outra vez 💜")
+        if st.button(
+            "🔄 Virar as cartas e continuar",
+            key="memoria_continuar",
+            use_container_width=True,
+        ):
+            st.session_state["memoria_selecionadas"] = []
+            st.session_state["memoria_erro_pendente"] = False
+            st.rerun()
+
+    if len(st.session_state["memoria_pares"]) == len(cartas):
+        st.success(
+            f"🎉 Parabéns! Você encontrou todos os {quantidade_pares} pares "
+            f"em {st.session_state['memoria_tentativas']} tentativas!"
+        )
+
+    if st.button(
+        "🎲 Novo jogo da memória",
+        key="memoria_novo_jogo",
+        use_container_width=True,
+    ):
+        for chave in [
+            "memoria_cartas",
+            "memoria_selecionadas",
+            "memoria_pares",
+            "memoria_tentativas",
+            "memoria_erro_pendente",
+        ]:
+            st.session_state.pop(chave, None)
+        st.rerun()
 
     st.markdown("### 🔤 Complete a palavra")
     palavra = st.radio(
