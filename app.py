@@ -880,6 +880,74 @@ def mostrar_fileira_premium(titulo, itens, contexto, limite=12):
             with cols[i % 2]:
                 mostrar_card(item, f"{contexto}_{i}", compacto=True)
 
+def mostrar_card_catalogo(item, contexto):
+    """Card compacto para fileiras horizontais da tela inicial."""
+    if item.get("capa_url"):
+        st.image(item["capa_url"], use_container_width=True)
+
+    nome = str(item.get("nome") or "Sem título")
+    st.markdown(f"**✨ {nome}**")
+
+    categoria_visivel = categoria_base(item)
+    if video_premium(item):
+        st.caption(f"💎 Premium • 🌟 {categoria_visivel}")
+    else:
+        st.caption(f"🌟 {categoria_visivel}")
+
+    chave = f"aberto_{contexto}_{item['id']}"
+    if chave not in st.session_state:
+        st.session_state[chave] = False
+
+    if not st.session_state[chave]:
+        if st.button(
+            "▶ Assistir",
+            key=f"assistir_{contexto}_{item['id']}",
+            use_container_width=True,
+        ):
+            registrar_assistido(item)
+            st.session_state[chave] = True
+            st.rerun()
+    else:
+        if st.button(
+            "✖ Fechar",
+            key=f"fechar_{contexto}_{item['id']}",
+            use_container_width=True,
+        ):
+            st.session_state[chave] = False
+            st.rerun()
+
+    favorito = bool(item.get("favorito", False))
+    texto = "💖 Na Lista" if favorito else "🤍 Minha Lista"
+    if st.button(
+        texto,
+        key=f"fav_{contexto}_{item['id']}",
+        use_container_width=True,
+    ):
+        alternar_favorito(item)
+
+    if st.session_state.get(chave, False):
+        st.video(item["video_url"])
+
+
+def mostrar_fileira_catalogo(titulo, itens, contexto, limite=12):
+    """Fileira horizontal rolável para a tela inicial."""
+    itens = list(itens)[:limite]
+    if not itens:
+        return
+
+    st.markdown(f"### {titulo}")
+
+    try:
+        cols = st.columns(len(itens), gap="small", wrap=False)
+        for i, (col, item) in enumerate(zip(cols, itens)):
+            with col:
+                mostrar_card_catalogo(item, f"{contexto}_{i}")
+    except TypeError:
+        cols = st.columns(2)
+        for i, item in enumerate(itens):
+            with cols[i % 2]:
+                mostrar_card(item, f"{contexto}_{i}", compacto=True)
+
 
 # Aplica gravação/remoção pendente do login no navegador e tenta restaurar a conta.
 executar_pendencias_browser()
@@ -965,23 +1033,43 @@ if menu == "🏠 Início":
     ultimo = ultimo_assistido(videos_inicio)
     if ultimo:
         st.subheader("▶ Continuar assistindo")
-        mostrar_card(ultimo, "continuar")
+        mostrar_card(ultimo, "continuar_home", compacto=True)
         st.markdown("---")
-
-    st.subheader("✨ Destaques")
 
     if not videos_inicio:
         st.info("Ainda não há vídeos gratuitos. Abra 📤 Enviar vídeo para começar.")
     else:
-        mostrar_card(videos_inicio[0], "destaque")
+        st.caption("Deslize as fileiras para o lado para ver mais vídeos. 💜")
 
-        if len(videos_inicio) > 1:
-            st.markdown("---")
-            st.subheader("🎞️ Últimos adicionados")
-            cols = st.columns(2)
-            for i, item in enumerate(videos_inicio[1:5]):
-                with cols[i % 2]:
-                    mostrar_card(item, f"ultimos_{i}")
+        mostrar_fileira_catalogo(
+            "✨ Novidades",
+            videos_inicio,
+            "home_novidades",
+            limite=12,
+        )
+
+        infantil_home = [v for v in videos_inicio if categoria_base(v) == "Infantil"]
+        filmes_home = [v for v in videos_inicio if categoria_base(v) == "Filmes"]
+        series_home = [v for v in videos_inicio if categoria_base(v) == "Séries"]
+
+        mostrar_fileira_catalogo(
+            "🧸 Infantil",
+            infantil_home,
+            "home_infantil",
+            limite=12,
+        )
+        mostrar_fileira_catalogo(
+            "🎬 Filmes",
+            filmes_home,
+            "home_filmes",
+            limite=12,
+        )
+        mostrar_fileira_catalogo(
+            "📺 Séries",
+            series_home,
+            "home_series",
+            limite=12,
+        )
 
 elif menu == "🔎 Buscar":
     st.subheader("🔎 Buscar vídeos")
