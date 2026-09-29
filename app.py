@@ -63,19 +63,39 @@ section[data-testid="stSidebar"] div[role="radiogroup"] label {
 section[data-testid="stSidebar"] div[role="radiogroup"] label:hover {
     background: rgba(78, 45, 125, 0.34) !important;
 }
-/* Opção selecionada */
+/* Opção selecionada — roxo mais escuro com borda dourada */
 section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) {
-    background: #6843A5 !important;
-    border: 1px solid #F2D675 !important;
-    box-shadow: 0 0 0 1px rgba(242,214,117,0.18) inset !important;
+    background: linear-gradient(90deg, #5B368F 0%, #6D43A8 100%) !important;
+    border: 2px solid #F2D675 !important;
+    box-shadow:
+        0 0 0 1px rgba(255,255,255,0.08) inset,
+        0 4px 14px rgba(56, 28, 92, 0.22) !important;
+}
+section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) p,
+section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) span {
+    color: #FFFFFF !important;
+    font-weight: 900 !important;
 }
 section[data-testid="stSidebar"] input[type="radio"] {
     accent-color: #F2D675 !important;
 }
+/* E-mail e qualquer link da barra lateral ficam claros */
+section[data-testid="stSidebar"] a,
+section[data-testid="stSidebar"] a:visited,
+section[data-testid="stSidebar"] a:hover,
+section[data-testid="stSidebar"] a:active {
+    color: #FFFFFF !important;
+    text-decoration-color: rgba(255,255,255,0.72) !important;
+}
 /* Caixa de usuário no rodapé do menu */
 section[data-testid="stSidebar"] div[data-testid="stAlert"] {
-    background: rgba(53, 28, 87, 0.24) !important;
-    border: 1px solid rgba(255,255,255,0.18) !important;
+    background: rgba(53, 28, 87, 0.30) !important;
+    border: 1px solid rgba(242,214,117,0.34) !important;
+}
+section[data-testid="stSidebar"] div[data-testid="stAlert"] p,
+section[data-testid="stSidebar"] div[data-testid="stAlert"] span,
+section[data-testid="stSidebar"] div[data-testid="stAlert"] a {
+    color: #FFFFFF !important;
 }
 div[data-testid="stButton"] button {
     width: 100%;
