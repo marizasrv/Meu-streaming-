@@ -2645,6 +2645,100 @@ elif menu == "🎬 Criar vídeo com IA":
                                 prompt=prompt_final,
                             )
 
+                    def gerar_video_fal_direto():
+                        """
+                        Chama o fal.ai diretamente, sem usar o roteamento do
+                        Hugging Face. A imagem é enviada como Data URI/Base64
+                        para evitar erro 403 ao acessar links temporários.
+                        """
+                        import os
+                        import urllib.request
+                        import fal_client
+
+                        os.environ["FAL_KEY"] = fal_api_key
+
+                        mime_imagem = (
+                            getattr(imagem_video, "type", None)
+                            or "image/png"
+                        )
+
+                        imagem_b64 = base64.b64encode(
+                            imagem_bytes
+                        ).decode("utf-8")
+
+                        imagem_data_uri = (
+                            f"data:{mime_imagem};base64,{imagem_b64}"
+                        )
+
+                        endpoint_fal = str(
+                            st.secrets.get(
+                                "FAL_VIDEO_ENDPOINT",
+                                "fal-ai/wan/v2.2-a14b/image-to-video",
+                            )
+                        ).strip() or "fal-ai/wan/v2.2-a14b/image-to-video"
+
+                        resolucao_fal = {
+                            "Rápida": "480p",
+                            "Equilibrada": "580p",
+                            "Melhor qualidade": "720p",
+                        }.get(qualidade, "580p")
+
+                        aspecto_fal = {
+                            "YouTube 16:9": "16:9",
+                            "TikTok/Reels 9:16": "9:16",
+                            "Quadrado 1:1": "1:1",
+                        }.get(formato, "16:9")
+
+                        # O endpoint trabalha a 16 fps para cobrança por
+                        # segundo; 81 quadros ≈ 5 s e 161 ≈ 10 s.
+                        num_frames_fal = min(
+                            161,
+                            max(
+                                17,
+                                int(duracao_video * 16) + 1,
+                            ),
+                        )
+
+                        argumentos_fal = {
+                            "image_url": imagem_data_uri,
+                            "prompt": prompt_final,
+                            "negative_prompt": negativo,
+                            "num_frames": num_frames_fal,
+                            "frames_per_second": 16,
+                            "resolution": resolucao_fal,
+                            "aspect_ratio": aspecto_fal,
+                        }
+
+                        resultado_fal = fal_client.subscribe(
+                            endpoint_fal,
+                            arguments=argumentos_fal,
+                            with_logs=False,
+                        )
+
+                        if not isinstance(resultado_fal, dict):
+                            raise RuntimeError(
+                                "O fal.ai retornou uma resposta inesperada."
+                            )
+
+                        video_info = resultado_fal.get("video") or {}
+                        video_url = (
+                            video_info.get("url")
+                            if isinstance(video_info, dict)
+                            else None
+                        )
+
+                        if not video_url:
+                            raise RuntimeError(
+                                "O fal.ai concluiu a tarefa, mas não retornou "
+                                "a URL do vídeo."
+                            )
+
+                        with urllib.request.urlopen(
+                            video_url,
+                            timeout=600,
+                        ) as resposta_video:
+                            return resposta_video.read()
+
                     with st.spinner(
                         "🎬 Criando o vídeo com IA... "
                         "isso pode levar alguns minutos."
@@ -2681,24 +2775,16 @@ elif menu == "🎬 Criar vídeo com IA":
                                 )
 
                                 # 2) Se os créditos HF acabaram e existe chave fal.ai,
-                                # tenta o mesmo modelo diretamente no fal.ai.
+                                # chama o fal.ai diretamente para não depender
+                                # de URLs temporárias geradas pelo roteador HF.
                                 if sem_creditos_hf and fal_api_key:
                                     st.info(
                                         "🔄 Os créditos do Hugging Face acabaram. "
-                                        "Tentando o provedor alternativo fal.ai..."
+                                        "Enviando a imagem diretamente ao fal.ai..."
                                     )
 
-                                    cliente_fal = InferenceClient(
-                                        provider="fal-ai",
-                                        api_key=fal_api_key,
-                                        timeout=600,
-                                    )
-
-                                    video_bytes = gerar_video_provedor(
-                                        cliente_fal,
-                                        fal_model,
-                                    )
-                                    provedor_usado = "fal.ai"
+                                    video_bytes = gerar_video_fal_direto()
+                                    provedor_usado = "fal.ai direto"
                                 else:
                                     raise
 
@@ -2706,20 +2792,11 @@ elif menu == "🎬 Criar vídeo com IA":
                         # usa fal.ai diretamente.
                         elif fal_api_key:
                             st.info(
-                                "🎬 Usando o provedor alternativo fal.ai."
+                                "🎬 Enviando a imagem diretamente ao fal.ai."
                             )
 
-                            cliente_fal = InferenceClient(
-                                provider="fal-ai",
-                                api_key=fal_api_key,
-                                timeout=600,
-                            )
-
-                            video_bytes = gerar_video_provedor(
-                                cliente_fal,
-                                fal_model,
-                            )
-                            provedor_usado = "fal.ai"
+                            video_bytes = gerar_video_fal_direto()
+                            provedor_usado = "fal.ai direto"
 
                         if not video_bytes:
                             raise RuntimeError(
@@ -2754,10 +2831,14 @@ elif menu == "🎬 Criar vídeo com IA":
                         f"{saldo_creditos_video() or 0} crédito(s)"
                     )
 
-            except ImportError:
+            except ImportError as e:
+                pacote = str(e)
                 st.error(
-                    "Falta instalar huggingface_hub."
+                    "Falta uma biblioteca necessária para gerar o vídeo. "
+                    "Atualize o requirements.txt conforme o arquivo desta atualização."
                 )
+                with st.expander("🔧 Ver detalhe técnico"):
+                    st.code(pacote)
 
             except Exception as e:
                 erro = str(e)
@@ -2803,6 +2884,10 @@ elif menu == "🎬 Criar vídeo com IA":
                             "O fal.ai pode exigir saldo próprio."
                         )
 
+                elif "cannot access content at" in erro_lower:
+                    st.warning(
+                        "🖼️ O provedor não conseguiu acessar a imagem enviada."
+                    )
                 elif (
                     "401" in erro
                     or "403" in erro
@@ -2810,8 +2895,8 @@ elif menu == "🎬 Criar vídeo com IA":
                     or "forbidden" in erro_lower
                 ):
                     st.warning(
-                        "🔑 A chave do provedor foi recusada. "
-                        "Confira HF_TOKEN ou FAL_API_KEY."
+                        "🔑 O provedor recusou a autorização. "
+                        "Confira a chave e as permissões da conta."
                     )
 
                 elif (
