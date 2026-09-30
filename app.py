@@ -2888,18 +2888,19 @@ def mostrar_card_tv(item, contexto):
     else:
         st.caption(f"🌙 Grátis • {categoria_tv}")
 
-    chave_tv = f"tv_aberto_{contexto}_{item['id']}"
-    if chave_tv not in st.session_state:
-        st.session_state[chave_tv] = False
+    # No Modo TV, somente um vídeo fica aberto por vez.
+    # Abrir outro fecha automaticamente o anterior.
+    video_aberto_id = st.session_state.get("tv_video_aberto_id")
+    este_video_aberto = str(video_aberto_id) == str(item["id"])
 
-    if not st.session_state[chave_tv]:
+    if not este_video_aberto:
         if st.button(
             "▶ Assistir agora",
             key=f"tv_assistir_{contexto}_{item['id']}",
             width="stretch",
         ):
             registrar_assistido(item)
-            st.session_state[chave_tv] = True
+            st.session_state["tv_video_aberto_id"] = str(item["id"])
             st.rerun()
     else:
         if st.button(
@@ -2907,7 +2908,7 @@ def mostrar_card_tv(item, contexto):
             key=f"tv_fechar_{contexto}_{item['id']}",
             width="stretch",
         ):
-            st.session_state[chave_tv] = False
+            st.session_state["tv_video_aberto_id"] = None
             st.rerun()
 
     favorito_tv = bool(item.get("favorito", False))
@@ -2919,7 +2920,7 @@ def mostrar_card_tv(item, contexto):
     ):
         alternar_favorito(item)
 
-    if st.session_state.get(chave_tv, False):
+    if este_video_aberto:
         reproduzir_video_url(item.get("video_url"))
 
 
