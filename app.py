@@ -9,6 +9,7 @@ import hmac
 import hashlib
 import base64
 from textwrap import dedent
+from io import BytesIO
 
 st.set_page_config(
     page_title="Mundo da Luna TV",
@@ -1002,6 +1003,238 @@ def adicionar_creditos_admin(email, quantidade):
         "updated_at": datetime.now(timezone.utc).isoformat()
     }).eq("user_id", item["user_id"]).execute()
 
+
+
+
+# -----------------------------
+# PDF DAS ATIVIDADES ESCOLARES
+# -----------------------------
+def criar_pdf_atividade(idade, materia, atividade_texto):
+    """
+    Gera uma folha A4 pronta para imprimir.
+    Usa somente elementos vetoriais e fontes padrão do PDF,
+    para funcionar bem no celular e na impressão.
+    """
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib import colors
+    from reportlab.pdfbase.pdfmetrics import stringWidth
+
+    buffer = BytesIO()
+    largura, altura = A4
+    margem = 42
+
+    pdf = canvas.Canvas(buffer, pagesize=A4)
+    pdf.setTitle(f"Mundo da Luna TV - {materia}")
+
+    roxo = colors.HexColor("#5B2C83")
+    roxo_claro = colors.HexColor("#EFE6F7")
+    dourado = colors.HexColor("#D4A72C")
+    cinza = colors.HexColor("#555555")
+    preto = colors.HexColor("#222222")
+
+    # Cabeçalho
+    pdf.setFillColor(roxo)
+    pdf.roundRect(
+        margem,
+        altura - 118,
+        largura - (margem * 2),
+        72,
+        16,
+        fill=1,
+        stroke=0,
+    )
+
+    pdf.setFillColor(colors.white)
+    pdf.setFont("Helvetica-Bold", 20)
+    pdf.drawString(margem + 18, altura - 78, "MUNDO DA LUNA TV")
+
+    pdf.setFont("Helvetica", 10)
+    pdf.drawString(
+        margem + 18,
+        altura - 96,
+        "Folha de atividade para imprimir",
+    )
+
+    # Lua simples no cabeçalho
+    pdf.setFillColor(dourado)
+    pdf.circle(largura - margem - 32, altura - 82, 16, fill=1, stroke=0)
+    pdf.setFillColor(roxo)
+    pdf.circle(largura - margem - 24, altura - 77, 15, fill=1, stroke=0)
+
+    # Identificação
+    y = altura - 150
+    pdf.setFillColor(preto)
+    pdf.setFont("Helvetica-Bold", 11)
+    pdf.drawString(margem, y, "Nome:")
+    pdf.line(margem + 38, y - 2, largura - 170, y - 2)
+    pdf.drawString(largura - 150, y, "Data:")
+    pdf.line(largura - 116, y - 2, largura - margem, y - 2)
+
+    # Título da atividade
+    y -= 42
+    pdf.setFillColor(roxo)
+    pdf.setFont("Helvetica-Bold", 16)
+    titulo = f"{materia} - {idade}".replace("–", "-")
+    pdf.drawString(margem, y, titulo)
+
+    y -= 22
+    pdf.setStrokeColor(dourado)
+    pdf.setLineWidth(2)
+    pdf.line(margem, y, largura - margem, y)
+    y -= 28
+
+    # Função de quebra de texto
+    def desenhar_paragrafo(texto_linha, x, y_atual, largura_max, tamanho=12, espacamento=18):
+        pdf.setFillColor(preto)
+        pdf.setFont("Helvetica", tamanho)
+
+        palavras = str(texto_linha).replace("–", "-").split()
+        linha = ""
+        linhas = []
+
+        for palavra in palavras:
+            teste = f"{linha} {palavra}".strip()
+            if stringWidth(teste, "Helvetica", tamanho) <= largura_max:
+                linha = teste
+            else:
+                if linha:
+                    linhas.append(linha)
+                linha = palavra
+
+        if linha:
+            linhas.append(linha)
+
+        for item in linhas:
+            pdf.drawString(x, y_atual, item)
+            y_atual -= espacamento
+
+        return y_atual
+
+    # Texto/instruções
+    linhas_atividade = [
+        linha.strip()
+        for linha in str(atividade_texto).splitlines()
+        if linha.strip()
+    ]
+
+    # O primeiro texto costuma repetir o título.
+    if linhas_atividade and materia.upper() in linhas_atividade[0].upper():
+        linhas_atividade = linhas_atividade[1:]
+
+    pdf.setFillColor(roxo_claro)
+    pdf.roundRect(
+        margem,
+        y - 115,
+        largura - (margem * 2),
+        125,
+        12,
+        fill=1,
+        stroke=0,
+    )
+
+    texto_y = y - 22
+    for linha in linhas_atividade[:6]:
+        texto_y = desenhar_paragrafo(
+            linha,
+            margem + 16,
+            texto_y,
+            largura - (margem * 2) - 32,
+            tamanho=12,
+            espacamento=18,
+        )
+        texto_y -= 3
+
+    y -= 145
+
+    # Área específica por matéria
+    pdf.setStrokeColor(roxo)
+    pdf.setFillColor(preto)
+    pdf.setLineWidth(1.3)
+
+    if materia == "Cores e formas":
+        pdf.setFont("Helvetica-Bold", 12)
+        pdf.drawString(margem, y, "Pinte o círculo de roxo e o quadrado de amarelo.")
+        y -= 60
+        pdf.circle(margem + 95, y, 44, fill=0, stroke=1)
+        pdf.rect(margem + 235, y - 44, 88, 88, fill=0, stroke=1)
+        y -= 80
+
+    elif materia == "Atividade para colorir":
+        pdf.setFont("Helvetica-Bold", 12)
+        pdf.drawString(margem, y, "Use o espaço abaixo para desenhar e colorir.")
+        y -= 24
+        pdf.roundRect(
+            margem,
+            110,
+            largura - (margem * 2),
+            y - 110,
+            12,
+            fill=0,
+            stroke=1,
+        )
+        # Pequenas estrelas-guia
+        pdf.setFont("Helvetica-Bold", 18)
+        for x in [margem + 30, margem + 75, largura - margem - 80, largura - margem - 35]:
+            pdf.drawString(x, y - 38, "*")
+
+    elif materia == "Animais":
+        pdf.setFont("Helvetica-Bold", 12)
+        pdf.drawString(margem, y, "Circule a resposta correta:")
+        y -= 40
+        opcoes = ["COELHO", "GATO", "CACHORRO"]
+        for i, opcao in enumerate(opcoes):
+            x = margem + (i * 155)
+            pdf.roundRect(x, y - 28, 135, 48, 8, fill=0, stroke=1)
+            pdf.setFont("Helvetica-Bold", 11)
+            pdf.drawCentredString(x + 67.5, y - 10, opcao)
+        y -= 90
+
+    elif materia == "Matemática":
+        pdf.setFont("Helvetica-Bold", 12)
+        pdf.drawString(margem, y, "Faça a conta no espaço abaixo:")
+        y -= 26
+        pdf.roundRect(
+            margem,
+            y - 150,
+            largura - (margem * 2),
+            150,
+            10,
+            fill=0,
+            stroke=1,
+        )
+        pdf.setFont("Helvetica", 12)
+        pdf.drawString(margem + 16, y - 30, "Resposta: ______________________________")
+        y -= 175
+
+    elif materia == "Leitura":
+        pdf.setFont("Helvetica-Bold", 12)
+        pdf.drawString(margem, y, "Resposta:")
+        y -= 25
+        for _ in range(5):
+            pdf.line(margem, y, largura - margem, y)
+            y -= 34
+
+    elif materia == "Alfabetização":
+        pdf.setFont("Helvetica-Bold", 12)
+        pdf.drawString(margem, y, "Escreva sua resposta:")
+        y -= 30
+        for _ in range(4):
+            pdf.line(margem, y, largura - margem, y)
+            y -= 38
+
+    # Rodapé
+    pdf.setFillColor(cinza)
+    pdf.setFont("Helvetica", 8.5)
+    pdf.drawCentredString(
+        largura / 2,
+        42,
+        "Mundo da Luna TV - atividade educativa para uso pessoal",
+    )
+
+    pdf.save()
+    buffer.seek(0)
+    return buffer.getvalue()
 
 
 # -----------------------------
@@ -3170,7 +3403,26 @@ elif menu == "📚 Atividades escolares":
             key=f"resp_mat_{idade}",
         )
         resposta_correta = int(resposta) == correta
-        atividade_baixar = f"MATEMÁTICA {idade}\nResolva a atividade mostrada no app.\nResposta: __________"
+        if idade == "4–5 anos":
+            atividade_baixar = (
+                f"MATEMÁTICA {idade}\n"
+                "Conte as estrelas: 2 estrelas + 1 estrela = ?\n"
+                "Resposta: __________"
+            )
+        elif idade == "6–7 anos":
+            atividade_baixar = (
+                f"MATEMÁTICA {idade}\n"
+                "Luna encontrou 4 cenouras e ganhou mais 3. "
+                "Quantas cenouras ela tem?\n"
+                "Resposta: __________"
+            )
+        else:
+            atividade_baixar = (
+                f"MATEMÁTICA {idade}\n"
+                "No castelo havia 12 estrelas. 5 apagaram. "
+                "Quantas ficaram acesas?\n"
+                "Resposta: __________"
+            )
 
     elif materia == "Cores e formas":
         st.write("🟣 Qual é a cor deste círculo?")
@@ -3214,18 +3466,48 @@ elif menu == "📚 Atividades escolares":
             else:
                 st.warning("💜 Quase! Tente novamente.")
 
-    st.download_button(
-        label="Baixar atividade",
-        icon="⬇️",
-        data=atividade_baixar.encode("utf-8"),
-        file_name=f"atividade_{materia.lower().replace(' ', '_')}_{idade.replace('–','-')}.txt",
-        mime="text/plain",
-        width="stretch",
-        key=f"baixar_atividade_{idade}_{materia}",
+    nome_arquivo_base = (
+        f"atividade_{materia.lower().replace(' ', '_')}_"
+        f"{idade.replace('–','-')}"
     )
 
+    try:
+        pdf_atividade = criar_pdf_atividade(
+            idade,
+            materia,
+            atividade_baixar,
+        )
+
+        st.download_button(
+            label="Baixar folha em PDF",
+            icon="📄",
+            data=pdf_atividade,
+            file_name=f"{nome_arquivo_base}.pdf",
+            mime="application/pdf",
+            width="stretch",
+            key=f"baixar_pdf_atividade_{idade}_{materia}",
+        )
+    except Exception as e:
+        st.warning(
+            "Não consegui preparar o PDF agora. "
+            "O arquivo de texto continua disponível abaixo."
+        )
+        with st.expander("Ver detalhe do PDF"):
+            st.code(str(e))
+
+    with st.expander("Baixar versão simples em texto"):
+        st.download_button(
+            label="Baixar atividade em texto",
+            icon="⬇️",
+            data=atividade_baixar.encode("utf-8"),
+            file_name=f"{nome_arquivo_base}.txt",
+            mime="text/plain",
+            width="stretch",
+            key=f"baixar_txt_atividade_{idade}_{materia}",
+        )
+
     st.caption(
-        "💡 Na próxima etapa também dá para transformar essas atividades em folhas PDF ilustradas."
+        "PDF em folha A4, pronto para imprimir ou salvar no celular."
     )
 
 
