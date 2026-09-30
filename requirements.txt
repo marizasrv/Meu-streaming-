@@ -3,3 +3,4 @@ supabase
 streamlit-js-eval
 huggingface_hub>=0.35.0
 fal-client
+reportlab>=4.0.0
