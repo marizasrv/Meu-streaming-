@@ -2507,31 +2507,19 @@ elif menu == "🔒 Premium":
 
             total_premium = len(exclusivos)
 
-            render_html(
-                f"""
-                <div class="premium-stats">
-                    <div class="premium-stat">
-                        <div class="premium-stat-num">{total_premium}</div>
-                        <div class="premium-stat-label">💎 Exclusivos</div>
-                    </div>
+            # Contadores nativos do Streamlit:
+            # mais seguros no celular e sem risco de exibir HTML como texto.
+            premium_linha_1 = st.columns(2, gap="small")
+            with premium_linha_1[0]:
+                st.metric("💎 Exclusivos", total_premium)
+            with premium_linha_1[1]:
+                st.metric("🧸 Infantil", len(infantil_premium))
 
-                    <div class="premium-stat">
-                        <div class="premium-stat-num">{len(infantil_premium)}</div>
-                        <div class="premium-stat-label">🧸 Infantil</div>
-                    </div>
-
-                    <div class="premium-stat">
-                        <div class="premium-stat-num">{len(filmes_premium)}</div>
-                        <div class="premium-stat-label">🎬 Filmes</div>
-                    </div>
-
-                    <div class="premium-stat">
-                        <div class="premium-stat-num">{len(series_premium)}</div>
-                        <div class="premium-stat-label">📺 Séries</div>
-                    </div>
-                </div>
-                """
-            )
+            premium_linha_2 = st.columns(2, gap="small")
+            with premium_linha_2[0]:
+                st.metric("🎬 Filmes", len(filmes_premium))
+            with premium_linha_2[1]:
+                st.metric("📺 Séries", len(series_premium))
 
             st.markdown(
                 '<div class="dica-deslize">'
