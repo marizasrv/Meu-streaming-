@@ -4311,16 +4311,15 @@ elif menu == "🎮 Jogos":
             width="stretch",
         )
 
-        if faixa in ["4–5 anos", "6–7 anos"]:
-            colunas_memoria = 2
-        else:
-            colunas_memoria = 3
+        # Duas cartas por linha em todas as faixas.
+        # Isso evita corte lateral no celular e mantém as cartas grandes.
+        colunas_memoria = 2
 
         for linha in range(0, len(cartas), colunas_memoria):
             cols = st.columns(
                 colunas_memoria,
                 gap="small",
-                wrap=False,
+                wrap=True,
             )
 
             for posicao, indice in enumerate(
