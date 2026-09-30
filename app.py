@@ -4319,7 +4319,7 @@ elif menu == "🎮 Jogos":
             cols = st.columns(
                 colunas_memoria,
                 gap="small",
-                wrap=True,
+                wrap=False,
             )
 
             for posicao, indice in enumerate(
