@@ -1668,6 +1668,71 @@ div[data-testid="stFileUploaderDropzone"] span {
     color: #cfc4dd !important;
 }
 
+
+/* V16 — menu lateral menor e em lilás */
+section[data-testid="stSidebar"] div[role="radiogroup"] {
+    gap: 0.28rem !important;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label {
+    background: linear-gradient(90deg, #6d4aa3 0%, #8b5cf6 100%) !important;
+    border: 1px solid #c4a7f2 !important;
+    border-radius: 12px !important;
+    padding: 6px 8px !important;
+    margin-bottom: 3px !important;
+    min-height: 42px !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label:hover {
+    background: linear-gradient(90deg, #7b55b5 0%, #9b6cff 100%) !important;
+    border-color: #d8c2ff !important;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label p,
+section[data-testid="stSidebar"] div[role="radiogroup"] label span {
+    color: #ffffff !important;
+    font-size: 0.92rem !important;
+    line-height: 1.05 !important;
+    font-weight: 700 !important;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked),
+section[data-testid="stSidebar"] div[role="radiogroup"] label[data-baseweb="radio"]:has(input:checked) {
+    background: linear-gradient(90deg, #a86cf7 0%, #c28cff 100%) !important;
+    border: 2px solid #f2d675 !important;
+    box-shadow: 0 0 10px rgba(194,140,255,0.25) !important;
+    transform: none !important;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) p,
+section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) span {
+    color: #ffffff !important;
+    font-weight: 800 !important;
+}
+
+@media (max-width: 640px) {
+    section[data-testid="stSidebar"] {
+        width: 250px !important;
+        min-width: 250px !important;
+        max-width: 250px !important;
+    }
+
+    section[data-testid="stSidebar"] div[role="radiogroup"] label {
+        padding: 5px 7px !important;
+        min-height: 38px !important;
+        border-radius: 11px !important;
+        margin-bottom: 2px !important;
+    }
+
+    section[data-testid="stSidebar"] div[role="radiogroup"] label p,
+    section[data-testid="stSidebar"] div[role="radiogroup"] label span {
+        font-size: 0.84rem !important;
+        line-height: 1 !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
