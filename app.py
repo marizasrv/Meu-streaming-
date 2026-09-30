@@ -5771,10 +5771,156 @@ elif menu == "📚 Atividades escolares":
             for tema in temas[fase]
         ]
 
+    def criar_fase_avancada(idade_atual, materia_atual, fase):
+        """Cria as fases 4 e 5 com atividades novas e um pouco mais difíceis."""
+        if materia_atual == "Alfabetização":
+            if idade_atual == "4–5 anos":
+                banco = {
+                    4: [("R _ T O", "A", "RATO"), ("B _ C A", "O", "BOCA"), ("D _ D O", "E", "DEDO")],
+                    5: [("S _ P O", "A", "SAPO"), ("M _ L A", "A", "MALA"), ("V _ L A", "E", "VELA")],
+                }
+                return [
+                    (f"Complete a palavra: **{lacuna}**", "texto", "Digite a letra que falta:", letra,
+                     f"ALFABETIZAÇÃO {idade_atual}\nComplete: {lacuna}\nEscreva {palavra}.")
+                    for lacuna, letra, palavra in banco[fase]
+                ]
+            elif idade_atual == "6–7 anos":
+                banco = {
+                    4: [("B O R B O L _ T A", "E", "BORBOLETA"), ("C A M I N H _", "O", "CAMINHO"), ("J A N _ L A", "E", "JANELA")],
+                    5: [("E N C A N T A D _", "O", "ENCANTADO"), ("A M I Z A D _", "E", "AMIZADE"), ("M I S T É R I _", "O", "MISTÉRIO")],
+                }
+                return [
+                    (f"Complete a palavra: **{lacuna}**", "texto", "Digite a letra que falta:", letra,
+                     f"ALFABETIZAÇÃO {idade_atual}\nComplete: {lacuna}\nEscreva {palavra}.")
+                    for lacuna, letra, palavra in banco[fase]
+                ]
+            else:
+                grupos = {
+                    4: [("portal", "segredo", "coragem"), ("torre", "mistério", "mapa"), ("floresta", "amizade", "aventura")],
+                    5: [("cristal", "escolha", "caminho"), ("princesa", "desafio", "coragem"), ("livro", "portal", "descoberta")],
+                }
+                return [
+                    (f"Escreva uma frase usando **{a}**, **{b}** e **{d}**.", "frase", "Sua frase:", 8 if fase == 4 else 9,
+                     f"ALFABETIZAÇÃO {idade_atual}\nEscreva uma frase usando: {a}, {b} e {d}.")
+                    for a, b, d in grupos[fase]
+                ]
+
+        if materia_atual == "Leitura":
+            bancos = {
+                ("4–5 anos", 4): [
+                    ("Luna achou uma estrela perto da porta.", "O que Luna achou?", "estrela"),
+                    ("O coelhinho pulou sobre uma pedra.", "Sobre o que ele pulou?", "pedra"),
+                    ("A princesa abriu uma caixa roxa.", "Qual era a cor da caixa?", "roxa"),
+                ],
+                ("4–5 anos", 5): [
+                    ("Luna levou o livro até o castelo.", "O que Luna levou?", "livro"),
+                    ("O coelhinho viu uma borboleta amarela.", "O que ele viu?", "borboleta"),
+                    ("A lua apareceu atrás da torre.", "Onde a lua apareceu?", "torre"),
+                ],
+                ("6–7 anos", 4): [
+                    ("Luna encontrou uma mensagem escondida dentro do livro.", "Onde estava a mensagem?", "livro"),
+                    ("O coelhinho ouviu um sino perto da ponte.", "O que ele ouviu?", "sino"),
+                    ("A princesa guardou a chave em uma caixa dourada.", "Onde ela guardou a chave?", "caixa"),
+                ],
+                ("6–7 anos", 5): [
+                    ("Luna atravessou a ponte para chegar à torre.", "Para onde Luna queria chegar?", "torre"),
+                    ("O mapa mostrava um caminho secreto pela floresta.", "O que o mapa mostrava?", "caminho"),
+                    ("O coelhinho encontrou uma flor azul perto do lago.", "Qual era a cor da flor?", "azul"),
+                ],
+                ("8–9 anos", 4): [
+                    ("Luna percebeu que as pegadas desapareciam perto de uma porta antiga.", "Onde as pegadas desapareciam?", "porta"),
+                    ("A princesa explicou que o mapa só funcionava à luz da lua.", "Quando o mapa funcionava?", "lua"),
+                    ("O coelhinho encontrou um símbolo gravado na pedra.", "Onde estava o símbolo?", "pedra"),
+                ],
+                ("8–9 anos", 5): [
+                    ("Ao abrir o livro, Luna descobriu uma mensagem escrita com tinta dourada.", "Como era a tinta?", "dourada"),
+                    ("A torre mais alta tinha uma janela iluminada durante a noite.", "O que estava iluminado?", "janela"),
+                    ("A ponte secreta só aparecia quando três estrelas brilhavam juntas.", "Quando a ponte aparecia?", "estrelas"),
+                ],
+            }
+            return [
+                (texto, "leitura", pergunta, resposta,
+                 f"LEITURA {idade_atual}\n{texto}\nPergunta: {pergunta}")
+                for texto, pergunta, resposta in bancos[(idade_atual, fase)]
+            ]
+
+        if materia_atual == "Matemática":
+            bancos = {
+                ("4–5 anos", 4): [("⭐⭐⭐ + ⭐⭐ = ?", 5), ("🐰🐰🐰🐰 - 🐰 = ?", 3), ("🌙🌙 + 🌙 = ?", 3)],
+                ("4–5 anos", 5): [("🍎🍎🍎 + 🍎🍎🍎 = ?", 6), ("⭐⭐⭐⭐⭐ - ⭐⭐ = ?", 3), ("🐰🐰 + 🐰🐰🐰 = ?", 5)],
+                ("6–7 anos", 4): [("14 + 7 = ?", 21), ("25 - 9 = ?", 16), ("5 grupos de 4 estrelas = ?", 20)],
+                ("6–7 anos", 5): [("24 dividido por 4 = ?", 6), ("17 + 18 = ?", 35), ("30 - 12 = ?", 18)],
+                ("8–9 anos", 4): [("7 × 8 = ?", 56), ("81 dividido por 9 = ?", 9), ("46 + 37 = ?", 83)],
+                ("8–9 anos", 5): [("96 dividido por 8 = ?", 12), ("12 × 7 = ?", 84), ("150 - 67 = ?", 83)],
+            }
+            return [
+                (pergunta, "numero", "Sua resposta:", resposta,
+                 f"MATEMÁTICA {idade_atual}\n{pergunta}")
+                for pergunta, resposta in bancos[(idade_atual, fase)]
+            ]
+
+        if materia_atual == "Cores e formas":
+            bancos = {
+                4: [
+                    ("Qual forma tem 7 lados?", ["Heptágono", "Pentágono", "Quadrado"], "Heptágono"),
+                    ("Misturar vermelho e amarelo forma qual cor?", ["Laranja", "Roxo", "Verde"], "Laranja"),
+                    ("Qual destas figuras tem 4 lados iguais?", ["Quadrado", "Retângulo", "Triângulo"], "Quadrado"),
+                ],
+                5: [
+                    ("Qual forma tem 10 lados?", ["Decágono", "Octógono", "Hexágono"], "Decágono"),
+                    ("Qual é uma cor secundária?", ["Roxo", "Azul", "Amarelo"], "Roxo"),
+                    ("Qual forma tem todos os lados curvos?", ["Círculo", "Quadrado", "Triângulo"], "Círculo"),
+                ],
+            }
+            return [
+                (pergunta, "opcao", "Escolha:", (opcoes, correta),
+                 f"CORES E FORMAS {idade_atual}\n{pergunta}")
+                for pergunta, opcoes, correta in bancos[fase]
+            ]
+
+        if materia_atual == "Animais":
+            bancos = {
+                4: [
+                    ("Qual destes animais é um inseto?", ["Borboleta", "Coelho", "Peixe"], "Borboleta"),
+                    ("Qual animal é conhecido por ter tromba?", ["Elefante", "Gato", "Galinha"], "Elefante"),
+                    ("Qual destes vive em uma colmeia?", ["Abelha", "Cachorro", "Peixe"], "Abelha"),
+                ],
+                5: [
+                    ("Qual destes animais é um réptil?", ["Cobra", "Coelho", "Pássaro"], "Cobra"),
+                    ("Qual animal muda de cor para se camuflar?", ["Camaleão", "Vaca", "Galinha"], "Camaleão"),
+                    ("Qual destes é um animal marinho?", ["Golfinho", "Coelho", "Gato"], "Golfinho"),
+                ],
+            }
+            return [
+                (pergunta, "opcao", "Escolha:", (opcoes, correta),
+                 f"ANIMAIS {idade_atual}\n{pergunta}")
+                for pergunta, opcoes, correta in bancos[fase]
+            ]
+
+        temas = {
+            4: [
+                "Desenhe um castelo visto à noite com estrelas no céu.",
+                "Crie um jardim mágico com flores e borboletas.",
+                "Desenhe Luna e o coelhinho encontrando uma chave dourada.",
+            ],
+            5: [
+                "Crie uma nova aventura de Luna em uma floresta encantada.",
+                "Desenhe um portal mágico e o mundo que existe do outro lado.",
+                "Crie uma capa para uma nova história do Mundo da Luna.",
+            ],
+        }
+        return [
+            (f"🎨 {tema}", "criativa", "", None,
+             f"ATIVIDADE PARA COLORIR {idade_atual}\n{tema}")
+            for tema in temas[fase]
+        ]
+
     fase1 = bancos_atividades[(idade, materia)]
     fase2 = criar_fase_extra(idade, materia, 2)
     fase3 = criar_fase_extra(idade, materia, 3)
-    fases_atividades = [fase1, fase2, fase3]
+    fase4 = criar_fase_avancada(idade, materia, 4)
+    fase5 = criar_fase_avancada(idade, materia, 5)
+    fases_atividades = [fase1, fase2, fase3, fase4, fase5]
 
     if fase_atividade >= len(fases_atividades):
         st.progress(1.0, text="Todas as fases concluídas!", width="stretch")
@@ -5791,9 +5937,15 @@ elif menu == "📚 Atividades escolares":
             st.rerun()
     else:
         atividades = fases_atividades[fase_atividade]
-        dificuldade = ["🌱 Fácil", "⭐ Intermediária", "🔥 Desafio"][fase_atividade]
+        dificuldade = [
+            "🌱 Fácil",
+            "⭐ Intermediária",
+            "🔥 Desafio",
+            "💎 Avançada",
+            "👑 Mestre",
+        ][fase_atividade]
         st.markdown(
-            f"### 📚 Fase {fase_atividade + 1} de 3 · {dificuldade}"
+            f"### 📚 Fase {fase_atividade + 1} de {len(fases_atividades)} · {dificuldade}"
         )
 
         if etapa_atividade >= len(atividades):
@@ -5805,7 +5957,7 @@ elif menu == "📚 Atividades escolares":
             st.success(f"🎉 Você concluiu a Fase {fase_atividade + 1}!")
             st.balloons()
 
-            if fase_atividade < 2:
+            if fase_atividade + 1 < len(fases_atividades):
                 st.markdown(
                     f"<div class='fase-desbloqueada'>🔓 Fase {fase_atividade + 2} desbloqueada!</div>",
                     unsafe_allow_html=True,
