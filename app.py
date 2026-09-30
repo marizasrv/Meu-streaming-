@@ -3097,10 +3097,13 @@ elif menu == "🆕 Novidades":
     if not novidades:
         st.info("Ainda não há novidades.")
     else:
-        cols = st.columns(2)
-        for i, item in enumerate(novidades[:10]):
-            with cols[i % 2]:
-                mostrar_card(item, f"novidades_{i}")
+        mostrar_fileira_catalogo(
+            "✨ Últimos conteúdos",
+            novidades,
+            "novidades",
+            limite=12,
+            marcar_novo=True,
+        )
 
 elif menu == "❤️ Minha Lista":
     st.subheader("❤️ Minha Lista")
@@ -3113,24 +3116,28 @@ elif menu == "❤️ Minha Lista":
     if not favoritos:
         st.info("Sua lista ainda está vazia. Toque em 🤍 Minha Lista em qualquer vídeo.")
     else:
-        cols = st.columns(2)
-        for i, item in enumerate(favoritos):
-            with cols[i % 2]:
-                mostrar_card(item, f"favoritos_{i}", em_minha_lista=True)
+        mostrar_fileira_catalogo(
+            "💖 Salvos para assistir",
+            favoritos,
+            "favoritos",
+            limite=30,
+        )
 
 elif menu == "🕒 Recentes":
     st.subheader("🕒 Assistidos recentemente")
 
-    recentes = listar_assistidos_recentes(videos_gratis(videos), limite=10)
+    recentes = listar_assistidos_recentes(videos_gratis(videos), limite=12)
 
     if not recentes:
         st.info("Você ainda não assistiu a nenhum vídeo.")
     else:
         st.caption("Os vídeos assistidos mais recentemente aparecem primeiro.")
-        cols = st.columns(2)
-        for i, item in enumerate(recentes):
-            with cols[i % 2]:
-                mostrar_card(item, f"recentes_{i}")
+        mostrar_fileira_catalogo(
+            "🕒 Continue de onde parou",
+            recentes,
+            "recentes",
+            limite=12,
+        )
 
 elif menu == "👤 Entrar / Minha conta":
     st.subheader("👤 Minha conta")
