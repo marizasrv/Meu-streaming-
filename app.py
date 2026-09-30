@@ -737,7 +737,32 @@ div[data-testid="stDownloadButton"] button span {
     font-weight: 800 !important;
 }
 [class*="st-key-memoria_carta_"] {
-    min-width: 92px !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Jogo da memória responsivo no celular */
+@media (max-width: 640px) {
+    [class*="st-key-memoria_carta_"] {
+        min-width: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+    }
+
+    [class*="st-key-memoria_carta_"] button {
+        width: 100% !important;
+        min-width: 0 !important;
+        min-height: 64px !important;
+        padding: 0.35rem 0.25rem !important;
+        font-size: 1.75rem !important;
+        border-radius: 14px !important;
+    }
+
+    [class*="st-key-memoria_carta_"] + div[data-testid="stCaptionContainer"] {
+        text-align: center !important;
+    }
 }
 
 </style>
@@ -3169,7 +3194,7 @@ elif menu == "🎮 Jogos":
 
     faixa = st.selectbox(
         "👧 Escolha a faixa etária",
-        ["4–5 anos", "6–7 anos", "8–9 anos"],
+        ["4–5 anos", "6–7 anos", "8–9 anos", "10–12 anos", "13–15 anos"],
         key="faixa_jogos",
     )
 
@@ -3193,7 +3218,7 @@ elif menu == "🎮 Jogos":
         st.markdown("### 🧠 Jogo da memória")
         st.caption(
             "Encontre os pares iguais. "
-            "Quanto maior a faixa etária, mais cartas aparecem."
+            "As cartas se ajustam automaticamente ao tamanho da tela."
         )
 
         # Reinicia o jogo quando a faixa etária mudar.
@@ -3212,6 +3237,8 @@ elif menu == "🎮 Jogos":
             "4–5 anos": 3,
             "6–7 anos": 4,
             "8–9 anos": 6,
+            "10–12 anos": 8,
+            "13–15 anos": 10,
         }[faixa]
 
         personagens_memoria = [
@@ -3221,6 +3248,10 @@ elif menu == "🎮 Jogos":
             ("⭐", "Estrela"),
             ("📖", "Livro mágico"),
             ("🌙", "Lua"),
+            ("🔑", "Chave"),
+            ("🪄", "Varinha"),
+            ("🧭", "Bússola"),
+            ("💎", "Cristal"),
         ][:quantidade_pares]
 
         if "memoria_cartas" not in st.session_state:
@@ -3249,13 +3280,16 @@ elif menu == "🎮 Jogos":
             f"🎯 Tentativas: {st.session_state['memoria_tentativas']}"
         )
 
-        colunas_memoria = 3 if faixa != "8–9 anos" else 4
+        if faixa in ["4–5 anos", "6–7 anos"]:
+            colunas_memoria = 3
+        else:
+            colunas_memoria = 4
 
         for linha in range(0, len(cartas), colunas_memoria):
             cols = st.columns(
                 colunas_memoria,
                 gap="small",
-                wrap=False,
+                wrap=True,
             )
 
             for posicao, indice in enumerate(
@@ -3410,64 +3444,63 @@ elif menu == "🎮 Jogos":
 
         if faixa == "4–5 anos":
             st.write("Complete a palavra: **L _ N A**")
-
             resposta_palavra = st.radio(
                 "Qual letra está faltando?",
                 ["A", "U", "O"],
                 key="jogo_palavra_45",
                 horizontal=True,
             )
-
-            correta_palavra = (
-                resposta_palavra == "U"
-            )
-
-            mensagem_correta = (
-                "🎉 Muito bem! A palavra é LUNA."
-            )
+            correta_palavra = resposta_palavra == "U"
+            mensagem_correta = "🎉 Muito bem! A palavra é LUNA."
 
         elif faixa == "6–7 anos":
-            st.write(
-                "Complete a palavra: **C _ E L H O**"
-            )
-
+            st.write("Complete a palavra: **C _ E L H O**")
             resposta_palavra = st.radio(
                 "Qual letra está faltando?",
                 ["A", "O", "U"],
                 key="jogo_palavra_67",
                 horizontal=True,
             )
+            correta_palavra = resposta_palavra == "O"
+            mensagem_correta = "🎉 Muito bem! A palavra é COELHO."
 
-            correta_palavra = (
-                resposta_palavra == "O"
+        elif faixa == "8–9 anos":
+            st.write("Complete a frase: **Luna abriu o ____ mágico.**")
+            resposta_palavra = st.radio(
+                "Escolha a palavra correta:",
+                ["livro", "sapato", "bolo"],
+                key="jogo_palavra_89",
             )
+            correta_palavra = resposta_palavra == "livro"
+            mensagem_correta = "🎉 Certo! Luna abriu o livro mágico."
 
+        elif faixa == "10–12 anos":
+            st.write(
+                "Qual palavra completa melhor a frase? "
+                "**Luna ficou ____ ao perceber que o caminho havia mudado.**"
+            )
+            resposta_palavra = st.radio(
+                "Escolha:",
+                ["intrigada", "adormecida", "invisível"],
+                key="jogo_palavra_1012",
+            )
+            correta_palavra = resposta_palavra == "intrigada"
             mensagem_correta = (
-                "🎉 Muito bem! A palavra é COELHO."
+                "✨ Isso! 'Intrigada' combina com alguém curioso diante de um mistério."
             )
 
         else:
             st.write(
-                "Complete a frase: "
-                "**Luna abriu o ____ mágico.**"
+                "Qual alternativa apresenta um **sinônimo** de 'misterioso'?"
             )
-
             resposta_palavra = st.radio(
-                "Escolha a palavra correta:",
-                [
-                    "livro",
-                    "sapato",
-                    "bolo",
-                ],
-                key="jogo_palavra_89",
+                "Escolha:",
+                ["enigmático", "barulhento", "veloz"],
+                key="jogo_palavra_1315",
             )
-
-            correta_palavra = (
-                resposta_palavra == "livro"
-            )
-
+            correta_palavra = resposta_palavra == "enigmático"
             mensagem_correta = (
-                "🎉 Certo! Luna abriu o livro mágico."
+                "✨ Certo! 'Enigmático' é um sinônimo de 'misterioso'."
             )
 
         if st.button(
@@ -3476,13 +3509,9 @@ elif menu == "🎮 Jogos":
             use_container_width=True,
         ):
             if correta_palavra:
-                st.success(
-                    mensagem_correta
-                )
+                st.success(mensagem_correta)
             else:
-                st.warning(
-                    "💜 Quase! Tente outra opção."
-                )
+                st.warning("💜 Quase! Tente outra opção.")
 
     # =========================================================
     # NÚMEROS
@@ -3491,29 +3520,41 @@ elif menu == "🎮 Jogos":
         st.markdown("### 🔢 Brincando com números")
 
         if faixa == "4–5 anos":
-            st.write(
-                "Conte as estrelas: "
-                "⭐ ⭐ ⭐ ⭐"
-            )
+            st.write("Conte as estrelas: ⭐ ⭐ ⭐ ⭐")
             resposta_correta_num = 4
             maximo_num = 10
 
         elif faixa == "6–7 anos":
             st.write(
-                "🐰 O coelhinho encontrou "
-                "**3 cenouras** e depois mais **2**. "
+                "🐰 O coelhinho encontrou **3 cenouras** e depois mais **2**. "
                 "Quantas cenouras ele tem?"
             )
             resposta_correta_num = 5
             maximo_num = 20
 
-        else:
+        elif faixa == "8–9 anos":
             st.write(
-                "🏰 No castelo havia **12 estrelas**. "
-                "**5 apagaram**. Quantas ficaram acesas?"
+                "🏰 No castelo havia **12 estrelas**. **5 apagaram**. "
+                "Quantas ficaram acesas?"
             )
             resposta_correta_num = 7
             maximo_num = 30
+
+        elif faixa == "10–12 anos":
+            st.write(
+                "🔮 Luna encontrou **6 cristais**. Cada cristal vale **4 pontos**. "
+                "Quantos pontos ela conseguiu?"
+            )
+            resposta_correta_num = 24
+            maximo_num = 100
+
+        else:
+            st.write(
+                "🧩 Um portal exige **3 chaves**, e cada chave tem **7 símbolos**. "
+                "Se Luna encontrou 2 portais completos, quantos símbolos há ao todo?"
+            )
+            resposta_correta_num = 42
+            maximo_num = 200
 
         resposta_numero = st.number_input(
             "Digite sua resposta:",
@@ -3528,17 +3569,10 @@ elif menu == "🎮 Jogos":
             key=f"conferir_numero_{faixa}",
             use_container_width=True,
         ):
-            if (
-                int(resposta_numero)
-                == resposta_correta_num
-            ):
-                st.success(
-                    "🎉 Acertou! Muito bem!"
-                )
+            if int(resposta_numero) == resposta_correta_num:
+                st.success("🎉 Acertou! Muito bem!")
             else:
-                st.warning(
-                    "💜 Quase! Conte novamente."
-                )
+                st.warning("💜 Quase! Pense mais um pouco.")
 
     # =========================================================
     # DESAFIO MÁGICO
@@ -3547,77 +3581,69 @@ elif menu == "🎮 Jogos":
         st.markdown("### 🌟 Desafio mágico")
 
         if faixa == "4–5 anos":
-            st.write(
-                "🟣 Qual é a cor deste círculo?"
-            )
-
+            st.write("🟣 Qual é a cor deste círculo?")
             resposta_desafio = st.radio(
                 "Escolha:",
-                [
-                    "Roxo",
-                    "Amarelo",
-                    "Verde",
-                ],
+                ["Roxo", "Amarelo", "Verde"],
                 key="desafio_45",
             )
-
-            correta_desafio = (
-                resposta_desafio == "Roxo"
-            )
-
-            sucesso_desafio = (
-                "✨ Isso! O círculo é roxo."
-            )
+            correta_desafio = resposta_desafio == "Roxo"
+            sucesso_desafio = "✨ Isso! O círculo é roxo."
 
         elif faixa == "6–7 anos":
-            st.write(
-                "🔺 Qual é o nome desta forma?"
-            )
-
+            st.write("🔺 Qual é o nome desta forma?")
             resposta_desafio = st.radio(
                 "Escolha:",
-                [
-                    "Triângulo",
-                    "Quadrado",
-                    "Círculo",
-                ],
+                ["Triângulo", "Quadrado", "Círculo"],
                 key="desafio_67",
             )
+            correta_desafio = resposta_desafio == "Triângulo"
+            sucesso_desafio = "✨ Certo! Essa forma é um triângulo."
 
-            correta_desafio = (
-                resposta_desafio == "Triângulo"
+        elif faixa == "8–9 anos":
+            st.write("Complete a sequência mágica:")
+            st.markdown("## ⭐ 🌙 ⭐ 🌙 ❓")
+            resposta_desafio = st.radio(
+                "O que vem depois?",
+                ["⭐ Estrela", "🌙 Lua", "🐰 Coelho"],
+                key="desafio_89",
+            )
+            correta_desafio = resposta_desafio == "⭐ Estrela"
+            sucesso_desafio = (
+                "✨ Muito bem! A sequência alterna estrela e lua."
             )
 
+        elif faixa == "10–12 anos":
+            st.write(
+                "🧠 Qual número completa a sequência? **2, 4, 8, 16, __**"
+            )
+            resposta_desafio = st.radio(
+                "Escolha:",
+                ["20", "24", "32"],
+                key="desafio_1012",
+            )
+            correta_desafio = resposta_desafio == "32"
             sucesso_desafio = (
-                "✨ Certo! Essa forma é um triângulo."
+                "✨ Certo! Cada número é o dobro do anterior."
             )
 
         else:
             st.write(
-                "Complete a sequência mágica:"
+                "🧩 Se todos os portais azuis são mágicos e este portal é azul, "
+                "qual conclusão é logicamente correta?"
             )
-            st.markdown(
-                "## ⭐ 🌙 ⭐ 🌙 ❓"
-            )
-
             resposta_desafio = st.radio(
-                "O que vem depois?",
+                "Escolha:",
                 [
-                    "⭐ Estrela",
-                    "🌙 Lua",
-                    "🐰 Coelho",
+                    "Este portal é mágico",
+                    "Todo portal mágico é azul",
+                    "Nenhum portal azul é mágico",
                 ],
-                key="desafio_89",
+                key="desafio_1315",
             )
-
-            correta_desafio = (
-                resposta_desafio
-                == "⭐ Estrela"
-            )
-
+            correta_desafio = resposta_desafio == "Este portal é mágico"
             sucesso_desafio = (
-                "✨ Muito bem! A sequência alterna "
-                "estrela e lua."
+                "✨ Exato! Essa conclusão segue diretamente das informações dadas."
             )
 
         if st.button(
@@ -3626,13 +3652,9 @@ elif menu == "🎮 Jogos":
             use_container_width=True,
         ):
             if correta_desafio:
-                st.success(
-                    sucesso_desafio
-                )
+                st.success(sucesso_desafio)
             else:
-                st.warning(
-                    "💜 Quase! Observe mais uma vez."
-                )
+                st.warning("💜 Quase! Observe mais uma vez.")
 
     st.markdown("---")
     st.caption(
