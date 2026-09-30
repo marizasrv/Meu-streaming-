@@ -2923,6 +2923,34 @@ def mostrar_card_tv(item, contexto):
     if este_video_aberto:
         reproduzir_video_url(item.get("video_url"))
 
+        # Navegadores normalmente só permitem tela cheia após um clique direto.
+        # Por isso, mostramos um botão próprio logo abaixo do player.
+        if st.button(
+            "⛶ Abrir em tela cheia",
+            key=f"tv_tela_cheia_{contexto}_{item['id']}",
+            width="stretch",
+        ):
+            streamlit_js_eval(
+                js_expressions="""
+                (() => {
+                    const videos = Array.from(document.querySelectorAll('video'));
+                    const video = videos[videos.length - 1];
+                    if (!video) return false;
+                    try { video.play(); } catch (e) {}
+                    if (video.requestFullscreen) {
+                        video.requestFullscreen();
+                    } else if (video.webkitEnterFullscreen) {
+                        video.webkitEnterFullscreen();
+                    } else if (video.webkitRequestFullscreen) {
+                        video.webkitRequestFullscreen();
+                    }
+                    return true;
+                })()
+                """,
+                want_output=False,
+                key=f"fullscreen_tv_{contexto}_{item['id']}",
+            )
+
 
 # Aplica navegação pendente ANTES de criar o st.radio.
 if "_menu_destino" in st.session_state:
