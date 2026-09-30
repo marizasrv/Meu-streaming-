@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 from supabase import create_client, Client
 from datetime import datetime, timezone
 from streamlit_js_eval import streamlit_js_eval
@@ -1622,6 +1623,57 @@ def upload_arquivo(arquivo, pasta):
     return nome_unico, url
 
 
+
+def mostrar_video_streaming(url):
+    """Reproduz MP4 comum ou streaming HLS (.m3u8)."""
+    url = str(url or "").strip()
+
+    if not url:
+        st.warning("Este vídeo ainda não possui um endereço válido.")
+        return
+
+    if ".m3u8" not in url.lower():
+        st.video(url)
+        return
+
+    player_id = f"hls_{uuid.uuid4().hex}"
+    url_js = json.dumps(url)
+
+    components.html(
+        f"""
+        <div style="width:100%;background:#000;border-radius:16px;overflow:hidden;">
+            <video
+                id="{player_id}"
+                controls
+                playsinline
+                style="width:100%;height:auto;display:block;background:#000;"
+            ></video>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+        <script>
+            const video = document.getElementById("{player_id}");
+            const src = {url_js};
+
+            if (video.canPlayType("application/vnd.apple.mpegurl")) {{
+                video.src = src;
+            }} else if (window.Hls && Hls.isSupported()) {{
+                const hls = new Hls();
+                hls.loadSource(src);
+                hls.attachMedia(video);
+            }} else {{
+                video.outerHTML =
+                    '<div style="padding:16px;color:white;background:#2b123f;">' +
+                    'Este navegador não conseguiu abrir o streaming HLS.' +
+                    '</div>';
+            }}
+        </script>
+        """,
+        height=520,
+        scrolling=False,
+    )
+
+
 def excluir_video(item):
     try:
         caminhos = []
@@ -1771,7 +1823,7 @@ def mostrar_card(item, contexto, em_minha_lista=False, compacto=False):
             alternar_favorito(item)
 
     if st.session_state.get(f"aberto_{contexto}_{item['id']}", False):
-        st.video(item["video_url"])
+        mostrar_video_streaming(item["video_url"])
 
 
 def mostrar_card_horizontal(item, contexto, novo=False):
@@ -1838,7 +1890,7 @@ def mostrar_card_horizontal(item, contexto, novo=False):
             alternar_favorito(item)
 
     if st.session_state.get(chave, False):
-        st.video(item["video_url"])
+        mostrar_video_streaming(item["video_url"])
 
 
 def mostrar_fileira_premium(titulo, itens, contexto, limite=12, marcar_novo=False):
@@ -1940,7 +1992,7 @@ def mostrar_card_catalogo(item, contexto, novo=False):
             alternar_favorito(item)
 
     if st.session_state.get(chave, False):
-        st.video(item["video_url"])
+        mostrar_video_streaming(item["video_url"])
 
 
 def mostrar_fileira_catalogo(titulo, itens, contexto, limite=12, marcar_novo=False):
@@ -2709,27 +2761,72 @@ elif menu == "📤 Enviar vídeo":
             key="capa_upload"
         )
 
-        video = st.file_uploader(
-            "Escolha um vídeo da galeria",
-            type=["mp4", "mov", "m4v"],
-            key="video_upload",
-            max_upload_size=500,
-            help="Você pode enviar vídeos de até 500 MB."
+        modo_video = st.radio(
+            "Como deseja adicionar o vídeo?",
+            [
+                "📁 Arquivo até 500 MB",
+                "🌐 Vídeo grande por link / streaming",
+            ],
+            help=(
+                "Para filmes grandes, use um link direto de vídeo MP4 "
+                "ou um link HLS terminado em .m3u8."
+            ),
         )
+
+        video = None
+        video_url_grande = ""
+
+        if modo_video == "📁 Arquivo até 500 MB":
+            video = st.file_uploader(
+                "Escolha um vídeo da galeria",
+                type=["mp4", "mov", "m4v"],
+                key="video_upload",
+                max_upload_size=500,
+                help="Você pode enviar vídeos de até 500 MB por esta opção."
+            )
+
+            if video is not None:
+                st.write(
+                    f"⭐ Vídeo selecionado: **{video.size / (1024 * 1024):.1f} MB**"
+                )
+
+        else:
+            st.info(
+                "🎞️ Para filmes grandes, cole o endereço direto do vídeo. "
+                "Pode ser um MP4 hospedado para streaming ou um link HLS (.m3u8). "
+                "O arquivo não passa pelo servidor do app, então pode ter vários GB."
+            )
+
+            video_url_grande = st.text_input(
+                "Link do vídeo grande",
+                placeholder="https://.../filme.mp4 ou https://.../playlist.m3u8",
+                key="video_url_grande",
+            )
 
         if capa is not None:
             st.image(capa, caption="✨ Prévia da capa", use_container_width=True)
 
-        if video is not None:
-            st.write(f"⭐ Vídeo selecionado: **{video.size / (1024 * 1024):.1f} MB**")
-
         if st.button("💾 Salvar permanentemente"):
-            if video is None:
+            usando_arquivo = modo_video == "📁 Arquivo até 500 MB"
+
+            if usando_arquivo and video is None:
                 st.warning("Escolha um vídeo primeiro.")
+
+            elif (not usando_arquivo) and (
+                not video_url_grande.strip().lower().startswith(("http://", "https://"))
+            ):
+                st.warning("Cole um link válido começando com http:// ou https://.")
+
             else:
                 with st.spinner("✨ Enviando e salvando..."):
                     try:
-                        video_path, video_url = upload_arquivo(video, "videos")
+                        if usando_arquivo:
+                            video_path, video_url = upload_arquivo(video, "videos")
+                            nome_padrao = video.name
+                        else:
+                            video_path = None
+                            video_url = video_url_grande.strip()
+                            nome_padrao = "Vídeo grande"
 
                         capa_path = None
                         capa_url = None
@@ -2738,7 +2835,7 @@ elif menu == "📤 Enviar vídeo":
                             capa_path, capa_url = upload_arquivo(capa, "capas")
 
                         supabase.table("videos").insert({
-                            "nome": nome.strip() if nome.strip() else video.name,
+                            "nome": nome.strip() if nome.strip() else nome_padrao,
                             "categoria": categoria_para_salvar(categoria, acesso),
                             "video_url": video_url,
                             "video_path": video_path,
@@ -2748,6 +2845,11 @@ elif menu == "📤 Enviar vídeo":
                         }).execute()
 
                         st.success("✅ Vídeo salvo permanentemente!")
+                        if not usando_arquivo:
+                            st.success(
+                                "🎬 Modo de vídeo grande ativado: "
+                                "o app reproduzirá o conteúdo direto do serviço de streaming."
+                            )
                         st.balloons()
                     except Exception as e:
                         st.error(f"Não consegui salvar o vídeo: {e}")
