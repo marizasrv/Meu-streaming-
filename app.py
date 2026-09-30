@@ -4162,9 +4162,9 @@ elif menu == "🎮 Jogos":
         pares = st.session_state["memoria_pares"]
         erro_pendente = st.session_state["memoria_erro_pendente"]
 
-        st.info(
-            f"🏆 Pares: {len(pares) // 2}/{quantidade_pares}  •  "
-            f"🎯 Tentativas: {st.session_state['memoria_tentativas']}"
+        st.markdown(
+            f"**🏆 {len(pares) // 2}/{quantidade_pares} pares**  ·  "
+            f"🎯 {st.session_state['memoria_tentativas']} tentativas"
         )
 
         if faixa in ["4–5 anos", "6–7 anos"]:
@@ -4305,14 +4305,13 @@ elif menu == "🎮 Jogos":
             )
             == len(cartas)
         ):
-            st.success(
-                "🎉 Parabéns! Você encontrou "
-                f"todos os {quantidade_pares} pares!"
+            st.markdown(
+                f"### 🎉 Parabéns! Você encontrou todos os {quantidade_pares} pares!"
             )
             st.balloons()
 
         if st.button(
-            "🎲 Novo jogo da memória",
+            "🎲 Novo jogo",
             key="memoria_novo_jogo",
             use_container_width=True,
         ):
