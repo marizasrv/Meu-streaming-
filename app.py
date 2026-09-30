@@ -784,13 +784,24 @@ section[data-testid="stSidebar"] .status-plano {
 }
 
 
-/* Jogo da memória */
+/* Jogo da memória — cartas maiores e desenhos mais visíveis */
 [class*="st-key-memoria_carta_"] button {
-    min-height: 72px !important;
-    font-size: 2rem !important;
-    border-radius: 16px !important;
+    min-height: 104px !important;
+    font-size: 3rem !important;
+    border-radius: 18px !important;
     border: 2px solid #8b5cf6 !important;
     font-weight: 800 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0.25rem !important;
+}
+[class*="st-key-memoria_carta_"] button p,
+[class*="st-key-memoria_carta_"] button span,
+[class*="st-key-memoria_carta_"] button [data-testid="stMarkdownContainer"] p {
+    font-size: 3rem !important;
+    line-height: 1 !important;
+    margin: 0 !important;
 }
 [class*="st-key-memoria_novo_jogo"] button,
 [class*="st-key-memoria_continuar"] button {
@@ -844,10 +855,21 @@ div[data-testid="stDownloadButton"] button span {
     [class*="st-key-memoria_carta_"] button {
         width: 100% !important;
         min-width: 0 !important;
-        min-height: 64px !important;
-        padding: 0.35rem 0.25rem !important;
-        font-size: 1.75rem !important;
-        border-radius: 14px !important;
+        min-height: 92px !important;
+        padding: 0.20rem 0.10rem !important;
+        font-size: 2.65rem !important;
+        border-radius: 16px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    [class*="st-key-memoria_carta_"] button p,
+    [class*="st-key-memoria_carta_"] button span,
+    [class*="st-key-memoria_carta_"] button [data-testid="stMarkdownContainer"] p {
+        font-size: 2.65rem !important;
+        line-height: 1 !important;
+        margin: 0 !important;
     }
 
     [class*="st-key-memoria_carta_"] + div[data-testid="stCaptionContainer"] {
@@ -4146,15 +4168,15 @@ elif menu == "🎮 Jogos":
         )
 
         if faixa in ["4–5 anos", "6–7 anos"]:
-            colunas_memoria = 3
+            colunas_memoria = 2
         else:
-            colunas_memoria = 4
+            colunas_memoria = 3
 
         for linha in range(0, len(cartas), colunas_memoria):
             cols = st.columns(
                 colunas_memoria,
                 gap="small",
-                wrap=True,
+                wrap=False,
             )
 
             for posicao, indice in enumerate(
