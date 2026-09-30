@@ -4211,9 +4211,17 @@ elif menu == "🎮 Jogos":
                     )
 
                     if esta_aberta:
-                        st.caption(carta["nome"])
+                        st.caption(
+                            carta["nome"],
+                            text_alignment="center",
+                            width="stretch",
+                        )
                     else:
-                        st.caption("Carta")
+                        st.caption(
+                            "Carta",
+                            text_alignment="center",
+                            width="stretch",
+                        )
 
                     if (
                         clicou
