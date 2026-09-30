@@ -2923,33 +2923,21 @@ def mostrar_card_tv(item, contexto):
     if este_video_aberto:
         reproduzir_video_url(item.get("video_url"))
 
-        # Navegadores normalmente só permitem tela cheia após um clique direto.
-        # Por isso, mostramos um botão próprio logo abaixo do player.
-        if st.button(
-            "⛶ Abrir em tela cheia",
-            key=f"tv_tela_cheia_{contexto}_{item['id']}",
-            width="stretch",
-        ):
-            streamlit_js_eval(
-                js_expressions="""
-                (() => {
-                    const videos = Array.from(document.querySelectorAll('video'));
-                    const video = videos[videos.length - 1];
-                    if (!video) return false;
-                    try { video.play(); } catch (e) {}
-                    if (video.requestFullscreen) {
-                        video.requestFullscreen();
-                    } else if (video.webkitEnterFullscreen) {
-                        video.webkitEnterFullscreen();
-                    } else if (video.webkitRequestFullscreen) {
-                        video.webkitRequestFullscreen();
-                    }
-                    return true;
-                })()
-                """,
-                want_output=False,
-                key=f"fullscreen_tv_{contexto}_{item['id']}",
+        # O navegador bloqueia tela cheia automática após um rerun do Streamlit.
+        # O botão abaixo abre o vídeo diretamente em uma nova tela/aba, onde
+        # o controle nativo de tela cheia funciona de forma confiável.
+        url_direta = str(item.get("video_url") or "").strip()
+        if "filesamples.com/samples/video/mp4/sample_640x360.mp4" in url_direta.lower():
+            url_direta = "https://storage.googleapis.com/cloud-samples-data/video/animals.mp4"
+
+        if url_direta:
+            st.link_button(
+                "⛶ Abrir vídeo em tela maior",
+                url_direta,
+                width="stretch",
             )
+        else:
+            st.caption("Este vídeo está sem link direto para abrir em tela maior.")
 
 
 # Aplica navegação pendente ANTES de criar o st.radio.
