@@ -3064,6 +3064,7 @@ menu = st.sidebar.radio(
         "🧸 Infantil",
         "🎬 Filmes",
         "📺 Séries",
+        "🌙 Histórias da Luna",
         "🎬 Criar vídeo com IA",
         "🎮 Jogos",
         "📚 Atividades escolares",
@@ -3227,6 +3228,123 @@ if menu == "🏠 Início":
             "home_series",
             limite=12,
         )
+
+elif menu == "🌙 Histórias da Luna":
+    st.subheader("🌙 Histórias da Luna")
+    st.caption(
+        "Leia as aventuras da Luna por capítulos. Novas histórias podem ser adicionadas depois."
+    )
+
+    historias_luna = [
+        {
+            "titulo": "Luna e o Livro Mágico",
+            "capitulos": [
+                (
+                    "Capítulo 1 · O livro misterioso",
+                    "Luna encontrou um antigo livro brilhante escondido em casa. "
+                    "Quando abriu a primeira página, letras douradas começaram a se mover "
+                    "e uma luz suave envolveu Luna e seu coelhinho."
+                ),
+                (
+                    "Capítulo 2 · A floresta encantada",
+                    "Em um instante, Luna e o coelhinho foram transportados para uma floresta "
+                    "cheia de árvores luminosas, flores mágicas e caminhos que pareciam mudar de lugar."
+                ),
+                (
+                    "Capítulo 3 · O castelo da princesa",
+                    "Seguindo um caminho de estrelas, Luna chegou a um grande castelo. "
+                    "Lá conheceu uma jovem princesa que guardava um segredo sobre o livro mágico."
+                ),
+            ],
+        },
+        {
+            "titulo": "Luna e o Espelho Encantado",
+            "capitulos": [
+                (
+                    "Capítulo 1 · O reflexo diferente",
+                    "No quarto, Luna percebeu que seu reflexo no espelho não repetia exatamente seus movimentos. "
+                    "O coelhinho ficou atento enquanto pequenas partículas roxas surgiam ao redor da moldura."
+                ),
+                (
+                    "Capítulo 2 · A varinha de luz",
+                    "Luna ergueu sua varinha brilhante diante do espelho. "
+                    "A luz aumentou e revelou uma passagem escondida atrás do reflexo."
+                ),
+                (
+                    "Capítulo 3 · O segredo do outro lado",
+                    "Ao atravessar o espelho, Luna descobriu um lugar silencioso e misterioso. "
+                    "Para voltar para casa, ela precisaria encontrar a verdadeira origem da magia."
+                ),
+            ],
+        },
+        {
+            "titulo": "Luna e o Segredo do Castelo",
+            "capitulos": [
+                (
+                    "Capítulo 1 · A porta fechada",
+                    "Luna voltou ao castelo e encontrou uma porta que nunca havia visto antes. "
+                    "Nenhuma chave comum conseguia abri-la."
+                ),
+                (
+                    "Capítulo 2 · A chave dourada",
+                    "Com a ajuda do coelhinho e da princesa, Luna encontrou uma pequena chave dourada "
+                    "escondida em um jardim iluminado pela lua."
+                ),
+                (
+                    "Capítulo 3 · A sala das estrelas",
+                    "Atrás da porta havia uma sala cheia de estrelas suspensas no ar. "
+                    "No centro, Luna encontrou uma nova página para seu livro mágico."
+                ),
+            ],
+        },
+    ]
+
+    for indice_historia, historia in enumerate(historias_luna):
+        with st.expander(
+            f"✨ {historia['titulo']} · {len(historia['capitulos'])} capítulos",
+            expanded=(indice_historia == 0),
+        ):
+            for indice_capitulo, (titulo_capitulo, texto_capitulo) in enumerate(
+                historia["capitulos"],
+                start=1,
+            ):
+                st.markdown(f"### {titulo_capitulo}")
+                st.write(texto_capitulo)
+
+                col_ler, col_video = st.columns([1, 1], gap="small")
+                with col_ler:
+                    st.button(
+                        "📖 Ler capítulo",
+                        key=f"luna_ler_{indice_historia}_{indice_capitulo}",
+                        disabled=True,
+                        width="stretch",
+                        help="O capítulo já está aberto para leitura nesta tela.",
+                    )
+
+                with col_video:
+                    videos_luna = [
+                        v for v in videos_gratis(videos)
+                        if "luna" in str(v.get("nome") or "").lower()
+                    ]
+                    if videos_luna:
+                        st.button(
+                            "🎬 Ver vídeos da Luna",
+                            key=f"luna_video_{indice_historia}_{indice_capitulo}",
+                            on_click=mudar_menu,
+                            args=("🧸 Infantil",),
+                            width="stretch",
+                        )
+                    else:
+                        st.button(
+                            "🎬 Vídeo em breve",
+                            key=f"luna_video_off_{indice_historia}_{indice_capitulo}",
+                            disabled=True,
+                            width="stretch",
+                        )
+
+                if indice_capitulo < len(historia["capitulos"]):
+                    st.markdown("---")
+
 
 elif menu == "📺 Modo TV":
     st.markdown("## 📺 Modo TV")
