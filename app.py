@@ -5272,11 +5272,12 @@ elif menu == "📚 Atividades escolares":
             atividade_baixar,
         )
 
+        st.caption("💜 PDF colorido com cabeçalho, espaço para responder e botão para voltar ao site.")
         st.download_button(
             label="Baixar folha em PDF",
             icon="📄",
             data=pdf_atividade,
-            file_name=f"{nome_arquivo_base}.pdf",
+            file_name=f"{nome_arquivo_base}_folha_colorida.pdf",
             mime="application/pdf",
             width="stretch",
             key=f"baixar_pdf_atividade_{idade}_{materia}",
@@ -5289,7 +5290,7 @@ elif menu == "📚 Atividades escolares":
         with st.expander("Ver detalhe do PDF"):
             st.code(str(e))
 
-    with st.expander("Baixar versão simples em texto"):
+    with st.expander("Opcional: baixar somente o texto da atividade"):
         st.download_button(
             label="Baixar atividade em texto",
             icon="⬇️",
