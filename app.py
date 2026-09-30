@@ -5120,7 +5120,7 @@ elif menu == "🎮 Jogos":
 
 elif menu == "📚 Atividades escolares":
     st.markdown("## 📚 Atividades escolares")
-    st.caption("Atividades educativas por idade, com correção na hora e avanço para a próxima.")
+    st.caption("Atividades educativas por idade, com correção na hora e avanço para novas fases.")
 
     idade = st.selectbox(
         "🎒 Faixa etária",
@@ -5144,8 +5144,10 @@ elif menu == "📚 Atividades escolares":
     chave_contexto = f"{idade}|{materia}"
     if st.session_state.get("atividade_contexto") != chave_contexto:
         st.session_state["atividade_contexto"] = chave_contexto
+        st.session_state["atividade_fase"] = 0
         st.session_state["atividade_etapa"] = 0
 
+    fase_atividade = st.session_state.get("atividade_fase", 0)
     etapa_atividade = st.session_state.get("atividade_etapa", 0)
 
     bancos_atividades = {
@@ -5259,145 +5261,325 @@ elif menu == "📚 Atividades escolares":
         ],
     }
 
-    atividades = bancos_atividades[(idade, materia)]
+    def criar_fase_extra(idade_atual, materia_atual, fase):
+        # Fases 2 e 3 sempre trazem exercícios novos.
+        if materia_atual == "Alfabetização":
+            if idade_atual == "4–5 anos":
+                palavras = {
+                    2: [("S _ L", "O", "SOL"), ("P _ T O", "A", "PATO"), ("M _ S A", "E", "MESA")],
+                    3: [("L _ A", "U", "LUA"), ("C _ S A", "A", "CASA"), ("F _ R", "L", "FLOR")],
+                }[fase]
+                return [
+                    (f"Complete a palavra: **{lacuna}**", "texto", "Digite a letra que falta:", letra,
+                     f"ALFABETIZAÇÃO {idade_atual}\nComplete: {lacuna}\nEscreva {palavra}.")
+                    for lacuna, letra, palavra in palavras
+                ]
+            elif idade_atual == "6–7 anos":
+                palavras = {
+                    2: [("E S T R _ L A", "E", "ESTRELA"), ("P R I N C _ S A", "E", "PRINCESA"), ("J A R D _ M", "I", "JARDIM")],
+                    3: [("M _ G I A", "A", "MAGIA"), ("C R I S T _ L", "A", "CRISTAL"), ("A V E N T U R _", "A", "AVENTURA")],
+                }[fase]
+                return [
+                    (f"Complete a palavra: **{lacuna}**", "texto", "Digite a letra que falta:", letra,
+                     f"ALFABETIZAÇÃO {idade_atual}\nComplete: {lacuna}\nEscreva {palavra}.")
+                    for lacuna, letra, palavra in palavras
+                ]
+            else:
+                grupos = {
+                    2: [("mapa", "chave", "torre"), ("jardim", "coelhinho", "lua"), ("castelo", "porta", "mistério")],
+                    3: [("aventura", "amizade", "coragem"), ("floresta", "segredo", "estrela"), ("princesa", "livro", "portal")],
+                }[fase]
+                return [
+                    (f"Escreva uma frase usando **{a}**, **{b}** e **{d}**.", "frase", "Sua frase:", 6 if fase == 2 else 7,
+                     f"ALFABETIZAÇÃO {idade_atual}\nEscreva uma frase usando: {a}, {b} e {d}.")
+                    for a, b, d in grupos
+                ]
 
-    if etapa_atividade >= len(atividades):
-        st.progress(1.0, text="Todas as atividades concluídas!", width="stretch")
-        st.success("🏆 Parabéns! Você terminou todas as atividades desta matéria!")
+        if materia_atual == "Leitura":
+            banco = {
+                ("4–5 anos", 2): [
+                    ("Luna encontrou uma flor roxa.", "O que Luna encontrou?", "flor"),
+                    ("O coelhinho dormiu perto da árvore.", "Quem dormiu?", "coelh"),
+                    ("A estrela estava no céu.", "Onde estava a estrela?", "céu"),
+                ],
+                ("4–5 anos", 3): [
+                    ("Luna abriu uma porta azul.", "Qual era a cor da porta?", "azul"),
+                    ("A princesa segurava um livro.", "O que a princesa segurava?", "livro"),
+                    ("O coelho comeu uma cenoura.", "O que o coelho comeu?", "cenoura"),
+                ],
+                ("6–7 anos", 2): [
+                    ("Luna seguiu pegadas brilhantes até o jardim.", "Até onde Luna seguiu as pegadas?", "jardim"),
+                    ("A princesa abriu a janela para ver a lua.", "O que a princesa abriu?", "janela"),
+                    ("O coelhinho encontrou uma chave atrás do livro.", "O que ele encontrou?", "chave"),
+                ],
+                ("6–7 anos", 3): [
+                    ("Luna encontrou um cristal perto da torre.", "Onde estava o cristal?", "torre"),
+                    ("Uma ponte ligava a floresta ao castelo.", "O que a ponte ligava ao castelo?", "floresta"),
+                    ("A princesa entregou um mapa ao coelhinho.", "O que a princesa entregou?", "mapa"),
+                ],
+                ("8–9 anos", 2): [
+                    ("Luna ouviu um sino vindo da torre e decidiu investigar.", "De onde vinha o sino?", "torre"),
+                    ("O mapa indicava uma passagem escondida atrás da biblioteca.", "Onde ficava a passagem?", "biblioteca"),
+                    ("O coelhinho encontrou um cristal azul no jardim.", "Qual era a cor do cristal?", "azul"),
+                ],
+                ("8–9 anos", 3): [
+                    ("As estrelas formavam uma seta apontando para a ponte.", "O que as estrelas formavam?", "seta"),
+                    ("A chave dourada abria apenas uma porta secreta.", "Que tipo de porta a chave abria?", "secreta"),
+                    ("Luna e o coelhinho atravessaram a ponte antes da chuva.", "O que eles atravessaram?", "ponte"),
+                ],
+            }
+            return [
+                (texto, "leitura", pergunta, resposta,
+                 f"LEITURA {idade_atual}\n{texto}\nPergunta: {pergunta}")
+                for texto, pergunta, resposta in banco[(idade_atual, fase)]
+            ]
+
+        if materia_atual == "Matemática":
+            banco = {
+                ("4–5 anos", 2): [("🍎 🍎 + 🍎 = ?", 3), ("⭐ ⭐ ⭐ + ⭐ = ?", 4), ("🐰 🐰 🐰 - 🐰 = ?", 2)],
+                ("4–5 anos", 3): [("🌙 🌙 + 🌙 🌙 = ?", 4), ("⭐ ⭐ ⭐ ⭐ ⭐ - ⭐ ⭐ = ?", 3), ("🐰 + 🐰 + 🐰 = ?", 3)],
+                ("6–7 anos", 2): [("8 + 5 = ?", 13), ("15 - 6 = ?", 9), ("4 grupos de 3 estrelas = ?", 12)],
+                ("6–7 anos", 3): [("18 dividido por 3 = ?", 6), ("9 + 8 = ?", 17), ("20 - 7 = ?", 13)],
+                ("8–9 anos", 2): [("6 × 7 = ?", 42), ("48 dividido por 6 = ?", 8), ("35 + 27 = ?", 62)],
+                ("8–9 anos", 3): [("72 dividido por 8 = ?", 9), ("9 × 6 = ?", 54), ("100 - 38 = ?", 62)],
+            }
+            return [
+                (pergunta, "numero", "Sua resposta:", resposta,
+                 f"MATEMÁTICA {idade_atual}\n{pergunta}")
+                for pergunta, resposta in banco[(idade_atual, fase)]
+            ]
+
+        if materia_atual == "Cores e formas":
+            banco = {
+                2: [
+                    ("Qual forma não tem lados?", ["Círculo", "Quadrado", "Triângulo"], "Círculo"),
+                    ("Misturar azul e amarelo forma qual cor?", ["Verde", "Roxo", "Laranja"], "Verde"),
+                    ("Qual forma tem 5 lados?", ["Pentágono", "Triângulo", "Quadrado"], "Pentágono"),
+                ],
+                3: [
+                    ("Qual forma tem 6 lados?", ["Hexágono", "Pentágono", "Quadrado"], "Hexágono"),
+                    ("Misturar vermelho e azul forma qual cor?", ["Roxo", "Verde", "Laranja"], "Roxo"),
+                    ("Qual forma tem 8 lados?", ["Octógono", "Hexágono", "Triângulo"], "Octógono"),
+                ],
+            }
+            return [
+                (pergunta, "opcao", "Escolha:", (opcoes, correta),
+                 f"CORES E FORMAS {idade_atual}\n{pergunta}")
+                for pergunta, opcoes, correta in banco[fase]
+            ]
+
+        if materia_atual == "Animais":
+            banco = {
+                2: [
+                    ("Qual animal vive na água?", ["Peixe", "Coelho", "Gato"], "Peixe"),
+                    ("Qual animal tem penas?", ["Pássaro", "Cachorro", "Coelho"], "Pássaro"),
+                    ("Qual animal põe ovos?", ["Galinha", "Cachorro", "Gato"], "Galinha"),
+                ],
+                3: [
+                    ("Qual animal tem casco?", ["Tartaruga", "Gato", "Coelho"], "Tartaruga"),
+                    ("Qual animal respira por brânquias?", ["Peixe", "Cachorro", "Pássaro"], "Peixe"),
+                    ("Qual animal passa por metamorfose?", ["Borboleta", "Gato", "Coelho"], "Borboleta"),
+                ],
+            }
+            return [
+                (pergunta, "opcao", "Escolha:", (opcoes, correta),
+                 f"ANIMAIS {idade_atual}\n{pergunta}")
+                for pergunta, opcoes, correta in banco[fase]
+            ]
+
+        # Atividade para colorir
+        temas = {
+            2: [
+                "Desenhe uma ponte entre a floresta e o castelo.",
+                "Desenhe Luna seguindo pegadas mágicas.",
+                "Desenhe a princesa na janela da torre.",
+            ],
+            3: [
+                "Desenhe um mapa com três caminhos.",
+                "Desenhe um jardim secreto do castelo.",
+                "Desenhe Luna e o coelhinho sob um céu estrelado.",
+            ],
+        }
+        return [
+            (f"🎨 {tema}", "criativa", "", None,
+             f"ATIVIDADE PARA COLORIR {idade_atual}\n{tema}")
+            for tema in temas[fase]
+        ]
+
+    fase1 = bancos_atividades[(idade, materia)]
+    fase2 = criar_fase_extra(idade, materia, 2)
+    fase3 = criar_fase_extra(idade, materia, 3)
+    fases_atividades = [fase1, fase2, fase3]
+
+    if fase_atividade >= len(fases_atividades):
+        st.progress(1.0, text="Todas as fases concluídas!", width="stretch")
+        st.success("🏆 Parabéns! Você terminou todas as fases desta matéria!")
         st.balloons()
+
         if st.button(
-            "🔄 Fazer atividades novamente",
-            key=f"reiniciar_atividades_{idade}_{materia}",
+            "🔄 Fazer todas as fases novamente",
+            key=f"reiniciar_atividades_total_{idade}_{materia}",
             width="stretch",
         ):
+            st.session_state["atividade_fase"] = 0
             st.session_state["atividade_etapa"] = 0
             st.rerun()
     else:
-        enunciado, tipo, rotulo, esperado, atividade_baixar = atividades[etapa_atividade]
-
-        st.markdown("### ✏️ Atividade do dia")
-        st.progress(
-            etapa_atividade / len(atividades),
-            text=f"Atividade {etapa_atividade + 1} de {len(atividades)}",
-            width="stretch",
+        atividades = fases_atividades[fase_atividade]
+        dificuldade = ["🌱 Fácil", "⭐ Intermediária", "🔥 Desafio"][fase_atividade]
+        st.markdown(
+            f"### 📚 Fase {fase_atividade + 1} de 3 · {dificuldade}"
         )
-        st.write(enunciado)
 
-        resposta_correta = None
-
-        if tipo == "texto":
-            resposta = st.text_input(
-                rotulo,
-                key=f"resp_atividade_{idade}_{materia}_{etapa_atividade}",
-            ).strip().upper()
-            resposta_correta = resposta == str(esperado).upper()
-
-        elif tipo == "frase":
-            resposta = st.text_area(
-                rotulo,
-                key=f"resp_atividade_{idade}_{materia}_{etapa_atividade}",
+        if etapa_atividade >= len(atividades):
+            st.progress(
+                1.0,
+                text=f"Fase {fase_atividade + 1} concluída!",
+                width="stretch",
             )
-            resposta_correta = len(resposta.strip().split()) >= int(esperado)
+            st.success(f"🎉 Você concluiu a Fase {fase_atividade + 1}!")
+            st.balloons()
 
-        elif tipo == "leitura":
-            st.info(enunciado)
-            st.write(f"**Pergunta:** {rotulo}")
-            resposta = st.text_input(
-                "Resposta:",
-                key=f"resp_atividade_{idade}_{materia}_{etapa_atividade}",
-            )
-            resposta_correta = str(esperado).lower() in resposta.lower()
+            if fase_atividade < 2:
+                st.markdown(
+                    f"<div class='fase-desbloqueada'>🔓 Fase {fase_atividade + 2} desbloqueada!</div>",
+                    unsafe_allow_html=True,
+                )
 
-        elif tipo == "numero":
-            resposta = st.number_input(
-                rotulo,
-                min_value=0,
-                max_value=500,
-                step=1,
-                key=f"resp_atividade_{idade}_{materia}_{etapa_atividade}",
-            )
-            resposta_correta = int(resposta) == int(esperado)
-
-        elif tipo == "opcao":
-            opcoes, correta = esperado
-            resposta = st.radio(
-                rotulo,
-                opcoes,
-                key=f"resp_atividade_{idade}_{materia}_{etapa_atividade}",
-            )
-            resposta_correta = resposta == correta
-
-        if tipo != "criativa":
             if st.button(
-                "✅ Conferir atividade",
-                key=f"conferir_atividade_{idade}_{materia}_{etapa_atividade}",
+                "➡️ Ir para a próxima fase",
+                key=f"proxima_fase_atividade_{idade}_{materia}_{fase_atividade}",
                 width="stretch",
             ):
-                if resposta_correta:
-                    st.success("🎉 Muito bem! Resposta correta!")
+                st.session_state["atividade_fase"] = fase_atividade + 1
+                st.session_state["atividade_etapa"] = 0
+                st.rerun()
+        else:
+            enunciado, tipo, rotulo, esperado, atividade_baixar = atividades[etapa_atividade]
+
+            st.markdown("### ✏️ Atividade do dia")
+            st.progress(
+                etapa_atividade / len(atividades),
+                text=f"Fase {fase_atividade + 1} · Atividade {etapa_atividade + 1} de {len(atividades)}",
+                width="stretch",
+            )
+            st.write(enunciado)
+
+            resposta_correta = None
+
+            if tipo == "texto":
+                resposta = st.text_input(
+                    rotulo,
+                    key=f"resp_atividade_{idade}_{materia}_{fase_atividade}_{etapa_atividade}",
+                ).strip().upper()
+                resposta_correta = resposta == str(esperado).upper()
+
+            elif tipo == "frase":
+                resposta = st.text_area(
+                    rotulo,
+                    key=f"resp_atividade_{idade}_{materia}_{fase_atividade}_{etapa_atividade}",
+                )
+                resposta_correta = len(resposta.strip().split()) >= int(esperado)
+
+            elif tipo == "leitura":
+                st.info(enunciado)
+                st.write(f"**Pergunta:** {rotulo}")
+                resposta = st.text_input(
+                    "Resposta:",
+                    key=f"resp_atividade_{idade}_{materia}_{fase_atividade}_{etapa_atividade}",
+                )
+                resposta_correta = str(esperado).lower() in resposta.lower()
+
+            elif tipo == "numero":
+                resposta = st.number_input(
+                    rotulo,
+                    min_value=0,
+                    max_value=500,
+                    step=1,
+                    key=f"resp_atividade_{idade}_{materia}_{fase_atividade}_{etapa_atividade}",
+                )
+                resposta_correta = int(resposta) == int(esperado)
+
+            elif tipo == "opcao":
+                opcoes, correta = esperado
+                resposta = st.radio(
+                    rotulo,
+                    opcoes,
+                    key=f"resp_atividade_{idade}_{materia}_{fase_atividade}_{etapa_atividade}",
+                )
+                resposta_correta = resposta == correta
+
+            if tipo != "criativa":
+                if st.button(
+                    "✅ Conferir atividade",
+                    key=f"conferir_atividade_{idade}_{materia}_{fase_atividade}_{etapa_atividade}",
+                    width="stretch",
+                ):
+                    if resposta_correta:
+                        st.success("🎉 Muito bem! Resposta correta!")
+                        st.balloons()
+                        time.sleep(1.0)
+                        st.session_state["atividade_etapa"] = etapa_atividade + 1
+                        st.rerun()
+                    else:
+                        st.warning("💜 Quase! Tente novamente.")
+            else:
+                if st.button(
+                    "✅ Terminei esta atividade",
+                    key=f"terminar_atividade_{idade}_{materia}_{fase_atividade}_{etapa_atividade}",
+                    width="stretch",
+                ):
+                    st.success("🎨 Muito bem! Vamos para a próxima atividade.")
                     st.balloons()
-                    time.sleep(1.0)
+                    time.sleep(0.8)
                     st.session_state["atividade_etapa"] = etapa_atividade + 1
                     st.rerun()
-                else:
-                    st.warning("💜 Quase! Tente novamente.")
-        else:
-            if st.button(
-                "✅ Terminei esta atividade",
-                key=f"terminar_atividade_{idade}_{materia}_{etapa_atividade}",
-                width="stretch",
-            ):
-                st.success("🎨 Muito bem! Vamos para a próxima atividade.")
-                st.balloons()
-                time.sleep(0.8)
-                st.session_state["atividade_etapa"] = etapa_atividade + 1
-                st.rerun()
 
-        nome_arquivo_base = (
-            f"atividade_{materia.lower().replace(' ', '_')}_"
-            f"{idade.replace('–','-')}_"
-            f"{etapa_atividade + 1}"
-        )
-
-        try:
-            pdf_atividade = criar_pdf_atividade(
-                idade,
-                materia,
-                atividade_baixar,
+            nome_arquivo_base = (
+                f"atividade_{materia.lower().replace(' ', '_')}_"
+                f"{idade.replace('–','-')}_fase{fase_atividade + 1}_"
+                f"{etapa_atividade + 1}"
             )
 
-            st.caption("💜 PDF colorido com cabeçalho, espaço para responder e botão para voltar ao site.")
-            st.download_button(
-                label="Baixar folha em PDF",
-                icon="📄",
-                data=pdf_atividade,
-                file_name=f"{nome_arquivo_base}_folha_colorida.pdf",
-                mime="application/pdf",
-                width="stretch",
-                key=f"baixar_pdf_atividade_{idade}_{materia}_{etapa_atividade}",
-            )
-        except Exception as e:
-            st.warning(
-                "Não consegui preparar o PDF agora. "
-                "O arquivo de texto continua disponível abaixo."
-            )
-            with st.expander("Ver detalhe do PDF"):
-                st.code(str(e))
+            try:
+                pdf_atividade = criar_pdf_atividade(
+                    idade,
+                    materia,
+                    atividade_baixar,
+                )
 
-        with st.expander("Opcional: baixar somente o texto da atividade"):
-            st.download_button(
-                label="Baixar atividade em texto",
-                icon="⬇️",
-                data=atividade_baixar.encode("utf-8"),
-                file_name=f"{nome_arquivo_base}.txt",
-                mime="text/plain",
-                width="stretch",
-                key=f"baixar_txt_atividade_{idade}_{materia}_{etapa_atividade}",
-            )
+                st.caption("💜 PDF colorido com cabeçalho, espaço para responder e botão para voltar ao site.")
+                st.download_button(
+                    label="Baixar folha em PDF",
+                    icon="📄",
+                    data=pdf_atividade,
+                    file_name=f"{nome_arquivo_base}_folha_colorida.pdf",
+                    mime="application/pdf",
+                    width="stretch",
+                    key=f"baixar_pdf_atividade_{idade}_{materia}_{fase_atividade}_{etapa_atividade}",
+                )
+            except Exception as e:
+                st.warning(
+                    "Não consegui preparar o PDF agora. "
+                    "O arquivo de texto continua disponível abaixo."
+                )
+                with st.expander("Ver detalhe do PDF"):
+                    st.code(str(e))
 
-        st.caption(
-            "PDF em folha A4, pronto para imprimir ou salvar no celular."
-        )
+            with st.expander("Opcional: baixar somente o texto da atividade"):
+                st.download_button(
+                    label="Baixar atividade em texto",
+                    icon="⬇️",
+                    data=atividade_baixar.encode("utf-8"),
+                    file_name=f"{nome_arquivo_base}.txt",
+                    mime="text/plain",
+                    width="stretch",
+                    key=f"baixar_txt_atividade_{idade}_{materia}_{fase_atividade}_{etapa_atividade}",
+                )
+
+            st.caption(
+                "PDF em folha A4, pronto para imprimir ou salvar no celular."
+            )
 
 
 elif menu == "🗑️ Gerenciar":
