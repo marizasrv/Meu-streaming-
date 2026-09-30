@@ -3987,29 +3987,37 @@ elif menu in ["🧸 Infantil", "🎬 Filmes", "📺 Séries"]:
 
             temporadas = series_agrupadas[nome_serie]
             for numero_temporada in sorted(temporadas):
-                st.markdown(f"### 📺 Temporada {numero_temporada}")
-
                 episodios = sorted(
                     temporadas[numero_temporada],
                     key=lambda par: par[0],
                 )
 
-                itens_temporada = []
-                for numero_episodio, item in episodios:
-                    item_exibicao = dict(item)
-                    titulo_original = str(item.get("nome") or "").strip()
-                    item_exibicao["nome"] = (
-                        f"Episódio {numero_episodio}"
-                        + (f" · {titulo_original}" if titulo_original else "")
+                # A temporada vira um menu recolhível. Ao tocar nela,
+                # aparecem somente os episódios daquela temporada.
+                with st.expander(
+                    f"📺 Temporada {numero_temporada} · {len(episodios)} episódio(s)",
+                    expanded=False,
+                ):
+                    st.caption(
+                        f"Toque em um episódio da Temporada {numero_temporada} para assistir."
                     )
-                    itens_temporada.append(item_exibicao)
 
-                mostrar_fileira_catalogo(
-                    f"Temporada {numero_temporada}",
-                    itens_temporada,
-                    f"series_{nome_serie}_{numero_temporada}",
-                    limite=50,
-                )
+                    itens_temporada = []
+                    for numero_episodio, item in episodios:
+                        item_exibicao = dict(item)
+                        titulo_original = str(item.get("nome") or "").strip()
+                        item_exibicao["nome"] = (
+                            f"Episódio {numero_episodio}"
+                            + (f" · {titulo_original}" if titulo_original else "")
+                        )
+                        itens_temporada.append(item_exibicao)
+
+                    mostrar_fileira_catalogo(
+                        "",
+                        itens_temporada,
+                        f"series_{nome_serie}_{numero_temporada}",
+                        limite=50,
+                    )
 
 
 elif menu == "🎬 Criar vídeo com IA":
