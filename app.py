@@ -855,6 +855,148 @@ div[data-testid="stDownloadButton"] button span {
     }
 }
 
+
+
+/* =========================================================
+   MODO NOTEBOOK / SMART TV — telas grandes
+   Mantém o celular como está e amplia a interface em telas maiores.
+   ========================================================= */
+@media (min-width: 1100px) {
+    .block-container {
+        max-width: 1500px !important;
+        padding-left: 2.2rem !important;
+        padding-right: 2.2rem !important;
+        padding-top: 1.2rem !important;
+    }
+
+    .hero {
+        padding: 22px 28px !important;
+        border-radius: 24px !important;
+    }
+
+    .hero .hero-title {
+        font-size: 2.45rem !important;
+        line-height: 1.08 !important;
+    }
+
+    .hero .hero-subtitle,
+    .hero .magic {
+        font-size: 1.2rem !important;
+    }
+
+    .secao-titulo-compacto {
+        font-size: 2rem !important;
+        margin-top: 0.7rem !important;
+        margin-bottom: 0.7rem !important;
+    }
+
+    .titulo-card {
+        width: 230px !important;
+        font-size: 1.18rem !important;
+        line-height: 1.24 !important;
+        -webkit-line-clamp: 2 !important;
+    }
+
+    .categoria-card {
+        font-size: 0.94rem !important;
+    }
+
+    [class*="st-key-cardacoes_"] div[data-testid="stButton"] button {
+        min-height: 46px !important;
+        padding: 0.45rem 0.7rem !important;
+        border-radius: 13px !important;
+    }
+
+    [class*="st-key-cardacoes_"] div[data-testid="stButton"] button p {
+        font-size: 0.98rem !important;
+    }
+
+    div[data-testid="stButton"] button,
+    div[data-testid="stLinkButton"] a {
+        min-height: 54px !important;
+    }
+
+    video {
+        width: 100% !important;
+        max-height: 72vh !important;
+        background: #000 !important;
+        border-radius: 18px !important;
+    }
+
+    section[data-testid="stSidebar"] div[role="radiogroup"] label {
+        min-height: 46px !important;
+        padding: 8px 10px !important;
+    }
+}
+
+/* TVs e monitores grandes: leitura confortável à distância */
+@media (min-width: 1600px) {
+    .block-container {
+        max-width: 1800px !important;
+        padding-left: 3rem !important;
+        padding-right: 3rem !important;
+    }
+
+    .hero .hero-title {
+        font-size: 3rem !important;
+    }
+
+    .hero .hero-subtitle,
+    .hero .magic {
+        font-size: 1.35rem !important;
+    }
+
+    .secao-titulo-compacto {
+        font-size: 2.35rem !important;
+    }
+
+    .titulo-card {
+        width: 270px !important;
+        font-size: 1.3rem !important;
+    }
+
+    .categoria-card {
+        font-size: 1.02rem !important;
+    }
+
+    [class*="st-key-cardacoes_"] div[data-testid="stButton"] button {
+        min-height: 52px !important;
+    }
+
+    [class*="st-key-cardacoes_"] div[data-testid="stButton"] button p {
+        font-size: 1.08rem !important;
+    }
+}
+
+/* MODO TV — leitura à distância e foco no catálogo */
+.tv-dica {
+    font-size: 1.05rem;
+    color: rgba(255,255,255,0.78);
+    margin: 0.25rem 0 1rem 0;
+}
+@media (min-width: 1100px) {
+    [class*="st-key-tv_assistir_"] button,
+    [class*="st-key-tv_fechar_"] button,
+    [class*="st-key-tv_fav_"] button {
+        min-height: 62px !important;
+        font-size: 1.15rem !important;
+    }
+}
+@media (min-width: 1600px) {
+    .tv-dica {
+        font-size: 1.28rem !important;
+    }
+    [class*="st-key-tv_assistir_"] button,
+    [class*="st-key-tv_fechar_"] button,
+    [class*="st-key-tv_fav_"] button {
+        min-height: 74px !important;
+    }
+    [class*="st-key-tv_assistir_"] button p,
+    [class*="st-key-tv_fechar_"] button p,
+    [class*="st-key-tv_fav_"] button p {
+        font-size: 1.35rem !important;
+    }
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -1979,6 +2121,55 @@ st.markdown("""
 <div class="gold-line"></div>
 """, unsafe_allow_html=True)
 
+def mostrar_card_tv(item, contexto):
+    """Card grande e simples para uso em notebook e Smart TV."""
+    if item.get("capa_url"):
+        st.image(item["capa_url"], use_container_width=True)
+
+    nome_tv = str(item.get("nome") or "Sem título")
+    st.markdown(f"### ✨ {nome_tv}")
+
+    categoria_tv = categoria_base(item)
+    if video_premium(item):
+        st.caption(f"💎 Premium • {categoria_tv}")
+    else:
+        st.caption(f"🌙 Grátis • {categoria_tv}")
+
+    chave_tv = f"tv_aberto_{contexto}_{item['id']}"
+    if chave_tv not in st.session_state:
+        st.session_state[chave_tv] = False
+
+    if not st.session_state[chave_tv]:
+        if st.button(
+            "▶ Assistir agora",
+            key=f"tv_assistir_{contexto}_{item['id']}",
+            use_container_width=True,
+        ):
+            registrar_assistido(item)
+            st.session_state[chave_tv] = True
+            st.rerun()
+    else:
+        if st.button(
+            "✖ Fechar vídeo",
+            key=f"tv_fechar_{contexto}_{item['id']}",
+            use_container_width=True,
+        ):
+            st.session_state[chave_tv] = False
+            st.rerun()
+
+    favorito_tv = bool(item.get("favorito", False))
+    texto_tv = "💖 Na Minha Lista" if favorito_tv else "🤍 Minha Lista"
+    if st.button(
+        texto_tv,
+        key=f"tv_fav_{contexto}_{item['id']}",
+        use_container_width=True,
+    ):
+        alternar_favorito(item)
+
+    if st.session_state.get(chave_tv, False):
+        st.video(item["video_url"])
+
+
 # Aplica navegação pendente ANTES de criar o st.radio.
 if "_menu_destino" in st.session_state:
     st.session_state["menu_principal"] = st.session_state.pop("_menu_destino")
@@ -1987,6 +2178,7 @@ menu = st.sidebar.radio(
     "Menu",
     [
         "🏠 Início",
+        "📺 Modo TV",
         "🔎 Buscar",
         "🆕 Novidades",
         "❤️ Minha Lista",
@@ -2161,6 +2353,52 @@ if menu == "🏠 Início":
             "home_series",
             limite=12,
         )
+
+elif menu == "📺 Modo TV":
+    st.markdown("## 📺 Modo TV")
+    st.caption(
+        "Tela simplificada com capas e botões maiores para notebook, computador e Smart TV."
+    )
+
+    # Usuário Premium ativo vê todo o catálogo. Os demais veem apenas conteúdo grátis.
+    premium_tv = (
+        st.session_state.usuario_logado
+        and st.session_state.plano_atual == "Premium"
+        and st.session_state.status_assinatura == "ativo"
+    )
+
+    catalogo_tv = list(videos) if premium_tv else videos_gratis(videos)
+
+    filtro_tv = st.selectbox(
+        "🎞️ Escolha uma categoria",
+        ["Todos", "Infantil", "Filmes", "Séries"],
+        key="filtro_modo_tv",
+    )
+
+    if filtro_tv != "Todos":
+        catalogo_tv = [
+            item for item in catalogo_tv
+            if categoria_base(item) == filtro_tv
+        ]
+
+    if not catalogo_tv:
+        st.info("Ainda não há vídeos nesta categoria.")
+    else:
+        st.markdown(
+            "<div class='tv-dica'>Use o navegador da TV em tela cheia para uma experiência melhor.</div>",
+            unsafe_allow_html=True,
+        )
+
+        # Três cards por linha em telas grandes. Em telas estreitas o Streamlit empilha as colunas.
+        for inicio in range(0, len(catalogo_tv), 3):
+            grupo = catalogo_tv[inicio:inicio + 3]
+            colunas_tv = st.columns(3, gap="large")
+
+            for indice, item in enumerate(grupo):
+                with colunas_tv[indice]:
+                    mostrar_card_tv(item, f"modo_tv_{inicio}_{indice}")
+
+            st.markdown("---")
 
 elif menu == "🔎 Buscar":
     st.subheader("🔎 Buscar vídeos")
