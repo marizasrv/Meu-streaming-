@@ -1366,6 +1366,19 @@ section[data-testid="stSidebar"] label:focus-within {
     }
 }
 
+
+/* V8 — PROGRESSO DOS JOGOS */
+@media (max-width: 640px) {
+    div[data-testid="stProgress"] {
+        margin-top: 0.20rem !important;
+        margin-bottom: 0.35rem !important;
+    }
+    div[data-testid="stProgress"] p {
+        font-size: 0.82rem !important;
+        line-height: 1.1 !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -4277,6 +4290,15 @@ elif menu == "🎮 Jogos":
             f"🎯 {st.session_state['memoria_tentativas']} tentativas"
         )
 
+        progresso_memoria = int(
+            ((len(pares) // 2) / quantidade_pares) * 100
+        )
+        st.progress(
+            progresso_memoria,
+            text=f"Progresso: {len(pares) // 2} de {quantidade_pares} pares",
+            width="stretch",
+        )
+
         if faixa in ["4–5 anos", "6–7 anos"]:
             colunas_memoria = 2
         else:
@@ -4573,6 +4595,7 @@ elif menu == "🎮 Jogos":
         etapa_palavras = st.session_state.get(chave_etapa_palavras, 0)
 
         if etapa_palavras >= len(perguntas_palavras):
+            st.progress(1.0, text="Progresso: 3 de 3 concluídas", width="stretch")
             st.success("🏆 Parabéns! Você terminou todas as palavras desta fase!")
             st.balloons()
 
@@ -4587,6 +4610,11 @@ elif menu == "🎮 Jogos":
         else:
             pergunta_atual = perguntas_palavras[etapa_palavras]
 
+            st.progress(
+                etapa_palavras / len(perguntas_palavras),
+                text=f"Progresso: {etapa_palavras} de {len(perguntas_palavras)} concluídas",
+                width="stretch",
+            )
             st.caption(
                 f"Pergunta {etapa_palavras + 1} de {len(perguntas_palavras)}"
             )
@@ -4654,6 +4682,7 @@ elif menu == "🎮 Jogos":
         etapa_numeros = st.session_state.get("numeros_etapa", 0)
 
         if etapa_numeros >= len(perguntas_numeros):
+            st.progress(1.0, text="Progresso: 3 de 3 concluídos", width="stretch")
             st.success("🏆 Parabéns! Você terminou todos os desafios de números desta fase!")
             st.balloons()
 
@@ -4667,6 +4696,11 @@ elif menu == "🎮 Jogos":
         else:
             pergunta_numero, resposta_correta_num, maximo_num = perguntas_numeros[etapa_numeros]
 
+            st.progress(
+                etapa_numeros / len(perguntas_numeros),
+                text=f"Progresso: {etapa_numeros} de {len(perguntas_numeros)} concluídas",
+                width="stretch",
+            )
             st.caption(
                 f"Pergunta {etapa_numeros + 1} de {len(perguntas_numeros)}"
             )
@@ -4736,6 +4770,7 @@ elif menu == "🎮 Jogos":
         etapa_desafio = st.session_state.get("desafio_etapa", 0)
 
         if etapa_desafio >= len(desafios):
+            st.progress(1.0, text="Progresso: 3 de 3 concluídos", width="stretch")
             st.success("🏆 Parabéns! Você venceu todos os desafios mágicos desta fase!")
             st.balloons()
 
@@ -4749,6 +4784,11 @@ elif menu == "🎮 Jogos":
         else:
             pergunta_desafio, opcoes_desafio, correta_desafio, sucesso_desafio = desafios[etapa_desafio]
 
+            st.progress(
+                etapa_desafio / len(desafios),
+                text=f"Progresso: {etapa_desafio} de {len(desafios)} concluídos",
+                width="stretch",
+            )
             st.caption(
                 f"Desafio {etapa_desafio + 1} de {len(desafios)}"
             )
