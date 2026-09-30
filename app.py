@@ -5267,7 +5267,7 @@ elif menu == "📚 Atividades escolares":
             if idade_atual == "4–5 anos":
                 palavras = {
                     2: [("S _ L", "O", "SOL"), ("P _ T O", "A", "PATO"), ("M _ S A", "E", "MESA")],
-                    3: [("L _ A", "U", "LUA"), ("C _ S A", "A", "CASA"), ("F _ R", "L", "FLOR")],
+                    3: [("L _ A", "U", "LUA"), ("C _ S A", "A", "CASA"), ("F L _ R", "O", "FLOR")],
                 }[fase]
                 return [
                     (f"Complete a palavra: **{lacuna}**", "texto", "Digite a letra que falta:", letra,
