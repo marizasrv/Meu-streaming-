@@ -4646,87 +4646,167 @@ elif menu == "🎮 Jogos":
     elif jogo_escolhido == "🔢 Números":
         st.markdown("### 🔢 Brincando com números")
 
-        banco_numeros = {
+        fases_numeros = {
             "4–5 anos": [
-                ("Conte as estrelas: ⭐ ⭐ ⭐ ⭐", 4, 10),
-                ("Quantos coelhinhos há? 🐰 🐰 🐰", 3, 10),
-                ("Quantas luas aparecem? 🌙 🌙 🌙 🌙 🌙", 5, 10),
+                [
+                    ("Conte as estrelas: ⭐ ⭐ ⭐ ⭐", 4, 10),
+                    ("Quantos coelhinhos há? 🐰 🐰 🐰", 3, 10),
+                    ("Quantas luas aparecem? 🌙 🌙 🌙 🌙 🌙", 5, 10),
+                ],
+                [
+                    ("🍎 Luna tem **2 maçãs** e ganha mais **3**. Quantas tem?", 5, 10),
+                    ("⭐ Há **6 estrelas** e 2 apagam. Quantas ficam?", 4, 10),
+                    ("🐰 Quantos coelhos há em dois grupos de 2? 🐰🐰 + 🐰🐰", 4, 10),
+                ],
+                [
+                    ("🌙 Conte: 🌙 🌙 🌙 🌙 🌙 🌙", 6, 10),
+                    ("🎈 Luna tinha **7 balões** e soltou 3. Quantos sobraram?", 4, 10),
+                    ("⭐ Quantas estrelas faltam para chegar a 10 se já temos 8?", 2, 10),
+                ],
             ],
             "6–7 anos": [
-                ("🐰 O coelhinho encontrou **3 cenouras** e depois mais **2**. Quantas cenouras ele tem?", 5, 20),
-                ("⭐ Luna tinha **5 estrelas** e ganhou mais **4**. Quantas estrelas tem agora?", 9, 20),
-                ("📖 Havia **10 livros** e 3 foram guardados. Quantos ficaram?", 7, 20),
+                [
+                    ("🐰 O coelhinho encontrou **3 cenouras** e depois mais **2**. Quantas cenouras ele tem?", 5, 20),
+                    ("⭐ Luna tinha **5 estrelas** e ganhou mais **4**. Quantas estrelas tem agora?", 9, 20),
+                    ("📖 Havia **10 livros** e 3 foram guardados. Quantos ficaram?", 7, 20),
+                ],
+                [
+                    ("🏰 Há **8 janelas** em uma torre e **5** em outra. Quantas ao todo?", 13, 20),
+                    ("🔑 Luna tinha **14 chaves** e perdeu 6. Quantas sobraram?", 8, 20),
+                    ("🐰 4 coelhos têm 2 cenouras cada. Quantas cenouras ao todo?", 8, 20),
+                ],
+                [
+                    ("⭐ 12 estrelas foram divididas em 3 grupos iguais. Quantas em cada grupo?", 4, 20),
+                    ("🌙 9 luas + 7 estrelas = quantos símbolos?", 16, 20),
+                    ("📚 18 livros menos 9 livros = ?", 9, 20),
+                ],
             ],
             "8–9 anos": [
-                ("🏰 No castelo havia **12 estrelas**. **5 apagaram**. Quantas ficaram acesas?", 7, 30),
-                ("🐰 O coelhinho encontrou **8 cenouras** de manhã e **6** à tarde. Quantas encontrou ao todo?", 14, 30),
-                ("🔑 Luna tinha **15 chaves** e usou **7**. Quantas sobraram?", 8, 30),
+                [
+                    ("🏰 No castelo havia **12 estrelas**. **5 apagaram**. Quantas ficaram acesas?", 7, 30),
+                    ("🐰 O coelhinho encontrou **8 cenouras** de manhã e **6** à tarde. Quantas encontrou ao todo?", 14, 30),
+                    ("🔑 Luna tinha **15 chaves** e usou **7**. Quantas sobraram?", 8, 30),
+                ],
+                [
+                    ("⭐ 4 caixas têm 5 estrelas cada. Quantas estrelas ao todo?", 20, 30),
+                    ("📖 24 livros foram divididos igualmente em 6 prateleiras. Quantos por prateleira?", 4, 30),
+                    ("🏰 Um castelo tem 18 janelas e ganhou mais 9. Quantas agora?", 27, 30),
+                ],
+                [
+                    ("🐰 30 cenouras foram divididas entre 5 coelhos. Quantas para cada um?", 6, 30),
+                    ("🌟 Qual é o dobro de 13?", 26, 30),
+                    ("🔮 21 cristais menos 8 = ?", 13, 30),
+                ],
             ],
             "10–12 anos": [
-                ("🔮 Luna encontrou **6 cristais**. Cada cristal vale **4 pontos**. Quantos pontos ela conseguiu?", 24, 100),
-                ("🌟 Cada caixa tem **8 estrelas**. Quantas estrelas há em **5 caixas**?", 40, 100),
-                ("🏰 Um castelo tem **36 janelas** divididas igualmente em **4 torres**. Quantas janelas por torre?", 9, 100),
+                [
+                    ("🔮 Luna encontrou **6 cristais**. Cada cristal vale **4 pontos**. Quantos pontos ela conseguiu?", 24, 100),
+                    ("🌟 Cada caixa tem **8 estrelas**. Quantas estrelas há em **5 caixas**?", 40, 100),
+                    ("🏰 Um castelo tem **36 janelas** divididas igualmente em **4 torres**. Quantas janelas por torre?", 9, 100),
+                ],
+                [
+                    ("🧩 7 portais usam 6 símbolos cada. Quantos símbolos ao todo?", 42, 100),
+                    ("⭐ 72 estrelas foram divididas em 8 grupos. Quantas por grupo?", 9, 100),
+                    ("🔑 45 chaves menos 17 = ?", 28, 100),
+                ],
+                [
+                    ("🔮 9 cristais valem 7 pontos cada. Quantos pontos?", 63, 100),
+                    ("🏰 84 janelas divididas entre 7 torres = ?", 12, 100),
+                    ("🌟 Qual é o triplo de 24?", 72, 100),
+                ],
             ],
             "13–15 anos": [
-                ("🧩 Um portal exige **3 chaves**, e cada chave tem **7 símbolos**. Se Luna encontrou 2 portais completos, quantos símbolos há ao todo?", 42, 200),
-                ("🔮 Um cristal vale **12 pontos**. Quantos pontos valem **7 cristais**?", 84, 200),
-                ("🧠 Se 96 estrelas forem divididas igualmente entre 8 torres, quantas estrelas ficam em cada torre?", 12, 200),
+                [
+                    ("🧩 Um portal exige **3 chaves**, e cada chave tem **7 símbolos**. Se Luna encontrou 2 portais completos, quantos símbolos há ao todo?", 42, 200),
+                    ("🔮 Um cristal vale **12 pontos**. Quantos pontos valem **7 cristais**?", 84, 200),
+                    ("🧠 Se 96 estrelas forem divididas igualmente entre 8 torres, quantas estrelas ficam em cada torre?", 12, 200),
+                ],
+                [
+                    ("⭐ 15 caixas têm 8 estrelas cada. Quantas estrelas ao todo?", 120, 200),
+                    ("🔑 144 chaves divididas igualmente entre 12 salas = ?", 12, 200),
+                    ("🔮 175 pontos menos 68 pontos = ?", 107, 200),
+                ],
+                [
+                    ("🧠 Qual é 25% de 200?", 50, 200),
+                    ("🏰 18 torres têm 9 janelas cada. Quantas janelas?", 162, 200),
+                    ("🌟 192 estrelas divididas em 16 grupos = ?", 12, 200),
+                ],
             ],
         }
 
         if st.session_state.get("numeros_faixa") != faixa:
             st.session_state["numeros_faixa"] = faixa
+            st.session_state["numeros_fase"] = 0
             st.session_state["numeros_etapa"] = 0
 
-        perguntas_numeros = banco_numeros[faixa]
+        fases_num = fases_numeros[faixa]
+        fase_num = st.session_state.get("numeros_fase", 0)
         etapa_numeros = st.session_state.get("numeros_etapa", 0)
 
-        if etapa_numeros >= len(perguntas_numeros):
-            st.progress(1.0, text="Progresso: 3 de 3 concluídos", width="stretch")
-            st.success("🏆 Parabéns! Você terminou todos os desafios de números desta fase!")
+        if fase_num >= len(fases_num):
+            st.progress(1.0, text="Todas as fases concluídas!", width="stretch")
+            st.success("🏆 Parabéns! Você terminou todas as fases de números!")
             st.balloons()
 
             if st.button(
-                "🔄 Jogar números novamente",
-                key=f"reiniciar_numeros_{faixa}",
+                "🔄 Jogar Números desde o início",
+                key=f"reiniciar_numeros_total_{faixa}",
                 width="stretch",
             ):
+                st.session_state["numeros_fase"] = 0
                 st.session_state["numeros_etapa"] = 0
                 st.rerun()
         else:
-            pergunta_numero, resposta_correta_num, maximo_num = perguntas_numeros[etapa_numeros]
+            perguntas_numeros = fases_num[fase_num]
+            st.markdown(f"#### Fase {fase_num + 1} de {len(fases_num)}")
 
-            st.progress(
-                etapa_numeros / len(perguntas_numeros),
-                text=f"Progresso: {etapa_numeros} de {len(perguntas_numeros)} concluídas",
-                width="stretch",
-            )
-            st.caption(
-                f"Pergunta {etapa_numeros + 1} de {len(perguntas_numeros)}"
-            )
-            st.write(pergunta_numero)
+            if etapa_numeros >= len(perguntas_numeros):
+                st.progress(1.0, text=f"Fase {fase_num + 1} concluída!", width="stretch")
+                st.success(f"🎉 Você concluiu a Fase {fase_num + 1}!")
+                st.balloons()
 
-            resposta_numero = st.number_input(
-                "Digite sua resposta:",
-                min_value=0,
-                max_value=maximo_num,
-                step=1,
-                key=f"jogo_numero_{faixa}_{etapa_numeros}",
-            )
-
-            if st.button(
-                "⭐ Conferir resposta",
-                key=f"conferir_numero_{faixa}_{etapa_numeros}",
-                width="stretch",
-            ):
-                if int(resposta_numero) == resposta_correta_num:
-                    st.success("🎉 Acertou! Muito bem!")
-                    st.balloons()
-                    time.sleep(1.1)
-                    st.session_state["numeros_etapa"] = etapa_numeros + 1
+                if st.button(
+                    "➡️ Ir para a próxima fase",
+                    key=f"proxima_fase_numeros_{faixa}_{fase_num}",
+                    width="stretch",
+                ):
+                    st.session_state["numeros_fase"] = fase_num + 1
+                    st.session_state["numeros_etapa"] = 0
                     st.rerun()
-                else:
-                    st.warning("💜 Quase! Pense mais um pouco.")
+            else:
+                pergunta_numero, resposta_correta_num, maximo_num = perguntas_numeros[etapa_numeros]
+
+                st.progress(
+                    etapa_numeros / len(perguntas_numeros),
+                    text=f"Fase {fase_num + 1}: {etapa_numeros} de {len(perguntas_numeros)} concluídas",
+                    width="stretch",
+                )
+                st.caption(
+                    f"Pergunta {etapa_numeros + 1} de {len(perguntas_numeros)}"
+                )
+                st.write(pergunta_numero)
+
+                resposta_numero = st.number_input(
+                    "Digite sua resposta:",
+                    min_value=0,
+                    max_value=maximo_num,
+                    step=1,
+                    key=f"jogo_numero_{faixa}_{fase_num}_{etapa_numeros}",
+                )
+
+                if st.button(
+                    "⭐ Conferir resposta",
+                    key=f"conferir_numero_{faixa}_{fase_num}_{etapa_numeros}",
+                    width="stretch",
+                ):
+                    if int(resposta_numero) == resposta_correta_num:
+                        st.success("🎉 Acertou! Muito bem!")
+                        st.balloons()
+                        time.sleep(1.0)
+                        st.session_state["numeros_etapa"] = etapa_numeros + 1
+                        st.rerun()
+                    else:
+                        st.warning("💜 Quase! Pense mais um pouco.")
 
     # =========================================================
     # DESAFIO MÁGICO
@@ -4734,85 +4814,165 @@ elif menu == "🎮 Jogos":
     else:
         st.markdown("### 🌟 Desafio mágico")
 
-        banco_desafios = {
+        fases_desafios = {
             "4–5 anos": [
-                ("🟣 Qual é a cor deste círculo?", ["Roxo", "Amarelo", "Verde"], "Roxo", "✨ Isso! O círculo é roxo."),
-                ("🔺 Qual é esta forma?", ["Triângulo", "Círculo", "Quadrado"], "Triângulo", "✨ Muito bem! É um triângulo."),
-                ("⭐ Qual símbolo é uma estrela?", ["⭐", "🌙", "🐰"], "⭐", "✨ Certo! Esta é a estrela."),
+                [
+                    ("🟣 Qual é a cor deste círculo?", ["Roxo", "Amarelo", "Verde"], "Roxo", "✨ Isso! O círculo é roxo."),
+                    ("🔺 Qual é esta forma?", ["Triângulo", "Círculo", "Quadrado"], "Triângulo", "✨ Muito bem! É um triângulo."),
+                    ("⭐ Qual símbolo é uma estrela?", ["⭐", "🌙", "🐰"], "⭐", "✨ Certo! Esta é a estrela."),
+                ],
+                [
+                    ("🐰 Qual destes é um animal?", ["🐰", "🏰", "⭐"], "🐰", "✨ Isso! O coelho é um animal."),
+                    ("🌙 O que aparece no céu à noite?", ["Lua", "Cenoura", "Sapato"], "Lua", "✨ Muito bem! A lua aparece no céu."),
+                    ("🟨 Qual forma tem quatro lados iguais?", ["Quadrado", "Círculo", "Triângulo"], "Quadrado", "✨ Certo! É o quadrado."),
+                ],
+                [
+                    ("🎨 Qual destas cores é azul?", ["Azul", "Rosa", "Verde"], "Azul", "✨ Isso! Azul é a resposta."),
+                    ("☀️ O que brilha de dia?", ["Sol", "Lua", "Chave"], "Sol", "✨ Muito bem! O sol brilha de dia."),
+                    ("🐰 O coelho tem quantas orelhas?", ["1", "2", "4"], "2", "✨ Certo! O coelho tem duas orelhas."),
+                ],
             ],
             "6–7 anos": [
-                ("🔺 Qual é o nome desta forma?", ["Triângulo", "Quadrado", "Círculo"], "Triângulo", "✨ Certo! Essa forma é um triângulo."),
-                ("🌙 Qual símbolo representa a lua?", ["🌙 Lua", "⭐ Estrela", "🐰 Coelho"], "🌙 Lua", "✨ Muito bem! Essa é a lua."),
-                ("🎨 Qual dessas cores é uma cor primária?", ["Azul", "Roxo", "Rosa"], "Azul", "✨ Certo! Azul é uma cor primária."),
+                [
+                    ("🔺 Qual é o nome desta forma?", ["Triângulo", "Quadrado", "Círculo"], "Triângulo", "✨ Certo! Essa forma é um triângulo."),
+                    ("🌙 Qual símbolo representa a lua?", ["🌙 Lua", "⭐ Estrela", "🐰 Coelho"], "🌙 Lua", "✨ Muito bem! Essa é a lua."),
+                    ("🎨 Qual dessas cores é uma cor primária?", ["Azul", "Roxo", "Rosa"], "Azul", "✨ Certo! Azul é uma cor primária."),
+                ],
+                [
+                    ("🔍 Qual palavra começa com a mesma letra de LUNA?", ["Livro", "Coelho", "Estrela"], "Livro", "✨ Isso! Luna e Livro começam com L."),
+                    ("⭐ Qual número vem depois de 9?", ["10", "11", "8"], "10", "✨ Muito bem! Depois de 9 vem 10."),
+                    ("🐰 Qual é o plural de coelho?", ["Coelhos", "Coelhas", "Coelhinho"], "Coelhos", "✨ Certo! O plural é coelhos."),
+                ],
+                [
+                    ("🌟 Complete: 2, 4, 6, __", ["7", "8", "10"], "8", "✨ Isso! A sequência cresce de 2 em 2."),
+                    ("🏰 Onde normalmente mora uma princesa em contos?", ["Castelo", "Ônibus", "Mercado"], "Castelo", "✨ Muito bem! Castelo."),
+                    ("🔑 Para que serve uma chave?", ["Abrir uma fechadura", "Comer", "Dormir"], "Abrir uma fechadura", "✨ Certo! A chave abre fechaduras."),
+                ],
             ],
             "8–9 anos": [
-                ("Complete a sequência mágica: **⭐ 🌙 ⭐ 🌙 ❓**", ["⭐ Estrela", "🌙 Lua", "🐰 Coelho"], "⭐ Estrela", "✨ Muito bem! A sequência alterna estrela e lua."),
-                ("Qual número vem depois? **2, 4, 6, 8, __**", ["9", "10", "12"], "10", "✨ Certo! A sequência aumenta de 2 em 2."),
-                ("Qual item não combina com os outros?", ["Castelo", "Palácio", "Cenoura"], "Cenoura", "✨ Isso! Cenoura é diferente dos outros dois."),
+                [
+                    ("Complete a sequência mágica: **⭐ 🌙 ⭐ 🌙 ❓**", ["⭐ Estrela", "🌙 Lua", "🐰 Coelho"], "⭐ Estrela", "✨ Muito bem! A sequência alterna estrela e lua."),
+                    ("Qual número vem depois? **2, 4, 6, 8, __**", ["9", "10", "12"], "10", "✨ Certo! A sequência aumenta de 2 em 2."),
+                    ("Qual item não combina com os outros?", ["Castelo", "Palácio", "Cenoura"], "Cenoura", "✨ Isso! Cenoura é diferente dos outros dois."),
+                ],
+                [
+                    ("🧠 Qual número completa: 5, 10, 15, __?", ["18", "20", "25"], "20", "✨ Certo! A sequência aumenta de 5 em 5."),
+                    ("🔍 Qual palavra é sinônimo de feliz?", ["Alegre", "Escuro", "Lento"], "Alegre", "✨ Muito bem! Alegre é sinônimo de feliz."),
+                    ("🌙 Qual é o contrário de claro?", ["Escuro", "Grande", "Rápido"], "Escuro", "✨ Isso! Escuro é o contrário de claro."),
+                ],
+                [
+                    ("⭐ Qual número é o dobro de 7?", ["12", "14", "16"], "14", "✨ Certo! O dobro de 7 é 14."),
+                    ("🧩 Se hoje é segunda-feira, que dia vem depois?", ["Terça-feira", "Domingo", "Sábado"], "Terça-feira", "✨ Muito bem! Depois de segunda vem terça."),
+                    ("🔑 Qual objeto é usado para abrir uma porta?", ["Chave", "Livro", "Estrela"], "Chave", "✨ Certo! É a chave."),
+                ],
             ],
             "10–12 anos": [
-                ("🧠 Qual número completa a sequência? **2, 4, 8, 16, __**", ["20", "24", "32"], "32", "✨ Certo! Cada número é o dobro do anterior."),
-                ("🧩 Se uma chave abre 2 portas, quantas portas 4 chaves podem abrir?", ["6", "8", "10"], "8", "✨ Muito bem! 4 × 2 = 8."),
-                ("🔮 Qual número falta? **5, 10, 15, __, 25**", ["18", "20", "22"], "20", "✨ Certo! A sequência aumenta de 5 em 5."),
+                [
+                    ("🧠 Qual número completa a sequência? **2, 4, 8, 16, __**", ["20", "24", "32"], "32", "✨ Certo! Cada número é o dobro do anterior."),
+                    ("🧩 Se uma chave abre 2 portas, quantas portas 4 chaves podem abrir?", ["6", "8", "10"], "8", "✨ Muito bem! 4 × 2 = 8."),
+                    ("🔮 Qual número falta? **5, 10, 15, __, 25**", ["18", "20", "22"], "20", "✨ Certo! A sequência aumenta de 5 em 5."),
+                ],
+                [
+                    ("🧠 Qual número completa: 3, 6, 12, 24, __?", ["36", "48", "54"], "48", "✨ Certo! Cada número dobra."),
+                    ("🔍 Qual palavra significa quase o mesmo que 'rápido'?", ["Veloz", "Pesado", "Escuro"], "Veloz", "✨ Muito bem! Veloz é sinônimo de rápido."),
+                    ("🧩 Se 5 caixas têm 4 objetos cada, quantos objetos existem?", ["9", "20", "25"], "20", "✨ Certo! 5 × 4 = 20."),
+                ],
+                [
+                    ("🔮 Qual é metade de 50?", ["20", "25", "30"], "25", "✨ Isso! Metade de 50 é 25."),
+                    ("🌟 Qual número vem depois: 10, 20, 30, __?", ["35", "40", "50"], "40", "✨ Muito bem! A sequência soma 10."),
+                    ("🧠 Se A é maior que B e B é maior que C, quem é o maior?", ["A", "B", "C"], "A", "✨ Certo! A é o maior."),
+                ],
             ],
             "13–15 anos": [
-                ("🧩 Se todos os portais azuis são mágicos e este portal é azul, qual conclusão é logicamente correta?", ["Este portal é mágico", "Todo portal mágico é azul", "Nenhum portal azul é mágico"], "Este portal é mágico", "✨ Exato! Essa conclusão segue diretamente das informações dadas."),
-                ("🧠 Qual número completa a sequência? **3, 6, 12, 24, __**", ["36", "48", "60"], "48", "✨ Certo! Cada número dobra."),
-                ("🔍 Se A é maior que B e B é maior que C, qual afirmação é verdadeira?", ["A é maior que C", "C é maior que A", "A é igual a C"], "A é maior que C", "✨ Exato! A relação é transitiva."),
+                [
+                    ("🧩 Se todos os portais azuis são mágicos e este portal é azul, qual conclusão é logicamente correta?", ["Este portal é mágico", "Todo portal mágico é azul", "Nenhum portal azul é mágico"], "Este portal é mágico", "✨ Exato! Essa conclusão segue diretamente das informações dadas."),
+                    ("🧠 Qual número completa a sequência? **3, 6, 12, 24, __**", ["36", "48", "60"], "48", "✨ Certo! Cada número dobra."),
+                    ("🔍 Se A é maior que B e B é maior que C, qual afirmação é verdadeira?", ["A é maior que C", "C é maior que A", "A é igual a C"], "A é maior que C", "✨ Exato! A relação é transitiva."),
+                ],
+                [
+                    ("🧠 Qual é 20% de 150?", ["20", "30", "40"], "30", "✨ Certo! 20% de 150 é 30."),
+                    ("🔍 Qual palavra é antônimo de 'expandir'?", ["Contrair", "Aumentar", "Alongar"], "Contrair", "✨ Muito bem! Contrair é o antônimo."),
+                    ("🧩 Se x + 8 = 20, qual é x?", ["10", "12", "14"], "12", "✨ Certo! x = 12."),
+                ],
+                [
+                    ("🌟 Qual número completa: 1, 4, 9, 16, __?", ["20", "25", "36"], "25", "✨ Isso! São quadrados perfeitos."),
+                    ("🧠 Se 3x = 27, qual é x?", ["6", "9", "12"], "9", "✨ Certo! x = 9."),
+                    ("🔍 Qual é o resultado lógico: se P implica Q e P é verdadeiro?", ["Q é verdadeiro", "Q é falso", "Nada pode ser dito"], "Q é verdadeiro", "✨ Exato! Pela implicação, Q é verdadeiro."),
+                ],
             ],
         }
 
         if st.session_state.get("desafio_faixa") != faixa:
             st.session_state["desafio_faixa"] = faixa
+            st.session_state["desafio_fase"] = 0
             st.session_state["desafio_etapa"] = 0
 
-        desafios = banco_desafios[faixa]
+        fases_des = fases_desafios[faixa]
+        fase_desafio = st.session_state.get("desafio_fase", 0)
         etapa_desafio = st.session_state.get("desafio_etapa", 0)
 
-        if etapa_desafio >= len(desafios):
-            st.progress(1.0, text="Progresso: 3 de 3 concluídos", width="stretch")
-            st.success("🏆 Parabéns! Você venceu todos os desafios mágicos desta fase!")
+        if fase_desafio >= len(fases_des):
+            st.progress(1.0, text="Todas as fases concluídas!", width="stretch")
+            st.success("🏆 Parabéns! Você venceu todas as fases do Desafio Mágico!")
             st.balloons()
 
             if st.button(
-                "🔄 Jogar desafios novamente",
-                key=f"reiniciar_desafio_{faixa}",
+                "🔄 Jogar Desafio Mágico desde o início",
+                key=f"reiniciar_desafio_total_{faixa}",
                 width="stretch",
             ):
+                st.session_state["desafio_fase"] = 0
                 st.session_state["desafio_etapa"] = 0
                 st.rerun()
         else:
-            pergunta_desafio, opcoes_desafio, correta_desafio, sucesso_desafio = desafios[etapa_desafio]
+            desafios = fases_des[fase_desafio]
+            st.markdown(f"#### Fase {fase_desafio + 1} de {len(fases_des)}")
 
-            st.progress(
-                etapa_desafio / len(desafios),
-                text=f"Progresso: {etapa_desafio} de {len(desafios)} concluídos",
-                width="stretch",
-            )
-            st.caption(
-                f"Desafio {etapa_desafio + 1} de {len(desafios)}"
-            )
-            st.write(pergunta_desafio)
+            if etapa_desafio >= len(desafios):
+                st.progress(1.0, text=f"Fase {fase_desafio + 1} concluída!", width="stretch")
+                st.success(f"🎉 Você concluiu a Fase {fase_desafio + 1}!")
+                st.balloons()
 
-            resposta_desafio = st.radio(
-                "Escolha:",
-                opcoes_desafio,
-                key=f"desafio_{faixa}_{etapa_desafio}",
-            )
-
-            if st.button(
-                "🌟 Conferir desafio",
-                key=f"conferir_desafio_{faixa}_{etapa_desafio}",
-                width="stretch",
-            ):
-                if resposta_desafio == correta_desafio:
-                    st.success(sucesso_desafio)
-                    st.balloons()
-                    time.sleep(1.1)
-                    st.session_state["desafio_etapa"] = etapa_desafio + 1
+                if st.button(
+                    "➡️ Ir para a próxima fase",
+                    key=f"proxima_fase_desafio_{faixa}_{fase_desafio}",
+                    width="stretch",
+                ):
+                    st.session_state["desafio_fase"] = fase_desafio + 1
+                    st.session_state["desafio_etapa"] = 0
                     st.rerun()
-                else:
-                    st.warning("💜 Quase! Observe mais uma vez.")
+            else:
+                pergunta_desafio, opcoes_desafio, correta_desafio, sucesso_desafio = desafios[etapa_desafio]
+
+                st.progress(
+                    etapa_desafio / len(desafios),
+                    text=f"Fase {fase_desafio + 1}: {etapa_desafio} de {len(desafios)} concluídos",
+                    width="stretch",
+                )
+                st.caption(
+                    f"Desafio {etapa_desafio + 1} de {len(desafios)}"
+                )
+                st.write(pergunta_desafio)
+
+                resposta_desafio = st.radio(
+                    "Escolha:",
+                    opcoes_desafio,
+                    key=f"desafio_{faixa}_{fase_desafio}_{etapa_desafio}",
+                )
+
+                if st.button(
+                    "🌟 Conferir desafio",
+                    key=f"conferir_desafio_{faixa}_{fase_desafio}_{etapa_desafio}",
+                    width="stretch",
+                ):
+                    if resposta_desafio == correta_desafio:
+                        st.success(sucesso_desafio)
+                        st.balloons()
+                        time.sleep(1.0)
+                        st.session_state["desafio_etapa"] = etapa_desafio + 1
+                        st.rerun()
+                    else:
+                        st.warning("💜 Quase! Observe mais uma vez.")
 
     st.markdown("---")
     st.caption(
