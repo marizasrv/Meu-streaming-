@@ -694,6 +694,96 @@ section[data-testid="stSidebar"] .status-plano {
 }
 
 
+/* Área Premium */
+.premium-hero {
+    padding: 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(242,214,117,0.40);
+    background:
+        radial-gradient(circle at top right, rgba(242,214,117,0.13), transparent 35%),
+        linear-gradient(135deg, rgba(91,33,182,0.34), rgba(49,17,78,0.58));
+    margin: 0.20rem 0 0.75rem 0;
+}
+
+.premium-hero-title {
+    color: #FFFFFF !important;
+    font-size: 1.45rem;
+    font-weight: 900;
+    line-height: 1.15;
+    margin-bottom: 0.28rem;
+}
+
+.premium-hero-text {
+    color: rgba(255,255,255,0.78) !important;
+    font-size: 0.95rem;
+    line-height: 1.35;
+}
+
+.premium-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(72px, 1fr));
+    gap: 7px;
+    margin: 0.55rem 0 0.85rem 0;
+}
+
+.premium-stat {
+    border-radius: 14px;
+    border: 1px solid rgba(242,214,117,0.28);
+    background: rgba(255,255,255,0.045);
+    padding: 9px 5px;
+    text-align: center;
+}
+
+.premium-stat-num {
+    color: #FFFFFF !important;
+    font-size: 1.45rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.premium-stat-label {
+    color: #F2D675 !important;
+    font-size: 0.74rem;
+    line-height: 1.12;
+    margin-top: 4px;
+}
+
+@media (max-width: 640px) {
+    .premium-hero {
+        padding: 12px !important;
+        border-radius: 17px !important;
+        margin-bottom: 0.55rem !important;
+    }
+
+    .premium-hero-title {
+        font-size: 1.18rem !important;
+    }
+
+    .premium-hero-text {
+        font-size: 0.82rem !important;
+    }
+
+    .premium-stats {
+        gap: 5px !important;
+        margin-top: 0.40rem !important;
+        margin-bottom: 0.65rem !important;
+    }
+
+    .premium-stat {
+        padding: 7px 3px !important;
+        border-radius: 12px !important;
+    }
+
+    .premium-stat-num {
+        font-size: 1.28rem !important;
+    }
+
+    .premium-stat-label {
+        font-size: 0.66rem !important;
+    }
+}
+
+
 /* Jogo da memória */
 [class*="st-key-memoria_carta_"] button {
     min-height: 72px !important;
@@ -2344,13 +2434,18 @@ elif menu == "🔒 Premium":
         carregar_plano_usuario()
 
     if not st.session_state.usuario_logado:
-        st.warning("Entre na sua conta para acessar a área Premium.")
+        st.warning(
+            "Entre na sua conta para acessar a Área Premium."
+        )
+
         st.button(
             "👤 Entrar / Criar conta",
             key="premium_ir_login",
             on_click=mudar_menu,
-            args=("👤 Entrar / Minha conta",)
+            args=("👤 Entrar / Minha conta",),
+            use_container_width=True,
         )
+
     elif not (
         st.session_state.plano_atual == "Premium"
         and st.session_state.status_assinatura == "ativo"
@@ -2358,7 +2453,10 @@ elif menu == "🔒 Premium":
         render_html("""
         <div class="lock-card">
             <h3>🔒 Conteúdo Premium bloqueado</h3>
-            <p>Essa área será liberada quando sua assinatura Premium for confirmada no sistema.</p>
+            <p>
+                Essa área é exclusiva para assinantes Premium ativos.
+                Assine para assistir aos conteúdos exclusivos.
+            </p>
         </div>
         """)
 
@@ -2366,21 +2464,108 @@ elif menu == "🔒 Premium":
             "💎 Ver plano Premium",
             key="premium_ver_planos",
             on_click=mudar_menu,
-            args=("💎 Planos",)
+            args=("💎 Planos",),
+            use_container_width=True,
         )
+
     else:
-        st.success("💎 Premium ativo!")
         exclusivos = videos_premium(videos)
 
-        if not exclusivos:
-            st.info("Ainda não há vídeos exclusivos. Envie um vídeo e marque o acesso como Premium.")
-        else:
-            st.markdown(
-            '<div class="dica-deslize">Deslize para o lado para ver mais vídeos. 💜</div>',
-            unsafe_allow_html=True,
-        )
+        render_html("""
+        <div class="premium-hero">
+            <div class="premium-hero-title">
+                💎 Bem-vindo à Área Premium
+            </div>
+            <div class="premium-hero-text">
+                Conteúdos exclusivos do Mundo da Luna TV,
+                organizados para você encontrar tudo com facilidade.
+            </div>
+        </div>
+        """)
 
-            # Novidades: mantém a ordem retornada pelo banco (mais recentes primeiro).
+        if not exclusivos:
+            st.info(
+                "Ainda não há vídeos exclusivos. "
+                "Envie um vídeo e marque o acesso como Premium."
+            )
+
+        else:
+            infantil_premium = [
+                v for v in exclusivos
+                if categoria_base(v) == "Infantil"
+            ]
+
+            filmes_premium = [
+                v for v in exclusivos
+                if categoria_base(v) == "Filmes"
+            ]
+
+            series_premium = [
+                v for v in exclusivos
+                if categoria_base(v) == "Séries"
+            ]
+
+            total_premium = len(exclusivos)
+
+            render_html(
+                f"""
+                <div class="premium-stats">
+                    <div class="premium-stat">
+                        <div class="premium-stat-num">{total_premium}</div>
+                        <div class="premium-stat-label">💎 Exclusivos</div>
+                    </div>
+
+                    <div class="premium-stat">
+                        <div class="premium-stat-num">{len(infantil_premium)}</div>
+                        <div class="premium-stat-label">🧸 Infantil</div>
+                    </div>
+
+                    <div class="premium-stat">
+                        <div class="premium-stat-num">{len(filmes_premium)}</div>
+                        <div class="premium-stat-label">🎬 Filmes</div>
+                    </div>
+
+                    <div class="premium-stat">
+                        <div class="premium-stat-num">{len(series_premium)}</div>
+                        <div class="premium-stat-label">📺 Séries</div>
+                    </div>
+                </div>
+                """
+            )
+
+            st.markdown(
+                '<div class="dica-deslize">'
+                'Deslize para o lado para ver mais vídeos. 💜'
+                '</div>',
+                unsafe_allow_html=True,
+            )
+
+            # Último vídeo Premium assistido
+            ultimo_premium = ultimo_assistido(exclusivos)
+
+            if ultimo_premium:
+                mostrar_fileira_premium(
+                    "▶ Continuar assistindo",
+                    [ultimo_premium],
+                    "premium_continuar",
+                    limite=1,
+                )
+
+            # Favoritos Premium
+            favoritos_premium = [
+                v for v in exclusivos
+                if bool(v.get("favorito", False))
+            ]
+
+            if favoritos_premium:
+                mostrar_fileira_premium(
+                    "❤️ Minha Lista Premium",
+                    favoritos_premium,
+                    "premium_favoritos",
+                    limite=12,
+                )
+
+            # Novidades Premium
             mostrar_fileira_premium(
                 "✨ Novidades",
                 exclusivos,
@@ -2389,22 +2574,20 @@ elif menu == "🔒 Premium":
                 marcar_novo=True,
             )
 
-            infantil_premium = [v for v in exclusivos if categoria_base(v) == "Infantil"]
-            filmes_premium = [v for v in exclusivos if categoria_base(v) == "Filmes"]
-            series_premium = [v for v in exclusivos if categoria_base(v) == "Séries"]
-
             mostrar_fileira_premium(
                 "🧸 Infantil",
                 infantil_premium,
                 "premium_infantil",
                 limite=12,
             )
+
             mostrar_fileira_premium(
                 "🎬 Filmes",
                 filmes_premium,
                 "premium_filmes",
                 limite=12,
             )
+
             mostrar_fileira_premium(
                 "📺 Séries",
                 series_premium,
