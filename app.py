@@ -4444,76 +4444,173 @@ elif menu == "🎮 Jogos":
     elif jogo_escolhido == "🔤 Palavras":
         st.markdown("### 🔤 Brincando com palavras")
 
-        if faixa == "4–5 anos":
-            st.write("Complete a palavra: **L _ N A**")
-            resposta_palavra = st.radio(
-                "Qual letra está faltando?",
-                ["A", "U", "O"],
-                key="jogo_palavra_45",
-                horizontal=True,
-            )
-            correta_palavra = resposta_palavra == "U"
-            mensagem_correta = "🎉 Muito bem! A palavra é LUNA."
+        banco_palavras = {
+            "4–5 anos": [
+                {
+                    "pergunta": "Complete a palavra: **L _ N A**",
+                    "rotulo": "Qual letra está faltando?",
+                    "opcoes": ["A", "U", "O"],
+                    "correta": "U",
+                    "mensagem": "🎉 Muito bem! A palavra é LUNA.",
+                },
+                {
+                    "pergunta": "Complete a palavra: **B _ L A**",
+                    "rotulo": "Qual letra está faltando?",
+                    "opcoes": ["O", "A", "E"],
+                    "correta": "O",
+                    "mensagem": "🎉 Isso! A palavra é BOLA.",
+                },
+                {
+                    "pergunta": "Complete a palavra: **G _ T O**",
+                    "rotulo": "Qual letra está faltando?",
+                    "opcoes": ["A", "E", "I"],
+                    "correta": "A",
+                    "mensagem": "🎉 Certo! A palavra é GATO.",
+                },
+            ],
+            "6–7 anos": [
+                {
+                    "pergunta": "Complete a palavra: **C _ E L H O**",
+                    "rotulo": "Qual letra está faltando?",
+                    "opcoes": ["A", "O", "U"],
+                    "correta": "O",
+                    "mensagem": "🎉 Muito bem! A palavra é COELHO.",
+                },
+                {
+                    "pergunta": "Complete a palavra: **F L _ R E S T A**",
+                    "rotulo": "Qual letra está faltando?",
+                    "opcoes": ["O", "A", "E"],
+                    "correta": "O",
+                    "mensagem": "🎉 Certo! A palavra é FLORESTA.",
+                },
+                {
+                    "pergunta": "Complete a palavra: **C A S T _ L O**",
+                    "rotulo": "Qual letra está faltando?",
+                    "opcoes": ["E", "A", "I"],
+                    "correta": "E",
+                    "mensagem": "🎉 Isso! A palavra é CASTELO.",
+                },
+            ],
+            "8–9 anos": [
+                {
+                    "pergunta": "Complete a frase: **Luna abriu o ____ mágico.**",
+                    "rotulo": "Escolha a palavra correta:",
+                    "opcoes": ["livro", "sapato", "bolo"],
+                    "correta": "livro",
+                    "mensagem": "🎉 Certo! Luna abriu o livro mágico.",
+                },
+                {
+                    "pergunta": "Complete a frase: **O coelhinho entrou na ____.**",
+                    "rotulo": "Escolha a palavra correta:",
+                    "opcoes": ["floresta", "garagem", "cozinha"],
+                    "correta": "floresta",
+                    "mensagem": "🎉 Muito bem! O coelhinho entrou na floresta.",
+                },
+                {
+                    "pergunta": "Complete a frase: **A princesa mora no ____.**",
+                    "rotulo": "Escolha a palavra correta:",
+                    "opcoes": ["castelo", "barco", "mercado"],
+                    "correta": "castelo",
+                    "mensagem": "🎉 Isso! A princesa mora no castelo.",
+                },
+            ],
+            "10–12 anos": [
+                {
+                    "pergunta": "Qual palavra completa melhor a frase? **Luna ficou ____ ao perceber que o caminho havia mudado.**",
+                    "rotulo": "Escolha:",
+                    "opcoes": ["intrigada", "adormecida", "invisível"],
+                    "correta": "intrigada",
+                    "mensagem": "✨ Isso! 'Intrigada' combina com alguém curioso diante de um mistério.",
+                },
+                {
+                    "pergunta": "Qual palavra completa melhor? **O castelo parecia ____ durante a tempestade.**",
+                    "rotulo": "Escolha:",
+                    "opcoes": ["sombrio", "redondo", "doce"],
+                    "correta": "sombrio",
+                    "mensagem": "✨ Certo! 'Sombrio' combina com a cena.",
+                },
+                {
+                    "pergunta": "Complete: **Luna seguiu as pistas com muita ____.**",
+                    "rotulo": "Escolha:",
+                    "opcoes": ["atenção", "fome", "pressa"],
+                    "correta": "atenção",
+                    "mensagem": "✨ Muito bem! 'Atenção' completa a frase.",
+                },
+            ],
+            "13–15 anos": [
+                {
+                    "pergunta": "Qual alternativa apresenta um **sinônimo** de 'misterioso'?",
+                    "rotulo": "Escolha:",
+                    "opcoes": ["enigmático", "barulhento", "veloz"],
+                    "correta": "enigmático",
+                    "mensagem": "✨ Certo! 'Enigmático' é um sinônimo de 'misterioso'.",
+                },
+                {
+                    "pergunta": "Qual palavra é sinônimo de **corajoso**?",
+                    "rotulo": "Escolha:",
+                    "opcoes": ["valente", "distraído", "quieto"],
+                    "correta": "valente",
+                    "mensagem": "✨ Isso! 'Valente' é sinônimo de 'corajoso'.",
+                },
+                {
+                    "pergunta": "Qual palavra é o contrário de **escuro**?",
+                    "rotulo": "Escolha:",
+                    "opcoes": ["claro", "forte", "lento"],
+                    "correta": "claro",
+                    "mensagem": "✨ Muito bem! 'Claro' é o contrário de 'escuro'.",
+                },
+            ],
+        }
 
-        elif faixa == "6–7 anos":
-            st.write("Complete a palavra: **C _ E L H O**")
-            resposta_palavra = st.radio(
-                "Qual letra está faltando?",
-                ["A", "O", "U"],
-                key="jogo_palavra_67",
-                horizontal=True,
-            )
-            correta_palavra = resposta_palavra == "O"
-            mensagem_correta = "🎉 Muito bem! A palavra é COELHO."
+        chave_faixa_palavras = "palavras_faixa"
+        chave_etapa_palavras = "palavras_etapa"
 
-        elif faixa == "8–9 anos":
-            st.write("Complete a frase: **Luna abriu o ____ mágico.**")
-            resposta_palavra = st.radio(
-                "Escolha a palavra correta:",
-                ["livro", "sapato", "bolo"],
-                key="jogo_palavra_89",
-            )
-            correta_palavra = resposta_palavra == "livro"
-            mensagem_correta = "🎉 Certo! Luna abriu o livro mágico."
+        if st.session_state.get(chave_faixa_palavras) != faixa:
+            st.session_state[chave_faixa_palavras] = faixa
+            st.session_state[chave_etapa_palavras] = 0
 
-        elif faixa == "10–12 anos":
-            st.write(
-                "Qual palavra completa melhor a frase? "
-                "**Luna ficou ____ ao perceber que o caminho havia mudado.**"
-            )
-            resposta_palavra = st.radio(
-                "Escolha:",
-                ["intrigada", "adormecida", "invisível"],
-                key="jogo_palavra_1012",
-            )
-            correta_palavra = resposta_palavra == "intrigada"
-            mensagem_correta = (
-                "✨ Isso! 'Intrigada' combina com alguém curioso diante de um mistério."
-            )
+        perguntas_palavras = banco_palavras[faixa]
+        etapa_palavras = st.session_state.get(chave_etapa_palavras, 0)
+
+        if etapa_palavras >= len(perguntas_palavras):
+            st.success("🏆 Parabéns! Você terminou todas as palavras desta fase!")
+            st.balloons()
+
+            if st.button(
+                "🔄 Jogar palavras novamente",
+                key=f"reiniciar_palavras_{faixa}",
+                width="stretch",
+            ):
+                st.session_state[chave_etapa_palavras] = 0
+                st.rerun()
 
         else:
-            st.write(
-                "Qual alternativa apresenta um **sinônimo** de 'misterioso'?"
+            pergunta_atual = perguntas_palavras[etapa_palavras]
+
+            st.caption(
+                f"Pergunta {etapa_palavras + 1} de {len(perguntas_palavras)}"
             )
+            st.write(pergunta_atual["pergunta"])
+
             resposta_palavra = st.radio(
-                "Escolha:",
-                ["enigmático", "barulhento", "veloz"],
-                key="jogo_palavra_1315",
-            )
-            correta_palavra = resposta_palavra == "enigmático"
-            mensagem_correta = (
-                "✨ Certo! 'Enigmático' é um sinônimo de 'misterioso'."
+                pergunta_atual["rotulo"],
+                pergunta_atual["opcoes"],
+                key=f"jogo_palavra_{faixa}_{etapa_palavras}",
             )
 
-        if st.button(
-            "✅ Conferir palavra",
-            key=f"conferir_palavra_{faixa}",
-            width="stretch",
-        ):
-            if correta_palavra:
-                st.success(mensagem_correta)
-            else:
-                st.warning("💜 Quase! Tente outra opção.")
+            if st.button(
+                "✅ Conferir palavra",
+                key=f"conferir_palavra_{faixa}_{etapa_palavras}",
+                width="stretch",
+            ):
+                if resposta_palavra == pergunta_atual["correta"]:
+                    st.success(pergunta_atual["mensagem"])
+                    st.balloons()
+                    time.sleep(1.1)
+                    st.session_state[chave_etapa_palavras] = etapa_palavras + 1
+                    st.rerun()
+                else:
+                    st.warning("💜 Quase! Tente outra opção.")
 
     # =========================================================
     # NÚMEROS
