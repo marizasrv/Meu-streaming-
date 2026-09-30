@@ -1892,15 +1892,24 @@ def link_plano_pagamento():
 # CRÉDITOS PARA VÍDEO COM IA
 # -----------------------------
 def links_pacotes_creditos():
-    """Links opcionais dos checkouts de créditos na Kiwify."""
+    """Links dos checkouts de créditos na Kiwify."""
     try:
         return {
-            5: str(st.secrets.get("KIWIFY_CREDITOS_5_URL", "")).strip(),
+            5: str(
+                st.secrets.get(
+                    "KIWIFY_CREDITOS_5_URL",
+                    "https://pay.kiwify.com.br/d1hcgvV",
+                )
+            ).strip(),
             15: str(st.secrets.get("KIWIFY_CREDITOS_15_URL", "")).strip(),
             30: str(st.secrets.get("KIWIFY_CREDITOS_30_URL", "")).strip(),
         }
     except Exception:
-        return {5: "", 15: "", 30: ""}
+        return {
+            5: "https://pay.kiwify.com.br/d1hcgvV",
+            15: "",
+            30: "",
+        }
 
 
 def obter_carteira_creditos():
