@@ -2507,19 +2507,17 @@ elif menu == "🔒 Premium":
 
             total_premium = len(exclusivos)
 
-            # Contadores nativos do Streamlit:
-            # mais seguros no celular e sem risco de exibir HTML como texto.
-            premium_linha_1 = st.columns(2, gap="small")
-            with premium_linha_1[0]:
-                st.metric("💎 Exclusivos", total_premium)
-            with premium_linha_1[1]:
-                st.metric("🧸 Infantil", len(infantil_premium))
-
-            premium_linha_2 = st.columns(2, gap="small")
-            with premium_linha_2[0]:
-                st.metric("🎬 Filmes", len(filmes_premium))
-            with premium_linha_2[1]:
-                st.metric("📺 Séries", len(series_premium))
+            # Resumo Premium compacto para celular.
+            # Duas linhas dentro de um único cartão, sem colunas que se empilham.
+            with st.container(border=True):
+                st.markdown(
+                    f"**💎 {total_premium} Exclusivos**  •  "
+                    f"**🧸 {len(infantil_premium)} Infantil**"
+                )
+                st.markdown(
+                    f"**🎬 {len(filmes_premium)} Filmes**  •  "
+                    f"**📺 {len(series_premium)} Séries**"
+                )
 
             st.markdown(
                 '<div class="dica-deslize">'
