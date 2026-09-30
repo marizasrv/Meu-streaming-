@@ -3760,10 +3760,12 @@ elif menu in ["🧸 Infantil", "🎬 Filmes", "📺 Séries"]:
     if not itens:
         st.info("Ainda não há vídeos nessa categoria.")
     else:
-        cols = st.columns(2)
-        for i, item in enumerate(itens):
-            with cols[i % 2]:
-                mostrar_card(item, f"categoria_{categoria_atual}_{i}")
+        mostrar_fileira_catalogo(
+            menu,
+            itens,
+            f"categoria_{categoria_atual.lower()}",
+            limite=30,
+        )
 
 
 elif menu == "🎬 Criar vídeo com IA":
