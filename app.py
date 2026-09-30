@@ -2450,7 +2450,9 @@ elif menu == "📤 Enviar vídeo":
         video = st.file_uploader(
             "Escolha um vídeo da galeria",
             type=["mp4", "mov", "m4v"],
-            key="video_upload"
+            key="video_upload",
+            max_upload_size=500,
+            help="Você pode enviar vídeos de até 500 MB."
         )
 
         if capa is not None:
