@@ -4422,7 +4422,11 @@ elif menu == "🎬 Criar vídeo com IA":
     with st.expander("💳 Comprar mais créditos"):
         st.write("Escolha um pacote. O pagamento pode abrir na Kiwify em outra aba.")
 
-        precos_exemplo = {5: "5 créditos", 15: "15 créditos", 30: "30 créditos"}
+        precos_exemplo = {
+            5: "5 créditos · R$ 9,90",
+            15: "15 créditos · R$ 24,90",
+            30: "30 créditos · R$ 39,90",
+        }
 
         for qtd in (5, 15, 30):
             url = pacotes.get(qtd, "")
