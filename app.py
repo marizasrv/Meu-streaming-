@@ -1898,6 +1898,50 @@ def criar_pdf_atividade(idade, materia, atividade_texto):
             pdf.line(margem, y, largura - margem, y)
             y -= 38
 
+    # Botão clicável para voltar ao site.
+    # st.context.url traz a URL atual do app sem parâmetros.
+    try:
+        url_app = st.context.url
+    except Exception:
+        url_app = None
+
+    if url_app:
+        botao_x = margem
+        botao_y = 64
+        botao_w = largura - (margem * 2)
+        botao_h = 30
+
+        pdf.setFillColor(roxo)
+        pdf.roundRect(
+            botao_x,
+            botao_y,
+            botao_w,
+            botao_h,
+            10,
+            fill=1,
+            stroke=0,
+        )
+
+        pdf.setFillColor(colors.white)
+        pdf.setFont("Helvetica-Bold", 10.5)
+        pdf.drawCentredString(
+            largura / 2,
+            botao_y + 10,
+            "< VOLTAR AO MUNDO DA LUNA TV",
+        )
+
+        pdf.linkURL(
+            url_app,
+            (
+                botao_x,
+                botao_y,
+                botao_x + botao_w,
+                botao_y + botao_h,
+            ),
+            relative=0,
+            thickness=0,
+        )
+
     # Rodapé
     pdf.setFillColor(cinza)
     pdf.setFont("Helvetica", 8.5)
