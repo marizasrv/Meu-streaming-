@@ -1379,6 +1379,18 @@ section[data-testid="stSidebar"] label:focus-within {
     }
 }
 
+.fase-desbloqueada {
+    display: inline-block;
+    margin: 0.35rem 0 0.55rem 0;
+    padding: 0.42rem 0.72rem;
+    border-radius: 999px;
+    background: rgba(246,216,107,0.13);
+    border: 1px solid rgba(246,216,107,0.55);
+    color: #F6D86B;
+    font-weight: 800;
+    font-size: 0.95rem;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -4746,7 +4758,10 @@ elif menu == "🎮 Jogos":
         if fase_num >= len(fases_num):
             st.progress(1.0, text="Todas as fases concluídas!", width="stretch")
             st.success("🏆 Parabéns! Você terminou todas as fases de números!")
-            st.balloons()
+            if not st.session_state.get("numeros_festa_final", False):
+                st.balloons()
+                st.snow()
+                st.session_state["numeros_festa_final"] = True
 
             if st.button(
                 "🔄 Jogar Números desde o início",
@@ -4755,21 +4770,36 @@ elif menu == "🎮 Jogos":
             ):
                 st.session_state["numeros_fase"] = 0
                 st.session_state["numeros_etapa"] = 0
+                st.session_state["numeros_festa_final"] = False
                 st.rerun()
         else:
             perguntas_numeros = fases_num[fase_num]
-            st.markdown(f"#### Fase {fase_num + 1} de {len(fases_num)}")
+            dificuldade_num = ["🌱 Fácil", "⭐ Intermediária", "🔥 Desafio"][min(fase_num, 2)]
+            st.markdown(f"#### Fase {fase_num + 1} de {len(fases_num)} · {dificuldade_num}")
 
             if etapa_numeros >= len(perguntas_numeros):
                 st.progress(1.0, text=f"Fase {fase_num + 1} concluída!", width="stretch")
                 st.success(f"🎉 Você concluiu a Fase {fase_num + 1}!")
                 st.balloons()
 
+                proxima_num = fase_num + 2
+                if fase_num + 1 < len(fases_num):
+                    st.markdown(
+                        f"<div class='fase-desbloqueada'>🔓 Fase {proxima_num} desbloqueada!</div>",
+                        unsafe_allow_html=True,
+                    )
+
                 if st.button(
                     "➡️ Ir para a próxima fase",
                     key=f"proxima_fase_numeros_{faixa}_{fase_num}",
                     width="stretch",
                 ):
+                    if fase_num + 1 < len(fases_num):
+                        st.toast(
+                            f"Fase {proxima_num} desbloqueada!",
+                            icon="🔓",
+                            duration="short",
+                        )
                     st.session_state["numeros_fase"] = fase_num + 1
                     st.session_state["numeros_etapa"] = 0
                     st.rerun()
@@ -4914,7 +4944,10 @@ elif menu == "🎮 Jogos":
         if fase_desafio >= len(fases_des):
             st.progress(1.0, text="Todas as fases concluídas!", width="stretch")
             st.success("🏆 Parabéns! Você venceu todas as fases do Desafio Mágico!")
-            st.balloons()
+            if not st.session_state.get("desafio_festa_final", False):
+                st.balloons()
+                st.snow()
+                st.session_state["desafio_festa_final"] = True
 
             if st.button(
                 "🔄 Jogar Desafio Mágico desde o início",
@@ -4923,21 +4956,36 @@ elif menu == "🎮 Jogos":
             ):
                 st.session_state["desafio_fase"] = 0
                 st.session_state["desafio_etapa"] = 0
+                st.session_state["desafio_festa_final"] = False
                 st.rerun()
         else:
             desafios = fases_des[fase_desafio]
-            st.markdown(f"#### Fase {fase_desafio + 1} de {len(fases_des)}")
+            dificuldade_des = ["🌱 Fácil", "⭐ Intermediária", "🔥 Desafio"][min(fase_desafio, 2)]
+            st.markdown(f"#### Fase {fase_desafio + 1} de {len(fases_des)} · {dificuldade_des}")
 
             if etapa_desafio >= len(desafios):
                 st.progress(1.0, text=f"Fase {fase_desafio + 1} concluída!", width="stretch")
                 st.success(f"🎉 Você concluiu a Fase {fase_desafio + 1}!")
                 st.balloons()
 
+                proxima_des = fase_desafio + 2
+                if fase_desafio + 1 < len(fases_des):
+                    st.markdown(
+                        f"<div class='fase-desbloqueada'>🔓 Fase {proxima_des} desbloqueada!</div>",
+                        unsafe_allow_html=True,
+                    )
+
                 if st.button(
                     "➡️ Ir para a próxima fase",
                     key=f"proxima_fase_desafio_{faixa}_{fase_desafio}",
                     width="stretch",
                 ):
+                    if fase_desafio + 1 < len(fases_des):
+                        st.toast(
+                            f"Fase {proxima_des} desbloqueada!",
+                            icon="🔓",
+                            duration="short",
+                        )
                     st.session_state["desafio_fase"] = fase_desafio + 1
                     st.session_state["desafio_etapa"] = 0
                     st.rerun()
