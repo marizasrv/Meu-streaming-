@@ -2399,7 +2399,44 @@ def mostrar_card(item, contexto, em_minha_lista=False, compacto=False):
             alternar_favorito(item)
 
     if st.session_state.get(f"aberto_{contexto}_{item['id']}", False):
-        st.video(item["video_url"], width="stretch")
+        reproduzir_video_url(item.get("video_url"))
+
+
+
+def reproduzir_video_url(url):
+    """Reproduz MP4/HLS e troca apenas o antigo link de teste que ficou instável."""
+    url = str(url or "").strip()
+    if not url:
+        st.warning("Este vídeo está sem link.")
+        return
+
+    # O primeiro teste do app usava o FileSamples. Se esse link antigo
+    # ainda estiver salvo, usa um MP4 público estável do Google apenas
+    # para manter o teste do player funcionando.
+    if "filesamples.com/samples/video/mp4/sample_640x360.mp4" in url.lower():
+        url = "https://storage.googleapis.com/cloud-samples-data/video/animals.mp4"
+
+    formato = (
+        "application/vnd.apple.mpegurl"
+        if ".m3u8" in url.lower()
+        else "video/mp4"
+    )
+
+    try:
+        st.video(
+            url,
+            format=formato,
+            width="stretch",
+        )
+    except Exception as e:
+        st.warning("Não consegui abrir este vídeo dentro do player.")
+        st.link_button(
+            "🌐 Abrir vídeo direto",
+            url,
+            width="stretch",
+        )
+        with st.expander("Detalhe técnico"):
+            st.code(str(e))
 
 
 def mostrar_card_horizontal(item, contexto, novo=False):
@@ -2466,7 +2503,7 @@ def mostrar_card_horizontal(item, contexto, novo=False):
             alternar_favorito(item)
 
     if st.session_state.get(chave, False):
-        st.video(item["video_url"], width="stretch")
+        reproduzir_video_url(item.get("video_url"))
 
 
 def mostrar_fileira_premium(titulo, itens, contexto, limite=12, marcar_novo=False):
@@ -2567,7 +2604,7 @@ def mostrar_card_catalogo(item, contexto, novo=False):
             alternar_favorito(item)
 
     if st.session_state.get(chave, False):
-        st.video(item["video_url"], width="stretch")
+        reproduzir_video_url(item.get("video_url"))
 
 
 def mostrar_fileira_catalogo(titulo, itens, contexto, limite=12, marcar_novo=False):
@@ -2654,7 +2691,7 @@ def mostrar_card_tv(item, contexto):
         alternar_favorito(item)
 
     if st.session_state.get(chave_tv, False):
-        st.video(item["video_url"], width="stretch")
+        reproduzir_video_url(item.get("video_url"))
 
 
 # Aplica navegação pendente ANTES de criar o st.radio.
