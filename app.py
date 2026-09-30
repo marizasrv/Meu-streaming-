@@ -1256,6 +1256,116 @@ video {
     }
 }
 
+
+/* =========================================================
+   POLIMENTO FINAL V7 — CELULAR, JOGOS, PLAYER E ACESSIBILIDADE
+   ========================================================= */
+
+/* Foco visível para teclado/controle remoto de TV */
+div[data-testid="stButton"] button:focus-visible,
+div[data-testid="stLinkButton"] a:focus-visible,
+section[data-testid="stSidebar"] label:focus-within {
+    outline: 3px solid #F6D86B !important;
+    outline-offset: 3px !important;
+}
+
+/* Player consistente em celular, notebook e TV */
+[data-testid="stVideo"],
+[data-testid="stVideo"] video {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+[data-testid="stVideo"] video {
+    aspect-ratio: 16 / 9 !important;
+    object-fit: contain !important;
+    background: #000 !important;
+}
+
+/* Legendas do jogo da memória centralizadas e próximas das cartas */
+[class*="st-key-memoria_carta_"] + div[data-testid="stCaptionContainer"],
+[class*="st-key-memoria_carta_"] ~ div[data-testid="stCaptionContainer"] {
+    text-align: center !important;
+    margin-top: 0.10rem !important;
+    margin-bottom: 0.30rem !important;
+}
+[class*="st-key-memoria_carta_"] + div[data-testid="stCaptionContainer"] p,
+[class*="st-key-memoria_carta_"] ~ div[data-testid="stCaptionContainer"] p {
+    font-size: 0.82rem !important;
+    line-height: 1.1 !important;
+}
+
+/* Botões auxiliares do jogo da memória mais compactos */
+[class*="st-key-memoria_continuar"] button,
+[class*="st-key-memoria_novo_jogo"] button {
+    min-height: 44px !important;
+    padding: 0.35rem 0.70rem !important;
+    border-radius: 13px !important;
+}
+[class*="st-key-memoria_continuar"] button p,
+[class*="st-key-memoria_novo_jogo"] button p {
+    font-size: 0.95rem !important;
+}
+
+/* Mobile: reduz rolagem sem perder legibilidade */
+@media (max-width: 640px) {
+    .block-container {
+        padding-top: 0.65rem !important;
+    }
+
+    [class*="st-key-catalogcard_"],
+    [class*="st-key-premiumcard_"],
+    [class*="st-key-tvcard_"] {
+        margin-bottom: 0.35rem !important;
+    }
+
+    [class*="st-key-cardacoes_"] button,
+    [class*="st-key-tv_assistir_"] button,
+    [class*="st-key-tv_fechar_"] button,
+    [class*="st-key-tv_fav_"] button {
+        min-height: 44px !important;
+        padding: 0.34rem 0.58rem !important;
+    }
+
+    [class*="st-key-cardacoes_"] button p,
+    [class*="st-key-tv_assistir_"] button p,
+    [class*="st-key-tv_fechar_"] button p,
+    [class*="st-key-tv_fav_"] button p {
+        font-size: 0.94rem !important;
+        line-height: 1.05 !important;
+    }
+
+    [class*="st-key-memoria_carta_"] button {
+        min-height: 96px !important;
+    }
+
+    [class*="st-key-memoria_carta_"] button p,
+    [class*="st-key-memoria_carta_"] button span,
+    [class*="st-key-memoria_carta_"] button [data-testid="stMarkdownContainer"] p {
+        font-size: 2.8rem !important;
+    }
+
+    [data-testid="stVideo"] video {
+        max-height: 55vh !important;
+        border-radius: 13px !important;
+    }
+}
+
+/* Notebook: aproveita largura sem deixar os elementos gigantes */
+@media (min-width: 641px) and (max-width: 1399px) {
+    .block-container {
+        max-width: 1250px !important;
+    }
+}
+
+/* Smart TV / monitor grande: foco em leitura à distância */
+@media (min-width: 1400px) {
+    [class*="st-key-tv_assistir_"] button,
+    [class*="st-key-tv_fechar_"] button,
+    [class*="st-key-tv_fav_"] button {
+        min-height: 62px !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -2125,7 +2235,7 @@ def mostrar_card(item, contexto, em_minha_lista=False, compacto=False):
         if compacto:
             st.image(item["capa_url"], width=280)
         else:
-            st.image(item["capa_url"], use_container_width=True)
+            st.image(item["capa_url"], width="stretch")
 
     if compacto:
         st.markdown(f"#### ✨ {item.get('nome', 'Sem título')}")
@@ -2215,7 +2325,7 @@ def mostrar_card_horizontal(item, contexto, novo=False):
             if st.button(
                 "▶ Assistir",
                 key=f"assistir_{contexto}_{item['id']}",
-                use_container_width=True,
+                width="stretch",
             ):
                 registrar_assistido(item)
                 st.session_state[chave] = True
@@ -2224,7 +2334,7 @@ def mostrar_card_horizontal(item, contexto, novo=False):
             if st.button(
                 "✖ Fechar",
                 key=f"fechar_{contexto}_{item['id']}",
-                use_container_width=True,
+                width="stretch",
             ):
                 st.session_state[chave] = False
                 st.rerun()
@@ -2234,7 +2344,7 @@ def mostrar_card_horizontal(item, contexto, novo=False):
         if st.button(
             texto,
             key=f"fav_{contexto}_{item['id']}",
-            use_container_width=True,
+            width="stretch",
         ):
             alternar_favorito(item)
 
@@ -2316,7 +2426,7 @@ def mostrar_card_catalogo(item, contexto, novo=False):
             if st.button(
                 "▶ Assistir",
                 key=f"assistir_{contexto}_{item['id']}",
-                use_container_width=True,
+                width="stretch",
             ):
                 registrar_assistido(item)
                 st.session_state[chave] = True
@@ -2325,7 +2435,7 @@ def mostrar_card_catalogo(item, contexto, novo=False):
             if st.button(
                 "✖ Fechar",
                 key=f"fechar_{contexto}_{item['id']}",
-                use_container_width=True,
+                width="stretch",
             ):
                 st.session_state[chave] = False
                 st.rerun()
@@ -2335,7 +2445,7 @@ def mostrar_card_catalogo(item, contexto, novo=False):
         if st.button(
             texto,
             key=f"fav_{contexto}_{item['id']}",
-            use_container_width=True,
+            width="stretch",
         ):
             alternar_favorito(item)
 
@@ -2384,7 +2494,7 @@ st.markdown("""
 def mostrar_card_tv(item, contexto):
     """Card grande e simples para uso em notebook e Smart TV."""
     if item.get("capa_url"):
-        st.image(item["capa_url"], use_container_width=True)
+        st.image(item["capa_url"], width="stretch")
 
     nome_tv = str(item.get("nome") or "Sem título")
     st.markdown(f"### ✨ {nome_tv}")
@@ -2403,7 +2513,7 @@ def mostrar_card_tv(item, contexto):
         if st.button(
             "▶ Assistir agora",
             key=f"tv_assistir_{contexto}_{item['id']}",
-            use_container_width=True,
+            width="stretch",
         ):
             registrar_assistido(item)
             st.session_state[chave_tv] = True
@@ -2412,7 +2522,7 @@ def mostrar_card_tv(item, contexto):
         if st.button(
             "✖ Fechar vídeo",
             key=f"tv_fechar_{contexto}_{item['id']}",
-            use_container_width=True,
+            width="stretch",
         ):
             st.session_state[chave_tv] = False
             st.rerun()
@@ -2422,7 +2532,7 @@ def mostrar_card_tv(item, contexto):
     if st.button(
         texto_tv,
         key=f"tv_fav_{contexto}_{item['id']}",
-        use_container_width=True,
+        width="stretch",
     ):
         alternar_favorito(item)
 
@@ -2492,7 +2602,7 @@ if menu != "🏠 Início":
         if st.button(
             "← Voltar",
             key="botao_voltar_inicio",
-            use_container_width=True,
+            width="stretch",
         ):
             voltar_inicio()
 
@@ -2514,7 +2624,7 @@ if menu == "🏠 Início":
                 "👤 Minha conta",
                 key="atalho_minha_conta",
                 on_click=abrir_minha_conta,
-                use_container_width=True,
+                width="stretch",
             )
 
             if st.session_state.plano_atual == "Premium":
@@ -2532,7 +2642,7 @@ if menu == "🏠 Início":
                 "👤 Entrar / Criar conta",
                 key="atalho_login_home",
                 on_click=abrir_minha_conta,
-                use_container_width=True,
+                width="stretch",
             )
 
     total = len(videos_inicio)
@@ -3016,7 +3126,7 @@ elif menu == "🔒 Premium":
             key="premium_ir_login",
             on_click=mudar_menu,
             args=("👤 Entrar / Minha conta",),
-            use_container_width=True,
+            width="stretch",
         )
 
     elif not (
@@ -3038,7 +3148,7 @@ elif menu == "🔒 Premium":
             key="premium_ver_planos",
             on_click=mudar_menu,
             args=("💎 Planos",),
-            use_container_width=True,
+            width="stretch",
         )
 
     else:
@@ -3415,7 +3525,7 @@ elif menu == "🎬 Criar vídeo com IA":
             key="video_ir_login",
             on_click=mudar_menu,
             args=("👤 Entrar / Minha conta",),
-            use_container_width=True,
+            width="stretch",
         )
         saldo_video = 0
     else:
@@ -3435,7 +3545,7 @@ elif menu == "🎬 Criar vídeo com IA":
         if st.button(
             "🔄 Atualizar meus créditos",
             key="atualizar_meus_creditos_video",
-            use_container_width=True,
+            width="stretch",
         ):
             st.rerun()
 
@@ -3492,7 +3602,7 @@ elif menu == "🎬 Criar vídeo com IA":
                     f"💎 Comprar {precos_exemplo[qtd]}",
                     key=f"pacote_creditos_{qtd}_sem_link",
                     disabled=True,
-                    use_container_width=True,
+                    width="stretch",
                 )
 
         if not links_configurados:
@@ -3698,7 +3808,7 @@ elif menu == "🎬 Criar vídeo com IA":
     if st.button(
         "✨ Gerar vídeo com IA",
         key="gerar_video_ia",
-        use_container_width=True,
+        width="stretch",
         disabled=not confirmar_custo,
     ):
         if not st.session_state.usuario_logado:
@@ -4067,7 +4177,7 @@ elif menu == "🎬 Criar vídeo com IA":
                 "mundo_da_luna_video_ia.mp4",
             ),
             mime="video/mp4",
-            use_container_width=True,
+            width="stretch",
             key="baixar_video_ia",
         )
 
@@ -4203,7 +4313,7 @@ elif menu == "🎮 Jogos":
                     clicou = st.button(
                         texto_carta,
                         key=f"memoria_carta_{indice}",
-                        use_container_width=True,
+                        width="stretch",
                         disabled=(
                             indice in pares
                             or erro_pendente
@@ -4287,7 +4397,7 @@ elif menu == "🎮 Jogos":
             if st.button(
                 "🔄 Tentar de novo",
                 key="memoria_continuar",
-                use_container_width=True,
+                width="stretch",
             ):
                 st.session_state[
                     "memoria_selecionadas"
@@ -4313,7 +4423,7 @@ elif menu == "🎮 Jogos":
         if st.button(
             "🎲 Novo jogo",
             key="memoria_novo_jogo",
-            use_container_width=True,
+            width="stretch",
         ):
             for chave in [
                 "memoria_cartas",
@@ -4399,7 +4509,7 @@ elif menu == "🎮 Jogos":
         if st.button(
             "✅ Conferir palavra",
             key=f"conferir_palavra_{faixa}",
-            use_container_width=True,
+            width="stretch",
         ):
             if correta_palavra:
                 st.success(mensagem_correta)
@@ -4460,7 +4570,7 @@ elif menu == "🎮 Jogos":
         if st.button(
             "⭐ Conferir resposta",
             key=f"conferir_numero_{faixa}",
-            use_container_width=True,
+            width="stretch",
         ):
             if int(resposta_numero) == resposta_correta_num:
                 st.success("🎉 Acertou! Muito bem!")
@@ -4542,7 +4652,7 @@ elif menu == "🎮 Jogos":
         if st.button(
             "🌟 Conferir desafio",
             key=f"conferir_desafio_{faixa}",
-            use_container_width=True,
+            width="stretch",
         ):
             if correta_desafio:
                 st.success(sucesso_desafio)
@@ -4689,7 +4799,7 @@ elif menu == "📚 Atividades escolares":
         if st.button(
             "✅ Conferir atividade",
             key=f"conferir_atividade_{idade}_{materia}",
-            use_container_width=True,
+            width="stretch",
         ):
             if resposta_correta:
                 st.success("🎉 Muito bem! Resposta correta!")
@@ -4814,7 +4924,7 @@ elif menu == "🗑️ Gerenciar":
         if st.button(
             "💎 Adicionar créditos",
             key="admin_adicionar_creditos",
-            use_container_width=True,
+            width="stretch",
         ):
             if not email_creditos.strip():
                 st.warning("Digite o e-mail do cliente.")
