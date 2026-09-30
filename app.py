@@ -1733,6 +1733,36 @@ section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked)
     }
 }
 
+
+/* V17 — e-mail da conta menor no menu lateral */
+section[data-testid="stSidebar"] div[data-testid="stAlert"] {
+    padding: 0.45rem 0.55rem !important;
+    border-radius: 12px !important;
+}
+
+section[data-testid="stSidebar"] div[data-testid="stAlert"] p,
+section[data-testid="stSidebar"] div[data-testid="stAlert"] span,
+section[data-testid="stSidebar"] div[data-testid="stAlert"] a {
+    font-size: 0.78rem !important;
+    line-height: 1.12 !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+}
+
+@media (max-width: 640px) {
+    section[data-testid="stSidebar"] div[data-testid="stAlert"] {
+        padding: 0.35rem 0.45rem !important;
+        border-radius: 10px !important;
+    }
+
+    section[data-testid="stSidebar"] div[data-testid="stAlert"] p,
+    section[data-testid="stSidebar"] div[data-testid="stAlert"] span,
+    section[data-testid="stSidebar"] div[data-testid="stAlert"] a {
+        font-size: 0.68rem !important;
+        line-height: 1.08 !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
