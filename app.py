@@ -3788,6 +3788,40 @@ elif menu == "📤 Enviar vídeo":
             help="Grátis aparece nas áreas normais. Premium aparece somente na Área Premium."
         )
 
+        serie_nome = ""
+        temporada = None
+        episodio = None
+
+        if categoria == "Séries":
+            st.markdown("### 📺 Dados da série")
+            serie_nome = st.text_input(
+                "Nome da série",
+                placeholder="Ex.: Aventuras da Luna",
+                key="serie_nome_upload",
+            )
+
+            col_temp, col_ep = st.columns(2, gap="small")
+            with col_temp:
+                temporada = st.number_input(
+                    "Temporada",
+                    min_value=1,
+                    step=1,
+                    value=1,
+                    key="serie_temporada_upload",
+                )
+            with col_ep:
+                episodio = st.number_input(
+                    "Episódio",
+                    min_value=1,
+                    step=1,
+                    value=1,
+                    key="serie_episodio_upload",
+                )
+
+            st.caption(
+                "Esses dados organizam automaticamente os episódios por temporada."
+            )
+
         if acesso == "Premium":
             st.info("💎 Este vídeo ficará disponível somente para assinantes Premium ativos.")
         else:
@@ -3872,15 +3906,26 @@ elif menu == "📤 Enviar vídeo":
                         if capa is not None:
                             capa_path, capa_url = upload_arquivo(capa, "capas")
 
-                        supabase.table("videos").insert({
+                        dados_video = {
                             "nome": nome.strip() if nome.strip() else nome_padrao,
                             "categoria": categoria_para_salvar(categoria, acesso),
                             "video_url": video_url,
                             "video_path": video_path,
                             "capa_url": capa_url,
                             "capa_path": capa_path,
-                            "favorito": False
-                        }).execute()
+                            "favorito": False,
+                        }
+
+                        if categoria == "Séries":
+                            dados_video.update({
+                                "serie_nome": serie_nome.strip() or (
+                                    nome.strip() if nome.strip() else "Série sem nome"
+                                ),
+                                "temporada": int(temporada or 1),
+                                "episodio": int(episodio or 1),
+                            })
+
+                        supabase.table("videos").insert(dados_video).execute()
 
                         st.success("✅ Vídeo salvo permanentemente!")
                         if not usando_arquivo:
@@ -3908,13 +3953,63 @@ elif menu in ["🧸 Infantil", "🎬 Filmes", "📺 Séries"]:
 
     if not itens:
         st.info("Ainda não há vídeos nessa categoria.")
-    else:
+
+    elif categoria_atual != "Séries":
         mostrar_fileira_catalogo(
             menu,
             itens,
             f"categoria_{categoria_atual.lower()}",
             limite=30,
         )
+
+    else:
+        # Organiza séries por nome, temporada e episódio.
+        def chave_serie(item):
+            nome_serie = str(item.get("serie_nome") or "").strip()
+            if nome_serie:
+                return nome_serie
+            return str(item.get("nome") or "Série sem nome").strip()
+
+        series_agrupadas = {}
+        for item in itens:
+            nome_serie = chave_serie(item)
+            temporada_item = int(item.get("temporada") or 1)
+            episodio_item = int(item.get("episodio") or 1)
+
+            series_agrupadas.setdefault(nome_serie, {})
+            series_agrupadas[nome_serie].setdefault(temporada_item, [])
+            series_agrupadas[nome_serie][temporada_item].append(
+                (episodio_item, item)
+            )
+
+        for nome_serie in sorted(series_agrupadas):
+            st.markdown(f"## ✨ {nome_serie}")
+
+            temporadas = series_agrupadas[nome_serie]
+            for numero_temporada in sorted(temporadas):
+                st.markdown(f"### 📺 Temporada {numero_temporada}")
+
+                episodios = sorted(
+                    temporadas[numero_temporada],
+                    key=lambda par: par[0],
+                )
+
+                itens_temporada = []
+                for numero_episodio, item in episodios:
+                    item_exibicao = dict(item)
+                    titulo_original = str(item.get("nome") or "").strip()
+                    item_exibicao["nome"] = (
+                        f"Episódio {numero_episodio}"
+                        + (f" · {titulo_original}" if titulo_original else "")
+                    )
+                    itens_temporada.append(item_exibicao)
+
+                mostrar_fileira_catalogo(
+                    f"Temporada {numero_temporada}",
+                    itens_temporada,
+                    f"series_{nome_serie}_{numero_temporada}",
+                    limite=50,
+                )
 
 
 elif menu == "🎬 Criar vídeo com IA":
