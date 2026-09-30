@@ -1439,6 +1439,65 @@ div[data-testid="stTextArea"] textarea:focus {
     -webkit-text-fill-color: #111827 !important;
 }
 
+
+/* V11 — Modo TV compacto no notebook/computador */
+@media (min-width: 641px) and (max-width: 1399px) {
+    [class*="st-key-tvcard_"] [data-testid="stImage"] img {
+        max-height: 125px !important;
+        aspect-ratio: 16 / 9 !important;
+        object-fit: cover !important;
+        border-radius: 12px !important;
+    }
+
+    [class*="st-key-tvcard_"] h3 {
+        font-size: 1rem !important;
+        line-height: 1.12 !important;
+        margin-top: 0.20rem !important;
+        margin-bottom: 0.08rem !important;
+    }
+
+    [class*="st-key-tvcard_"] div[data-testid="stCaptionContainer"] p {
+        font-size: 0.78rem !important;
+        line-height: 1.1 !important;
+    }
+
+    [class*="st-key-tv_assistir_"] button,
+    [class*="st-key-tv_fechar_"] button,
+    [class*="st-key-tv_fav_"] button {
+        min-height: 40px !important;
+        height: 40px !important;
+        padding: 0.20rem 0.45rem !important;
+        border-radius: 11px !important;
+    }
+
+    [class*="st-key-tv_assistir_"] button p,
+    [class*="st-key-tv_fechar_"] button p,
+    [class*="st-key-tv_fav_"] button p {
+        font-size: 0.86rem !important;
+        line-height: 1 !important;
+    }
+
+    [class*="st-key-tvcard_"] div[data-testid="stButton"] {
+        margin-top: 0.08rem !important;
+        margin-bottom: 0.08rem !important;
+    }
+
+    [class*="st-key-tvcard_"] [data-testid="stVideo"] video {
+        max-height: 155px !important;
+        object-fit: contain !important;
+    }
+
+    .tv-dica {
+        font-size: 0.84rem !important;
+        margin-bottom: 0.55rem !important;
+    }
+
+    hr {
+        margin-top: 0.45rem !important;
+        margin-bottom: 0.45rem !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
