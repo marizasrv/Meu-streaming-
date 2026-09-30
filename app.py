@@ -5067,17 +5067,24 @@ elif menu == "🎮 Jogos":
             )
             st.write(pergunta_atual["pergunta"])
 
-            resposta_palavra = st.radio(
-                pergunta_atual["rotulo"],
-                pergunta_atual["opcoes"],
-                key=f"jogo_palavra_{faixa}_{etapa_palavras}",
-            )
-
-            if st.button(
-                "✅ Conferir palavra",
-                key=f"conferir_palavra_{faixa}_{etapa_palavras}",
-                width="stretch",
+            with st.form(
+                key=f"form_palavra_{faixa}_{etapa_palavras}",
+                clear_on_submit=False,
+                enter_to_submit=True,
             ):
+                resposta_palavra = st.radio(
+                    pergunta_atual["rotulo"],
+                    pergunta_atual["opcoes"],
+                    key=f"jogo_palavra_{faixa}_{etapa_palavras}",
+                )
+                confirmar_palavra = st.form_submit_button(
+                    "✅ Conferir palavra",
+                    width="stretch",
+                )
+
+            st.caption("⌨️ No notebook, você também pode pressionar Enter para confirmar.")
+
+            if confirmar_palavra:
                 if resposta_palavra == pergunta_atual["correta"]:
                     st.success(pergunta_atual["mensagem"])
                     st.balloons()
@@ -5251,19 +5258,26 @@ elif menu == "🎮 Jogos":
                 )
                 st.write(pergunta_numero)
 
-                resposta_numero = st.number_input(
-                    "Digite sua resposta:",
-                    min_value=0,
-                    max_value=maximo_num,
-                    step=1,
-                    key=f"jogo_numero_{faixa}_{fase_num}_{etapa_numeros}",
-                )
-
-                if st.button(
-                    "⭐ Conferir resposta",
-                    key=f"conferir_numero_{faixa}_{fase_num}_{etapa_numeros}",
-                    width="stretch",
+                with st.form(
+                    key=f"form_numero_{faixa}_{fase_num}_{etapa_numeros}",
+                    clear_on_submit=False,
+                    enter_to_submit=True,
                 ):
+                    resposta_numero = st.number_input(
+                        "Digite sua resposta:",
+                        min_value=0,
+                        max_value=maximo_num,
+                        step=1,
+                        key=f"jogo_numero_{faixa}_{fase_num}_{etapa_numeros}",
+                    )
+                    confirmar_numero = st.form_submit_button(
+                        "⭐ Conferir resposta",
+                        width="stretch",
+                    )
+
+                st.caption("⌨️ Digite a resposta e pressione Enter para confirmar.")
+
+                if confirmar_numero:
                     if int(resposta_numero) == resposta_correta_num:
                         st.success("🎉 Acertou! Muito bem!")
                         st.balloons()
@@ -5437,17 +5451,24 @@ elif menu == "🎮 Jogos":
                 )
                 st.write(pergunta_desafio)
 
-                resposta_desafio = st.radio(
-                    "Escolha:",
-                    opcoes_desafio,
-                    key=f"desafio_{faixa}_{fase_desafio}_{etapa_desafio}",
-                )
-
-                if st.button(
-                    "🌟 Conferir desafio",
-                    key=f"conferir_desafio_{faixa}_{fase_desafio}_{etapa_desafio}",
-                    width="stretch",
+                with st.form(
+                    key=f"form_desafio_{faixa}_{fase_desafio}_{etapa_desafio}",
+                    clear_on_submit=False,
+                    enter_to_submit=True,
                 ):
+                    resposta_desafio = st.radio(
+                        "Escolha:",
+                        opcoes_desafio,
+                        key=f"desafio_{faixa}_{fase_desafio}_{etapa_desafio}",
+                    )
+                    confirmar_desafio = st.form_submit_button(
+                        "🌟 Conferir desafio",
+                        width="stretch",
+                    )
+
+                st.caption("⌨️ No notebook, você também pode pressionar Enter para confirmar.")
+
+                if confirmar_desafio:
                     if resposta_desafio == correta_desafio:
                         st.success(sucesso_desafio)
                         st.balloons()
