@@ -2302,7 +2302,7 @@ elif menu == "🎬 Criar vídeo com IA":
         fal_configurado = False
 
     if fal_configurado:
-        st.caption("🟢 fal.ai configurado • Wan 2.2 Turbo econômico")
+        st.caption("🟢 fal.ai configurado • Wan 2.2 Turbo econômico • prioridade ativa")
     else:
         st.caption("🟣 Provedor alternativo fal.ai: ainda não configurado")
 
@@ -2544,10 +2544,17 @@ elif menu == "🎬 Criar vídeo com IA":
             "💰 Modo econômico: fal.ai Wan 2.2 Turbo em 480p."
         )
 
+    confirmar_custo = st.checkbox(
+        "💳 Confirmo que quero gerar o vídeo e usar saldo do provedor de IA",
+        value=False,
+        key="confirmar_custo_video_ia",
+    )
+
     if st.button(
         "✨ Gerar vídeo com IA",
         key="gerar_video_ia",
         use_container_width=True,
+        disabled=not confirmar_custo,
     ):
         if not st.session_state.usuario_logado:
             st.warning("Entre ou crie uma conta para gerar vídeo com IA.")
@@ -2751,8 +2758,18 @@ elif menu == "🎬 Criar vídeo com IA":
                         video_bytes = None
                         erro_hf = None
 
-                        # 1) Tenta primeiro pelo Hugging Face, quando configurado.
-                        if hf_token:
+                        # Se o fal.ai estiver configurado, usa o Turbo econômico
+                        # diretamente. Isso evita perder tempo tentando HF sem saldo.
+                        if fal_api_key:
+                            st.info(
+                                "🎬 Usando fal.ai Wan 2.2 Turbo econômico."
+                            )
+
+                            video_bytes = gerar_video_fal_direto()
+                            provedor_usado = "fal.ai direto • Wan 2.2 Turbo"
+
+                        # Se fal.ai não estiver configurado, tenta Hugging Face.
+                        elif hf_token:
                             try:
                                 cliente_hf = InferenceClient(
                                     provider=hf_provider,
@@ -2768,41 +2785,7 @@ elif menu == "🎬 Criar vídeo com IA":
 
                             except Exception as erro_primario:
                                 erro_hf = erro_primario
-                                msg_hf = str(erro_primario).lower()
-
-                                sem_creditos_hf = (
-                                    "402" in str(erro_primario)
-                                    or "payment required" in msg_hf
-                                    or "depleted" in msg_hf
-                                    or "monthly included credits" in msg_hf
-                                    or "billing" in msg_hf
-                                    or "quota" in msg_hf
-                                )
-
-                                # 2) Se os créditos HF acabaram e existe chave fal.ai,
-                                # chama o fal.ai diretamente para não depender
-                                # de URLs temporárias geradas pelo roteador HF.
-                                if sem_creditos_hf and fal_api_key:
-                                    st.info(
-                                        "🔄 Os créditos do Hugging Face acabaram. "
-                                        "Enviando a imagem diretamente ao fal.ai..."
-                                    )
-
-                                    video_bytes = gerar_video_fal_direto()
-                                    provedor_usado = "fal.ai direto"
-                                else:
-                                    raise
-
-                        # Se não há HF_TOKEN mas existe FAL_API_KEY,
-                        # usa fal.ai diretamente.
-                        elif fal_api_key:
-                            st.info(
-                                "🎬 Enviando a imagem diretamente ao fal.ai."
-                            )
-
-                            video_bytes = gerar_video_fal_direto()
-                            provedor_usado = "fal.ai direto"
-
+                                raise
                         if not video_bytes:
                             raise RuntimeError(
                                 "O provedor não retornou o vídeo."
