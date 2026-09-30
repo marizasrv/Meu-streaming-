@@ -4316,6 +4316,7 @@ elif menu == "🎮 Jogos":
                         width="stretch",
                         disabled=(
                             indice in pares
+                            or indice in selecionadas
                             or erro_pendente
                         ),
                     )
@@ -4387,27 +4388,25 @@ elif menu == "🎮 Jogos":
 
                             st.rerun()
 
+        if len(st.session_state["memoria_selecionadas"]) == 1:
+            st.markdown(
+                ":small[👆 Agora escolha uma segunda carta.]"
+            )
+
         if st.session_state[
             "memoria_erro_pendente"
         ]:
             st.markdown(
-                ":small[💜 Cartas diferentes. Observe e tente novamente.]"
+                ":small[💜 Cartas diferentes. Elas vão virar novamente.]"
             )
-
-            if st.button(
-                "🔄 Tentar de novo",
-                key="memoria_continuar",
-                width="stretch",
-            ):
-                st.session_state[
-                    "memoria_selecionadas"
-                ] = []
-
-                st.session_state[
-                    "memoria_erro_pendente"
-                ] = False
-
-                st.rerun()
+            time.sleep(1.2)
+            st.session_state[
+                "memoria_selecionadas"
+            ] = []
+            st.session_state[
+                "memoria_erro_pendente"
+            ] = False
+            st.rerun()
 
         if (
             len(
