@@ -2519,67 +2519,160 @@ elif menu == "🔒 Premium":
                     f"**📺 {len(series_premium)} Séries**"
                 )
 
-            st.markdown(
-                '<div class="dica-deslize">'
-                'Deslize para o lado para ver mais vídeos. 💜'
-                '</div>',
-                unsafe_allow_html=True,
-            )
+            # Organização inteligente da Área Premium:
+            # com poucos vídeos, cada conteúdo aparece apenas uma vez.
+            modo_poucos_videos = total_premium <= 4
 
-            # Último vídeo Premium assistido
-            ultimo_premium = ultimo_assistido(exclusivos)
-
-            if ultimo_premium:
-                mostrar_fileira_premium(
-                    "▶ Continuar assistindo",
-                    [ultimo_premium],
-                    "premium_continuar",
-                    limite=1,
+            def chave_video_premium(item):
+                return str(
+                    item.get("id")
+                    or item.get("video_url")
+                    or item.get("nome")
+                    or ""
                 )
 
-            # Favoritos Premium
+            ultimo_premium = ultimo_assistido(exclusivos)
+
             favoritos_premium = [
                 v for v in exclusivos
                 if bool(v.get("favorito", False))
             ]
 
-            if favoritos_premium:
+            if modo_poucos_videos:
+                st.caption(
+                    "✨ Como há poucos conteúdos, cada vídeo aparece "
+                    "apenas uma vez para a tela ficar mais organizada."
+                )
+
+                ids_mostrados = set()
+
+                # 1) Prioriza o conteúdo que a pessoa já começou a assistir.
+                if ultimo_premium:
+                    mostrar_fileira_premium(
+                        "▶ Continuar assistindo",
+                        [ultimo_premium],
+                        "premium_continuar",
+                        limite=1,
+                    )
+                    ids_mostrados.add(
+                        chave_video_premium(ultimo_premium)
+                    )
+
+                # 2) Depois mostra favoritos que ainda não apareceram.
+                favoritos_sem_repetir = [
+                    v for v in favoritos_premium
+                    if chave_video_premium(v) not in ids_mostrados
+                ]
+
+                if favoritos_sem_repetir:
+                    mostrar_fileira_premium(
+                        "❤️ Minha Lista Premium",
+                        favoritos_sem_repetir,
+                        "premium_favoritos",
+                        limite=12,
+                    )
+
+                    ids_mostrados.update(
+                        chave_video_premium(v)
+                        for v in favoritos_sem_repetir
+                    )
+
+                # 3) O restante aparece somente na própria categoria.
+                restantes = [
+                    v for v in exclusivos
+                    if chave_video_premium(v) not in ids_mostrados
+                ]
+
+                grupos_compactos = [
+                    (
+                        "🧸 Infantil",
+                        [
+                            v for v in restantes
+                            if categoria_base(v) == "Infantil"
+                        ],
+                        "premium_infantil",
+                    ),
+                    (
+                        "🎬 Filmes",
+                        [
+                            v for v in restantes
+                            if categoria_base(v) == "Filmes"
+                        ],
+                        "premium_filmes",
+                    ),
+                    (
+                        "📺 Séries",
+                        [
+                            v for v in restantes
+                            if categoria_base(v) == "Séries"
+                        ],
+                        "premium_series",
+                    ),
+                ]
+
+                for titulo_grupo, itens_grupo, chave_grupo in grupos_compactos:
+                    if itens_grupo:
+                        mostrar_fileira_premium(
+                            titulo_grupo,
+                            itens_grupo,
+                            chave_grupo,
+                            limite=12,
+                        )
+
+            else:
+                # Com mais conteúdos, usa a organização completa.
+                st.markdown(
+                    '<div class="dica-deslize">'
+                    'Deslize para o lado para ver mais vídeos. 💜'
+                    '</div>',
+                    unsafe_allow_html=True,
+                )
+
+                if ultimo_premium:
+                    mostrar_fileira_premium(
+                        "▶ Continuar assistindo",
+                        [ultimo_premium],
+                        "premium_continuar",
+                        limite=1,
+                    )
+
+                if favoritos_premium:
+                    mostrar_fileira_premium(
+                        "❤️ Minha Lista Premium",
+                        favoritos_premium,
+                        "premium_favoritos",
+                        limite=12,
+                    )
+
                 mostrar_fileira_premium(
-                    "❤️ Minha Lista Premium",
-                    favoritos_premium,
-                    "premium_favoritos",
+                    "✨ Novidades",
+                    exclusivos,
+                    "premium_novidades",
+                    limite=12,
+                    marcar_novo=True,
+                )
+
+                mostrar_fileira_premium(
+                    "🧸 Infantil",
+                    infantil_premium,
+                    "premium_infantil",
                     limite=12,
                 )
 
-            # Novidades Premium
-            mostrar_fileira_premium(
-                "✨ Novidades",
-                exclusivos,
-                "premium_novidades",
-                limite=12,
-                marcar_novo=True,
-            )
+                mostrar_fileira_premium(
+                    "🎬 Filmes",
+                    filmes_premium,
+                    "premium_filmes",
+                    limite=12,
+                )
 
-            mostrar_fileira_premium(
-                "🧸 Infantil",
-                infantil_premium,
-                "premium_infantil",
-                limite=12,
-            )
+                mostrar_fileira_premium(
+                    "📺 Séries",
+                    series_premium,
+                    "premium_series",
+                    limite=12,
+                )
 
-            mostrar_fileira_premium(
-                "🎬 Filmes",
-                filmes_premium,
-                "premium_filmes",
-                limite=12,
-            )
-
-            mostrar_fileira_premium(
-                "📺 Séries",
-                series_premium,
-                "premium_series",
-                limite=12,
-            )
 
 elif menu == "📤 Enviar vídeo":
     st.subheader("📤 Enviar novo vídeo")
