@@ -3161,8 +3161,11 @@ elif menu == "🎬 Criar vídeo com IA":
 
 
 elif menu == "🎮 Jogos":
-    st.markdown("## 🎮 Jogos")
-    st.caption("Joguinhos simples e educativos do Mundo da Luna.")
+    st.markdown("## 🎮 Jogos do Mundo da Luna")
+    st.caption(
+        "Escolha a idade e depois o jogo. "
+        "Cada atividade muda de dificuldade conforme a faixa etária."
+    )
 
     faixa = st.selectbox(
         "👧 Escolha a faixa etária",
@@ -3170,159 +3173,471 @@ elif menu == "🎮 Jogos":
         key="faixa_jogos",
     )
 
-    st.markdown("### 🧠 Jogo da memória")
-    st.caption("Encontre os pares iguais. Cada faixa etária ganha uma quantidade diferente de cartas.")
-
-    # Reinicia o jogo quando a faixa etária mudar.
-    if st.session_state.get("memoria_faixa") != faixa:
-        st.session_state["memoria_faixa"] = faixa
-        st.session_state.pop("memoria_cartas", None)
-        st.session_state.pop("memoria_selecionadas", None)
-        st.session_state.pop("memoria_pares", None)
-        st.session_state.pop("memoria_tentativas", None)
-        st.session_state.pop("memoria_erro_pendente", None)
-
-    quantidade_pares = {
-        "4–5 anos": 3,
-        "6–7 anos": 4,
-        "8–9 anos": 6,
-    }[faixa]
-
-    personagens_memoria = [
-        ("👧", "Luna"),
-        ("🐰", "Coelhinho"),
-        ("🏰", "Castelo"),
-        ("⭐", "Estrela"),
-        ("📖", "Livro mágico"),
-        ("🌙", "Lua"),
-    ][:quantidade_pares]
-
-    if "memoria_cartas" not in st.session_state:
-        import random
-
-        cartas = []
-        for emoji, nome in personagens_memoria:
-            cartas.append({"emoji": emoji, "nome": nome})
-            cartas.append({"emoji": emoji, "nome": nome})
-
-        random.shuffle(cartas)
-        st.session_state["memoria_cartas"] = cartas
-        st.session_state["memoria_selecionadas"] = []
-        st.session_state["memoria_pares"] = []
-        st.session_state["memoria_tentativas"] = 0
-        st.session_state["memoria_erro_pendente"] = False
-
-    cartas = st.session_state["memoria_cartas"]
-    selecionadas = st.session_state["memoria_selecionadas"]
-    pares = st.session_state["memoria_pares"]
-    erro_pendente = st.session_state["memoria_erro_pendente"]
-
-    st.write(
-        f"🏆 Pares encontrados: **{len(pares)}/{quantidade_pares}**  •  "
-        f"🎯 Tentativas: **{st.session_state['memoria_tentativas']}**"
+    jogo_escolhido = st.radio(
+        "✨ Escolha um jogo",
+        [
+            "🧠 Memória",
+            "🔤 Palavras",
+            "🔢 Números",
+            "🌟 Desafio mágico",
+        ],
+        key="jogo_escolhido",
     )
 
-    colunas_memoria = 3 if faixa != "8–9 anos" else 4
+    st.markdown("---")
 
-    for inicio in range(0, len(cartas), colunas_memoria):
-        cols = st.columns(colunas_memoria, gap="small", wrap=False)
-        for posicao, indice in enumerate(range(inicio, min(inicio + colunas_memoria, len(cartas)))):
-            carta = cartas[indice]
-            esta_aberta = indice in selecionadas or indice in pares
-            texto_carta = carta["emoji"] if esta_aberta else "❓"
-
-            with cols[posicao]:
-                clicou = st.button(
-                    texto_carta,
-                    key=f"memoria_carta_{indice}",
-                    use_container_width=True,
-                    disabled=(indice in pares or erro_pendente),
-                )
-
-                if esta_aberta:
-                    st.caption(carta["nome"])
-                else:
-                    st.caption("Carta")
-
-                if clicou and indice not in selecionadas and indice not in pares:
-                    selecionadas.append(indice)
-
-                    if len(selecionadas) == 2:
-                        st.session_state["memoria_tentativas"] += 1
-                        primeira, segunda = selecionadas
-
-                        if cartas[primeira]["nome"] == cartas[segunda]["nome"]:
-                            pares.extend([primeira, segunda])
-                            st.session_state["memoria_selecionadas"] = []
-                            st.session_state["memoria_pares"] = pares
-                            st.session_state["memoria_erro_pendente"] = False
-                            st.rerun()
-                        else:
-                            st.session_state["memoria_selecionadas"] = selecionadas
-                            st.session_state["memoria_erro_pendente"] = True
-                            st.rerun()
-                    else:
-                        st.session_state["memoria_selecionadas"] = selecionadas
-                        st.rerun()
-
-    if st.session_state["memoria_erro_pendente"]:
-        st.warning("Essas duas cartas são diferentes. Veja bem e tente outra vez 💜")
-        if st.button(
-            "🔄 Virar as cartas e continuar",
-            key="memoria_continuar",
-            use_container_width=True,
-        ):
-            st.session_state["memoria_selecionadas"] = []
-            st.session_state["memoria_erro_pendente"] = False
-            st.rerun()
-
-    if len(st.session_state["memoria_pares"]) == len(cartas):
-        st.success(
-            f"🎉 Parabéns! Você encontrou todos os {quantidade_pares} pares "
-            f"em {st.session_state['memoria_tentativas']} tentativas!"
+    # =========================================================
+    # JOGO DA MEMÓRIA
+    # =========================================================
+    if jogo_escolhido == "🧠 Memória":
+        st.markdown("### 🧠 Jogo da memória")
+        st.caption(
+            "Encontre os pares iguais. "
+            "Quanto maior a faixa etária, mais cartas aparecem."
         )
 
-    if st.button(
-        "🎲 Novo jogo da memória",
-        key="memoria_novo_jogo",
-        use_container_width=True,
-    ):
-        for chave in [
-            "memoria_cartas",
-            "memoria_selecionadas",
-            "memoria_pares",
-            "memoria_tentativas",
-            "memoria_erro_pendente",
+        # Reinicia o jogo quando a faixa etária mudar.
+        if st.session_state.get("memoria_faixa") != faixa:
+            st.session_state["memoria_faixa"] = faixa
+            for chave in [
+                "memoria_cartas",
+                "memoria_selecionadas",
+                "memoria_pares",
+                "memoria_tentativas",
+                "memoria_erro_pendente",
+            ]:
+                st.session_state.pop(chave, None)
+
+        quantidade_pares = {
+            "4–5 anos": 3,
+            "6–7 anos": 4,
+            "8–9 anos": 6,
+        }[faixa]
+
+        personagens_memoria = [
+            ("👧", "Luna"),
+            ("🐰", "Coelhinho"),
+            ("🏰", "Castelo"),
+            ("⭐", "Estrela"),
+            ("📖", "Livro mágico"),
+            ("🌙", "Lua"),
+        ][:quantidade_pares]
+
+        if "memoria_cartas" not in st.session_state:
+            import random
+
+            cartas = []
+            for emoji, nome in personagens_memoria:
+                cartas.append({"emoji": emoji, "nome": nome})
+                cartas.append({"emoji": emoji, "nome": nome})
+
+            random.shuffle(cartas)
+
+            st.session_state["memoria_cartas"] = cartas
+            st.session_state["memoria_selecionadas"] = []
+            st.session_state["memoria_pares"] = []
+            st.session_state["memoria_tentativas"] = 0
+            st.session_state["memoria_erro_pendente"] = False
+
+        cartas = st.session_state["memoria_cartas"]
+        selecionadas = st.session_state["memoria_selecionadas"]
+        pares = st.session_state["memoria_pares"]
+        erro_pendente = st.session_state["memoria_erro_pendente"]
+
+        st.info(
+            f"🏆 Pares: {len(pares) // 2}/{quantidade_pares}  •  "
+            f"🎯 Tentativas: {st.session_state['memoria_tentativas']}"
+        )
+
+        colunas_memoria = 3 if faixa != "8–9 anos" else 4
+
+        for linha in range(0, len(cartas), colunas_memoria):
+            cols = st.columns(
+                colunas_memoria,
+                gap="small",
+                wrap=False,
+            )
+
+            for posicao, indice in enumerate(
+                range(
+                    linha,
+                    min(
+                        linha + colunas_memoria,
+                        len(cartas),
+                    ),
+                )
+            ):
+                carta = cartas[indice]
+                esta_aberta = (
+                    indice in selecionadas
+                    or indice in pares
+                )
+                texto_carta = (
+                    carta["emoji"]
+                    if esta_aberta
+                    else "❓"
+                )
+
+                with cols[posicao]:
+                    clicou = st.button(
+                        texto_carta,
+                        key=f"memoria_carta_{indice}",
+                        use_container_width=True,
+                        disabled=(
+                            indice in pares
+                            or erro_pendente
+                        ),
+                    )
+
+                    if esta_aberta:
+                        st.caption(carta["nome"])
+                    else:
+                        st.caption("Carta")
+
+                    if (
+                        clicou
+                        and indice not in selecionadas
+                        and indice not in pares
+                    ):
+                        selecionadas.append(indice)
+
+                        if len(selecionadas) == 2:
+                            st.session_state[
+                                "memoria_tentativas"
+                            ] += 1
+
+                            primeira, segunda = selecionadas
+
+                            if (
+                                cartas[primeira]["nome"]
+                                == cartas[segunda]["nome"]
+                            ):
+                                pares.extend(
+                                    [primeira, segunda]
+                                )
+
+                                st.session_state[
+                                    "memoria_selecionadas"
+                                ] = []
+
+                                st.session_state[
+                                    "memoria_pares"
+                                ] = pares
+
+                                st.session_state[
+                                    "memoria_erro_pendente"
+                                ] = False
+
+                                st.rerun()
+
+                            else:
+                                st.session_state[
+                                    "memoria_selecionadas"
+                                ] = selecionadas
+
+                                st.session_state[
+                                    "memoria_erro_pendente"
+                                ] = True
+
+                                st.rerun()
+
+                        else:
+                            st.session_state[
+                                "memoria_selecionadas"
+                            ] = selecionadas
+
+                            st.rerun()
+
+        if st.session_state[
+            "memoria_erro_pendente"
         ]:
-            st.session_state.pop(chave, None)
-        st.rerun()
+            st.warning(
+                "💜 Essas duas cartas são diferentes. "
+                "Observe bem antes de virar novamente."
+            )
 
-    st.markdown("### 🔤 Complete a palavra")
-    palavra = st.radio(
-        "Qual palavra completa: C__ELHO?",
-        ["AO", "OE", "OU"],
-        key="jogo_palavra",
-        horizontal=True,
-    )
-    if st.button("✅ Conferir resposta", key="conferir_palavra", use_container_width=True):
-        if palavra == "OE":
-            st.success("Muito bem! A palavra é COELHO 🐰")
-        else:
-            st.warning("Quase! Tente novamente 💜")
+            if st.button(
+                "🔄 Virar as cartas e continuar",
+                key="memoria_continuar",
+                use_container_width=True,
+            ):
+                st.session_state[
+                    "memoria_selecionadas"
+                ] = []
 
-    st.markdown("### 🔢 Contando estrelas")
-    resposta_numero = st.number_input(
-        "Quantas estrelas aparecem aqui? ⭐ ⭐ ⭐ ⭐",
-        min_value=0,
-        max_value=10,
-        step=1,
-        key="contar_estrelas",
-    )
-    if st.button("⭐ Conferir estrelas", key="conferir_estrelas", use_container_width=True):
-        if resposta_numero == 4:
-            st.success("Acertou! São 4 estrelas ⭐⭐⭐⭐")
+                st.session_state[
+                    "memoria_erro_pendente"
+                ] = False
+
+                st.rerun()
+
+        if (
+            len(
+                st.session_state["memoria_pares"]
+            )
+            == len(cartas)
+        ):
+            st.success(
+                "🎉 Parabéns! Você encontrou "
+                f"todos os {quantidade_pares} pares!"
+            )
+            st.balloons()
+
+        if st.button(
+            "🎲 Novo jogo da memória",
+            key="memoria_novo_jogo",
+            use_container_width=True,
+        ):
+            for chave in [
+                "memoria_cartas",
+                "memoria_selecionadas",
+                "memoria_pares",
+                "memoria_tentativas",
+                "memoria_erro_pendente",
+            ]:
+                st.session_state.pop(
+                    chave,
+                    None,
+                )
+
+            st.rerun()
+
+    # =========================================================
+    # PALAVRAS
+    # =========================================================
+    elif jogo_escolhido == "🔤 Palavras":
+        st.markdown("### 🔤 Brincando com palavras")
+
+        if faixa == "4–5 anos":
+            st.write("Complete a palavra: **L _ N A**")
+
+            resposta_palavra = st.radio(
+                "Qual letra está faltando?",
+                ["A", "U", "O"],
+                key="jogo_palavra_45",
+                horizontal=True,
+            )
+
+            correta_palavra = (
+                resposta_palavra == "U"
+            )
+
+            mensagem_correta = (
+                "🎉 Muito bem! A palavra é LUNA."
+            )
+
+        elif faixa == "6–7 anos":
+            st.write(
+                "Complete a palavra: **C _ E L H O**"
+            )
+
+            resposta_palavra = st.radio(
+                "Qual letra está faltando?",
+                ["A", "O", "U"],
+                key="jogo_palavra_67",
+                horizontal=True,
+            )
+
+            correta_palavra = (
+                resposta_palavra == "O"
+            )
+
+            mensagem_correta = (
+                "🎉 Muito bem! A palavra é COELHO."
+            )
+
         else:
-            st.warning("Conte de novo com calma 😊")
+            st.write(
+                "Complete a frase: "
+                "**Luna abriu o ____ mágico.**"
+            )
+
+            resposta_palavra = st.radio(
+                "Escolha a palavra correta:",
+                [
+                    "livro",
+                    "sapato",
+                    "bolo",
+                ],
+                key="jogo_palavra_89",
+            )
+
+            correta_palavra = (
+                resposta_palavra == "livro"
+            )
+
+            mensagem_correta = (
+                "🎉 Certo! Luna abriu o livro mágico."
+            )
+
+        if st.button(
+            "✅ Conferir palavra",
+            key=f"conferir_palavra_{faixa}",
+            use_container_width=True,
+        ):
+            if correta_palavra:
+                st.success(
+                    mensagem_correta
+                )
+            else:
+                st.warning(
+                    "💜 Quase! Tente outra opção."
+                )
+
+    # =========================================================
+    # NÚMEROS
+    # =========================================================
+    elif jogo_escolhido == "🔢 Números":
+        st.markdown("### 🔢 Brincando com números")
+
+        if faixa == "4–5 anos":
+            st.write(
+                "Conte as estrelas: "
+                "⭐ ⭐ ⭐ ⭐"
+            )
+            resposta_correta_num = 4
+            maximo_num = 10
+
+        elif faixa == "6–7 anos":
+            st.write(
+                "🐰 O coelhinho encontrou "
+                "**3 cenouras** e depois mais **2**. "
+                "Quantas cenouras ele tem?"
+            )
+            resposta_correta_num = 5
+            maximo_num = 20
+
+        else:
+            st.write(
+                "🏰 No castelo havia **12 estrelas**. "
+                "**5 apagaram**. Quantas ficaram acesas?"
+            )
+            resposta_correta_num = 7
+            maximo_num = 30
+
+        resposta_numero = st.number_input(
+            "Digite sua resposta:",
+            min_value=0,
+            max_value=maximo_num,
+            step=1,
+            key=f"jogo_numero_{faixa}",
+        )
+
+        if st.button(
+            "⭐ Conferir resposta",
+            key=f"conferir_numero_{faixa}",
+            use_container_width=True,
+        ):
+            if (
+                int(resposta_numero)
+                == resposta_correta_num
+            ):
+                st.success(
+                    "🎉 Acertou! Muito bem!"
+                )
+            else:
+                st.warning(
+                    "💜 Quase! Conte novamente."
+                )
+
+    # =========================================================
+    # DESAFIO MÁGICO
+    # =========================================================
+    else:
+        st.markdown("### 🌟 Desafio mágico")
+
+        if faixa == "4–5 anos":
+            st.write(
+                "🟣 Qual é a cor deste círculo?"
+            )
+
+            resposta_desafio = st.radio(
+                "Escolha:",
+                [
+                    "Roxo",
+                    "Amarelo",
+                    "Verde",
+                ],
+                key="desafio_45",
+            )
+
+            correta_desafio = (
+                resposta_desafio == "Roxo"
+            )
+
+            sucesso_desafio = (
+                "✨ Isso! O círculo é roxo."
+            )
+
+        elif faixa == "6–7 anos":
+            st.write(
+                "🔺 Qual é o nome desta forma?"
+            )
+
+            resposta_desafio = st.radio(
+                "Escolha:",
+                [
+                    "Triângulo",
+                    "Quadrado",
+                    "Círculo",
+                ],
+                key="desafio_67",
+            )
+
+            correta_desafio = (
+                resposta_desafio == "Triângulo"
+            )
+
+            sucesso_desafio = (
+                "✨ Certo! Essa forma é um triângulo."
+            )
+
+        else:
+            st.write(
+                "Complete a sequência mágica:"
+            )
+            st.markdown(
+                "## ⭐ 🌙 ⭐ 🌙 ❓"
+            )
+
+            resposta_desafio = st.radio(
+                "O que vem depois?",
+                [
+                    "⭐ Estrela",
+                    "🌙 Lua",
+                    "🐰 Coelho",
+                ],
+                key="desafio_89",
+            )
+
+            correta_desafio = (
+                resposta_desafio
+                == "⭐ Estrela"
+            )
+
+            sucesso_desafio = (
+                "✨ Muito bem! A sequência alterna "
+                "estrela e lua."
+            )
+
+        if st.button(
+            "🌟 Conferir desafio",
+            key=f"conferir_desafio_{faixa}",
+            use_container_width=True,
+        ):
+            if correta_desafio:
+                st.success(
+                    sucesso_desafio
+                )
+            else:
+                st.warning(
+                    "💜 Quase! Observe mais uma vez."
+                )
+
+    st.markdown("---")
+    st.caption(
+        "🌙 Os jogos são educativos e não usam créditos de IA."
+    )
 
 elif menu == "📚 Atividades escolares":
     st.markdown("## 📚 Atividades escolares")
