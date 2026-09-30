@@ -997,6 +997,243 @@ div[data-testid="stDownloadButton"] button span {
         font-size: 1.35rem !important;
     }
 }
+
+
+/* =========================================================
+   ATUALIZAÇÃO RESPONSIVA V3 — CELULAR / NOTEBOOK / TV
+   ========================================================= */
+
+/* Capas uniformes nos cards do catálogo e do Modo TV */
+[class*="st-key-catalogcard_"] [data-testid="stImage"] img,
+[class*="st-key-premiumcard_"] [data-testid="stImage"] img,
+[class*="st-key-tvcard_"] [data-testid="stImage"] img {
+    width: 100% !important;
+    aspect-ratio: 16 / 9 !important;
+    object-fit: cover !important;
+    border-radius: 16px !important;
+}
+
+/* Cards usam toda a largura disponível de cada coluna */
+[class*="st-key-catalogcard_"],
+[class*="st-key-premiumcard_"],
+[class*="st-key-tvcard_"] {
+    width: 100% !important;
+}
+
+/* Títulos do catálogo: duas linhas em telas maiores */
+.titulo-card {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Player sempre ocupa toda a largura do card/coluna */
+[data-testid="stVideo"] video,
+video {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Notebook e desktop: 3 cards por linha no catálogo normal */
+@media (min-width: 641px) and (max-width: 1399px) {
+    [class*="st-key-catalogcard_"] .titulo-card,
+    [class*="st-key-premiumcard_"] .titulo-card {
+        font-size: 1.05rem !important;
+    }
+}
+
+/* TV/telas grandes: botões e títulos confortáveis */
+@media (min-width: 1400px) {
+    [class*="st-key-tvcard_"] h3 {
+        font-size: 1.35rem !important;
+        line-height: 1.15 !important;
+    }
+    [class*="st-key-tvcard_"] div[data-testid="stButton"] button {
+        min-height: 58px !important;
+        font-size: 1.05rem !important;
+    }
+}
+
+/* CELULAR: uma coluna, título completo e botões largos */
+@media (max-width: 640px) {
+    .titulo-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        font-size: 1.08rem !important;
+        line-height: 1.22 !important;
+        display: block !important;
+        overflow: visible !important;
+        -webkit-line-clamp: unset !important;
+        -webkit-box-orient: initial !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
+    }
+
+    [class*="st-key-cardacoes_"] {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    [class*="st-key-cardacoes_"] div[data-testid="stButton"] button {
+        width: 100% !important;
+        min-height: 46px !important;
+        padding: 0.45rem 0.7rem !important;
+    }
+
+    [class*="st-key-cardacoes_"] div[data-testid="stButton"] button p {
+        font-size: 0.98rem !important;
+        white-space: normal !important;
+    }
+
+    /* Voltar pequeno de verdade no celular */
+    [class*="st-key-botao_voltar_inicio"] {
+        width: 108px !important;
+        max-width: 108px !important;
+    }
+    [class*="st-key-botao_voltar_inicio"] div[data-testid="stButton"] button {
+        min-height: 36px !important;
+        height: 36px !important;
+        padding: 0.10rem 0.45rem !important;
+        border-radius: 10px !important;
+    }
+    [class*="st-key-botao_voltar_inicio"] div[data-testid="stButton"] button p {
+        font-size: 0.82rem !important;
+        line-height: 1 !important;
+    }
+
+    [class*="st-key-catalogcard_"] [data-testid="stImage"] img,
+    [class*="st-key-premiumcard_"] [data-testid="stImage"] img,
+    [class*="st-key-tvcard_"] [data-testid="stImage"] img {
+        aspect-ratio: 16 / 9 !important;
+        object-fit: cover !important;
+    }
+}
+
+
+/* =========================================================
+   ATUALIZAÇÃO V4 — CELULAR MAIS COMPACTO
+   Mantém notebook/TV grandes e reduz rolagem no celular.
+   ========================================================= */
+@media (max-width: 640px) {
+    /* Menos margens laterais e verticais no conteúdo principal */
+    .block-container {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+        padding-bottom: 1.2rem !important;
+    }
+
+    /* Cards do catálogo e Modo TV mais compactos */
+    [class*="st-key-catalogcard_"],
+    [class*="st-key-premiumcard_"],
+    [class*="st-key-tvcard_"] {
+        margin-bottom: 0.55rem !important;
+        padding-bottom: 0 !important;
+    }
+
+    /* Capas continuam largas, porém um pouco mais baixas no celular */
+    [class*="st-key-catalogcard_"] [data-testid="stImage"] img,
+    [class*="st-key-premiumcard_"] [data-testid="stImage"] img,
+    [class*="st-key-tvcard_"] [data-testid="stImage"] img {
+        width: 100% !important;
+        aspect-ratio: 16 / 8.3 !important;
+        max-height: 190px !important;
+        object-fit: cover !important;
+        border-radius: 13px !important;
+    }
+
+    /* Títulos completos sem ficarem enormes */
+    .titulo-card,
+    [class*="st-key-tvcard_"] h3 {
+        font-size: 1.12rem !important;
+        line-height: 1.18 !important;
+        margin-top: 0.22rem !important;
+        margin-bottom: 0.10rem !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
+    }
+
+    [class*="st-key-tvcard_"] div[data-testid="stCaptionContainer"] {
+        margin-top: 0.02rem !important;
+        margin-bottom: 0.18rem !important;
+    }
+
+    [class*="st-key-tvcard_"] div[data-testid="stCaptionContainer"] p,
+    .categoria-card {
+        font-size: 0.82rem !important;
+        line-height: 1.15 !important;
+    }
+
+    /* Botões do catálogo: menores e confortáveis ao toque */
+    [class*="st-key-cardacoes_"] div[data-testid="stButton"] button,
+    [class*="st-key-tv_assistir_"] button,
+    [class*="st-key-tv_fechar_"] button,
+    [class*="st-key-tv_fav_"] button {
+        min-height: 46px !important;
+        height: 46px !important;
+        padding: 0.28rem 0.55rem !important;
+        border-radius: 13px !important;
+        margin: 0 !important;
+    }
+
+    [class*="st-key-cardacoes_"] div[data-testid="stButton"] button p,
+    [class*="st-key-tv_assistir_"] button p,
+    [class*="st-key-tv_fechar_"] button p,
+    [class*="st-key-tv_fav_"] button p {
+        font-size: 0.95rem !important;
+        line-height: 1 !important;
+        font-weight: 800 !important;
+        white-space: normal !important;
+    }
+
+    /* Menos espaço entre os dois botões de cada card */
+    [class*="st-key-cardacoes_"] div[data-testid="stButton"],
+    [class*="st-key-tvcard_"] div[data-testid="stButton"] {
+        margin-top: 0.12rem !important;
+        margin-bottom: 0.12rem !important;
+    }
+
+    /* Seções mais próximas umas das outras */
+    .secao-titulo-compacto {
+        margin-top: 0.30rem !important;
+        margin-bottom: 0.35rem !important;
+        font-size: 1.28rem !important;
+    }
+
+    /* Separadores do Modo TV não criam grandes vazios */
+    hr {
+        margin-top: 0.45rem !important;
+        margin-bottom: 0.45rem !important;
+    }
+
+    .tv-dica {
+        font-size: 0.82rem !important;
+        line-height: 1.2 !important;
+        margin: 0.18rem 0 0.55rem 0 !important;
+    }
+
+    /* Player: largo, mas sem ocupar a tela inteira verticalmente */
+    [data-testid="stVideo"] video,
+    video {
+        width: 100% !important;
+        max-height: 58vh !important;
+        border-radius: 13px !important;
+        background: #000 !important;
+    }
+
+    /* Botão Voltar menor */
+    [class*="st-key-botao_voltar_inicio"] {
+        width: 92px !important;
+        max-width: 92px !important;
+    }
+    [class*="st-key-botao_voltar_inicio"] div[data-testid="stButton"] button {
+        min-height: 34px !important;
+        height: 34px !important;
+        padding: 0.08rem 0.36rem !important;
+    }
+    [class*="st-key-botao_voltar_inicio"] div[data-testid="stButton"] button p {
+        font-size: 0.78rem !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -1913,13 +2150,13 @@ def mostrar_card(item, contexto, em_minha_lista=False, compacto=False):
             alternar_favorito(item)
 
     if st.session_state.get(f"aberto_{contexto}_{item['id']}", False):
-        st.video(item["video_url"])
+        st.video(item["video_url"], width="stretch")
 
 
 def mostrar_card_horizontal(item, contexto, novo=False):
     """Card compacto para fileiras horizontais da Área Premium."""
     if item.get("capa_url"):
-        st.image(item["capa_url"], width=170)
+        st.image(item["capa_url"], width="stretch")
     if novo:
         st.markdown(
             '<div class="selo-novo">✨ NOVO</div>',
@@ -1945,7 +2182,7 @@ def mostrar_card_horizontal(item, contexto, novo=False):
     try:
         acoes = st.container(
             key=f"cardacoes_{contexto}_{item['id']}",
-            width=142,
+            width="stretch",
             border=False,
         )
     except TypeError:
@@ -1980,7 +2217,7 @@ def mostrar_card_horizontal(item, contexto, novo=False):
             alternar_favorito(item)
 
     if st.session_state.get(chave, False):
-        st.video(item["video_url"])
+        st.video(item["video_url"], width="stretch")
 
 
 def mostrar_fileira_premium(titulo, itens, contexto, limite=12, marcar_novo=False):
@@ -1994,26 +2231,25 @@ def mostrar_fileira_premium(titulo, itens, contexto, limite=12, marcar_novo=Fals
         unsafe_allow_html=True,
     )
 
-    try:
-        # Streamlit atual: cada card recebe largura fixa de 190 px.
-        # A fileira não quebra e pode ser deslizada horizontalmente no celular.
-        fileira = st.container(horizontal=True, wrap=False, gap="xsmall")
-        for i, item in enumerate(itens):
-            card = fileira.container(width=190, border=False)
-            with card:
-                mostrar_card_horizontal(item, f"{contexto}_{i}", novo=marcar_novo)
-    except TypeError:
-        # Compatibilidade com versões antigas do Streamlit.
-        cols = st.columns(max(len(itens), 3), gap="xsmall", wrap=False)
-        for i, (col, item) in enumerate(zip(cols, itens)):
-            with col:
-                mostrar_card_horizontal(item, f"{contexto}_{i}", novo=marcar_novo)
+    # 3 cards por linha em notebook/desktop. Com wrap=True, o Streamlit
+    # empilha automaticamente as colunas em telas de até 640 px.
+    for inicio in range(0, len(itens), 3):
+        grupo = itens[inicio:inicio + 3]
+        try:
+            cols = st.columns(3, gap="medium", wrap=True)
+        except TypeError:
+            cols = st.columns(3, gap="medium")
+
+        for i, item in enumerate(grupo):
+            with cols[i]:
+                with st.container(key=f"premiumcard_{contexto}_{inicio+i}"):
+                    mostrar_card_horizontal(item, f"{contexto}_{inicio+i}", novo=marcar_novo)
 
 
 def mostrar_card_catalogo(item, contexto, novo=False):
     """Card compacto para fileiras horizontais da tela inicial."""
     if item.get("capa_url"):
-        st.image(item["capa_url"], width=170)
+        st.image(item["capa_url"], width="stretch")
     if novo:
         st.markdown(
             '<div class="selo-novo">✨ NOVO</div>',
@@ -2047,7 +2283,7 @@ def mostrar_card_catalogo(item, contexto, novo=False):
     try:
         acoes = st.container(
             key=f"cardacoes_{contexto}_{item['id']}",
-            width=142,
+            width="stretch",
             border=False,
         )
     except TypeError:
@@ -2082,7 +2318,7 @@ def mostrar_card_catalogo(item, contexto, novo=False):
             alternar_favorito(item)
 
     if st.session_state.get(chave, False):
-        st.video(item["video_url"])
+        st.video(item["video_url"], width="stretch")
 
 
 def mostrar_fileira_catalogo(titulo, itens, contexto, limite=12, marcar_novo=False):
@@ -2096,17 +2332,19 @@ def mostrar_fileira_catalogo(titulo, itens, contexto, limite=12, marcar_novo=Fal
         unsafe_allow_html=True,
     )
 
-    try:
-        fileira = st.container(horizontal=True, wrap=False, gap="xsmall")
-        for i, item in enumerate(itens):
-            card = fileira.container(width=190, border=False)
-            with card:
-                mostrar_card_catalogo(item, f"{contexto}_{i}", novo=marcar_novo)
-    except TypeError:
-        cols = st.columns(max(len(itens), 3), gap="xsmall", wrap=False)
-        for i, (col, item) in enumerate(zip(cols, itens)):
-            with col:
-                mostrar_card_catalogo(item, f"{contexto}_{i}", novo=marcar_novo)
+    # 3 cards por linha em notebook/desktop. No celular (<=640 px),
+    # wrap=True faz cada coluna cair para uma linha própria.
+    for inicio in range(0, len(itens), 3):
+        grupo = itens[inicio:inicio + 3]
+        try:
+            cols = st.columns(3, gap="medium", wrap=True)
+        except TypeError:
+            cols = st.columns(3, gap="medium")
+
+        for i, item in enumerate(grupo):
+            with cols[i]:
+                with st.container(key=f"catalogcard_{contexto}_{inicio+i}"):
+                    mostrar_card_catalogo(item, f"{contexto}_{inicio+i}", novo=marcar_novo)
 
 
 # Aplica gravação/remoção pendente do login no navegador e tenta restaurar a conta.
@@ -2167,7 +2405,7 @@ def mostrar_card_tv(item, contexto):
         alternar_favorito(item)
 
     if st.session_state.get(chave_tv, False):
-        st.video(item["video_url"])
+        st.video(item["video_url"], width="stretch")
 
 
 # Aplica navegação pendente ANTES de criar o st.radio.
@@ -2389,14 +2627,19 @@ elif menu == "📺 Modo TV":
             unsafe_allow_html=True,
         )
 
-        # Três cards por linha em telas grandes. Em telas estreitas o Streamlit empilha as colunas.
-        for inicio in range(0, len(catalogo_tv), 3):
-            grupo = catalogo_tv[inicio:inicio + 3]
-            colunas_tv = st.columns(3, gap="large")
+        # Quatro cards por linha em telas grandes. Em telas estreitas,
+        # wrap=True empilha automaticamente para facilitar o uso no celular.
+        for inicio in range(0, len(catalogo_tv), 4):
+            grupo = catalogo_tv[inicio:inicio + 4]
+            try:
+                colunas_tv = st.columns(4, gap="large", wrap=True)
+            except TypeError:
+                colunas_tv = st.columns(4, gap="large")
 
             for indice, item in enumerate(grupo):
                 with colunas_tv[indice]:
-                    mostrar_card_tv(item, f"modo_tv_{inicio}_{indice}")
+                    with st.container(key=f"tvcard_{inicio}_{indice}"):
+                        mostrar_card_tv(item, f"modo_tv_{inicio}_{indice}")
 
             st.markdown("---")
 
