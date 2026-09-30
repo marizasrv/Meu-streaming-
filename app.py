@@ -1907,13 +1907,18 @@ def links_pacotes_creditos():
                     "https://pay.kiwify.com.br/TsDl4ZM",
                 )
             ).strip(),
-            30: str(st.secrets.get("KIWIFY_CREDITOS_30_URL", "")).strip(),
+            30: str(
+                st.secrets.get(
+                    "KIWIFY_CREDITOS_30_URL",
+                    "https://pay.kiwify.com.br/D40eER1",
+                )
+            ).strip(),
         }
     except Exception:
         return {
             5: "https://pay.kiwify.com.br/d1hcgvV",
             15: "https://pay.kiwify.com.br/TsDl4ZM",
-            30: "",
+            30: "https://pay.kiwify.com.br/D40eER1",
         }
 
 
