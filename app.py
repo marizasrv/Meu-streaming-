@@ -4280,13 +4280,12 @@ elif menu == "🎮 Jogos":
         if st.session_state[
             "memoria_erro_pendente"
         ]:
-            st.warning(
-                "💜 Essas duas cartas são diferentes. "
-                "Observe bem antes de virar novamente."
+            st.markdown(
+                ":small[💜 Cartas diferentes. Observe e tente novamente.]"
             )
 
             if st.button(
-                "🔄 Virar as cartas e continuar",
+                "🔄 Tentar de novo",
                 key="memoria_continuar",
                 use_container_width=True,
             ):
