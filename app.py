@@ -4618,60 +4618,81 @@ elif menu == "🎮 Jogos":
     elif jogo_escolhido == "🔢 Números":
         st.markdown("### 🔢 Brincando com números")
 
-        if faixa == "4–5 anos":
-            st.write("Conte as estrelas: ⭐ ⭐ ⭐ ⭐")
-            resposta_correta_num = 4
-            maximo_num = 10
+        banco_numeros = {
+            "4–5 anos": [
+                ("Conte as estrelas: ⭐ ⭐ ⭐ ⭐", 4, 10),
+                ("Quantos coelhinhos há? 🐰 🐰 🐰", 3, 10),
+                ("Quantas luas aparecem? 🌙 🌙 🌙 🌙 🌙", 5, 10),
+            ],
+            "6–7 anos": [
+                ("🐰 O coelhinho encontrou **3 cenouras** e depois mais **2**. Quantas cenouras ele tem?", 5, 20),
+                ("⭐ Luna tinha **5 estrelas** e ganhou mais **4**. Quantas estrelas tem agora?", 9, 20),
+                ("📖 Havia **10 livros** e 3 foram guardados. Quantos ficaram?", 7, 20),
+            ],
+            "8–9 anos": [
+                ("🏰 No castelo havia **12 estrelas**. **5 apagaram**. Quantas ficaram acesas?", 7, 30),
+                ("🐰 O coelhinho encontrou **8 cenouras** de manhã e **6** à tarde. Quantas encontrou ao todo?", 14, 30),
+                ("🔑 Luna tinha **15 chaves** e usou **7**. Quantas sobraram?", 8, 30),
+            ],
+            "10–12 anos": [
+                ("🔮 Luna encontrou **6 cristais**. Cada cristal vale **4 pontos**. Quantos pontos ela conseguiu?", 24, 100),
+                ("🌟 Cada caixa tem **8 estrelas**. Quantas estrelas há em **5 caixas**?", 40, 100),
+                ("🏰 Um castelo tem **36 janelas** divididas igualmente em **4 torres**. Quantas janelas por torre?", 9, 100),
+            ],
+            "13–15 anos": [
+                ("🧩 Um portal exige **3 chaves**, e cada chave tem **7 símbolos**. Se Luna encontrou 2 portais completos, quantos símbolos há ao todo?", 42, 200),
+                ("🔮 Um cristal vale **12 pontos**. Quantos pontos valem **7 cristais**?", 84, 200),
+                ("🧠 Se 96 estrelas forem divididas igualmente entre 8 torres, quantas estrelas ficam em cada torre?", 12, 200),
+            ],
+        }
 
-        elif faixa == "6–7 anos":
-            st.write(
-                "🐰 O coelhinho encontrou **3 cenouras** e depois mais **2**. "
-                "Quantas cenouras ele tem?"
-            )
-            resposta_correta_num = 5
-            maximo_num = 20
+        if st.session_state.get("numeros_faixa") != faixa:
+            st.session_state["numeros_faixa"] = faixa
+            st.session_state["numeros_etapa"] = 0
 
-        elif faixa == "8–9 anos":
-            st.write(
-                "🏰 No castelo havia **12 estrelas**. **5 apagaram**. "
-                "Quantas ficaram acesas?"
-            )
-            resposta_correta_num = 7
-            maximo_num = 30
+        perguntas_numeros = banco_numeros[faixa]
+        etapa_numeros = st.session_state.get("numeros_etapa", 0)
 
-        elif faixa == "10–12 anos":
-            st.write(
-                "🔮 Luna encontrou **6 cristais**. Cada cristal vale **4 pontos**. "
-                "Quantos pontos ela conseguiu?"
-            )
-            resposta_correta_num = 24
-            maximo_num = 100
+        if etapa_numeros >= len(perguntas_numeros):
+            st.success("🏆 Parabéns! Você terminou todos os desafios de números desta fase!")
+            st.balloons()
 
+            if st.button(
+                "🔄 Jogar números novamente",
+                key=f"reiniciar_numeros_{faixa}",
+                width="stretch",
+            ):
+                st.session_state["numeros_etapa"] = 0
+                st.rerun()
         else:
-            st.write(
-                "🧩 Um portal exige **3 chaves**, e cada chave tem **7 símbolos**. "
-                "Se Luna encontrou 2 portais completos, quantos símbolos há ao todo?"
+            pergunta_numero, resposta_correta_num, maximo_num = perguntas_numeros[etapa_numeros]
+
+            st.caption(
+                f"Pergunta {etapa_numeros + 1} de {len(perguntas_numeros)}"
             )
-            resposta_correta_num = 42
-            maximo_num = 200
+            st.write(pergunta_numero)
 
-        resposta_numero = st.number_input(
-            "Digite sua resposta:",
-            min_value=0,
-            max_value=maximo_num,
-            step=1,
-            key=f"jogo_numero_{faixa}",
-        )
+            resposta_numero = st.number_input(
+                "Digite sua resposta:",
+                min_value=0,
+                max_value=maximo_num,
+                step=1,
+                key=f"jogo_numero_{faixa}_{etapa_numeros}",
+            )
 
-        if st.button(
-            "⭐ Conferir resposta",
-            key=f"conferir_numero_{faixa}",
-            width="stretch",
-        ):
-            if int(resposta_numero) == resposta_correta_num:
-                st.success("🎉 Acertou! Muito bem!")
-            else:
-                st.warning("💜 Quase! Pense mais um pouco.")
+            if st.button(
+                "⭐ Conferir resposta",
+                key=f"conferir_numero_{faixa}_{etapa_numeros}",
+                width="stretch",
+            ):
+                if int(resposta_numero) == resposta_correta_num:
+                    st.success("🎉 Acertou! Muito bem!")
+                    st.balloons()
+                    time.sleep(1.1)
+                    st.session_state["numeros_etapa"] = etapa_numeros + 1
+                    st.rerun()
+                else:
+                    st.warning("💜 Quase! Pense mais um pouco.")
 
     # =========================================================
     # DESAFIO MÁGICO
@@ -4679,81 +4700,79 @@ elif menu == "🎮 Jogos":
     else:
         st.markdown("### 🌟 Desafio mágico")
 
-        if faixa == "4–5 anos":
-            st.write("🟣 Qual é a cor deste círculo?")
-            resposta_desafio = st.radio(
-                "Escolha:",
-                ["Roxo", "Amarelo", "Verde"],
-                key="desafio_45",
-            )
-            correta_desafio = resposta_desafio == "Roxo"
-            sucesso_desafio = "✨ Isso! O círculo é roxo."
+        banco_desafios = {
+            "4–5 anos": [
+                ("🟣 Qual é a cor deste círculo?", ["Roxo", "Amarelo", "Verde"], "Roxo", "✨ Isso! O círculo é roxo."),
+                ("🔺 Qual é esta forma?", ["Triângulo", "Círculo", "Quadrado"], "Triângulo", "✨ Muito bem! É um triângulo."),
+                ("⭐ Qual símbolo é uma estrela?", ["⭐", "🌙", "🐰"], "⭐", "✨ Certo! Esta é a estrela."),
+            ],
+            "6–7 anos": [
+                ("🔺 Qual é o nome desta forma?", ["Triângulo", "Quadrado", "Círculo"], "Triângulo", "✨ Certo! Essa forma é um triângulo."),
+                ("🌙 Qual símbolo representa a lua?", ["🌙 Lua", "⭐ Estrela", "🐰 Coelho"], "🌙 Lua", "✨ Muito bem! Essa é a lua."),
+                ("🎨 Qual dessas cores é uma cor primária?", ["Azul", "Roxo", "Rosa"], "Azul", "✨ Certo! Azul é uma cor primária."),
+            ],
+            "8–9 anos": [
+                ("Complete a sequência mágica: **⭐ 🌙 ⭐ 🌙 ❓**", ["⭐ Estrela", "🌙 Lua", "🐰 Coelho"], "⭐ Estrela", "✨ Muito bem! A sequência alterna estrela e lua."),
+                ("Qual número vem depois? **2, 4, 6, 8, __**", ["9", "10", "12"], "10", "✨ Certo! A sequência aumenta de 2 em 2."),
+                ("Qual item não combina com os outros?", ["Castelo", "Palácio", "Cenoura"], "Cenoura", "✨ Isso! Cenoura é diferente dos outros dois."),
+            ],
+            "10–12 anos": [
+                ("🧠 Qual número completa a sequência? **2, 4, 8, 16, __**", ["20", "24", "32"], "32", "✨ Certo! Cada número é o dobro do anterior."),
+                ("🧩 Se uma chave abre 2 portas, quantas portas 4 chaves podem abrir?", ["6", "8", "10"], "8", "✨ Muito bem! 4 × 2 = 8."),
+                ("🔮 Qual número falta? **5, 10, 15, __, 25**", ["18", "20", "22"], "20", "✨ Certo! A sequência aumenta de 5 em 5."),
+            ],
+            "13–15 anos": [
+                ("🧩 Se todos os portais azuis são mágicos e este portal é azul, qual conclusão é logicamente correta?", ["Este portal é mágico", "Todo portal mágico é azul", "Nenhum portal azul é mágico"], "Este portal é mágico", "✨ Exato! Essa conclusão segue diretamente das informações dadas."),
+                ("🧠 Qual número completa a sequência? **3, 6, 12, 24, __**", ["36", "48", "60"], "48", "✨ Certo! Cada número dobra."),
+                ("🔍 Se A é maior que B e B é maior que C, qual afirmação é verdadeira?", ["A é maior que C", "C é maior que A", "A é igual a C"], "A é maior que C", "✨ Exato! A relação é transitiva."),
+            ],
+        }
 
-        elif faixa == "6–7 anos":
-            st.write("🔺 Qual é o nome desta forma?")
-            resposta_desafio = st.radio(
-                "Escolha:",
-                ["Triângulo", "Quadrado", "Círculo"],
-                key="desafio_67",
-            )
-            correta_desafio = resposta_desafio == "Triângulo"
-            sucesso_desafio = "✨ Certo! Essa forma é um triângulo."
+        if st.session_state.get("desafio_faixa") != faixa:
+            st.session_state["desafio_faixa"] = faixa
+            st.session_state["desafio_etapa"] = 0
 
-        elif faixa == "8–9 anos":
-            st.write("Complete a sequência mágica:")
-            st.markdown("## ⭐ 🌙 ⭐ 🌙 ❓")
-            resposta_desafio = st.radio(
-                "O que vem depois?",
-                ["⭐ Estrela", "🌙 Lua", "🐰 Coelho"],
-                key="desafio_89",
-            )
-            correta_desafio = resposta_desafio == "⭐ Estrela"
-            sucesso_desafio = (
-                "✨ Muito bem! A sequência alterna estrela e lua."
-            )
+        desafios = banco_desafios[faixa]
+        etapa_desafio = st.session_state.get("desafio_etapa", 0)
 
-        elif faixa == "10–12 anos":
-            st.write(
-                "🧠 Qual número completa a sequência? **2, 4, 8, 16, __**"
-            )
-            resposta_desafio = st.radio(
-                "Escolha:",
-                ["20", "24", "32"],
-                key="desafio_1012",
-            )
-            correta_desafio = resposta_desafio == "32"
-            sucesso_desafio = (
-                "✨ Certo! Cada número é o dobro do anterior."
-            )
+        if etapa_desafio >= len(desafios):
+            st.success("🏆 Parabéns! Você venceu todos os desafios mágicos desta fase!")
+            st.balloons()
 
+            if st.button(
+                "🔄 Jogar desafios novamente",
+                key=f"reiniciar_desafio_{faixa}",
+                width="stretch",
+            ):
+                st.session_state["desafio_etapa"] = 0
+                st.rerun()
         else:
-            st.write(
-                "🧩 Se todos os portais azuis são mágicos e este portal é azul, "
-                "qual conclusão é logicamente correta?"
+            pergunta_desafio, opcoes_desafio, correta_desafio, sucesso_desafio = desafios[etapa_desafio]
+
+            st.caption(
+                f"Desafio {etapa_desafio + 1} de {len(desafios)}"
             )
+            st.write(pergunta_desafio)
+
             resposta_desafio = st.radio(
                 "Escolha:",
-                [
-                    "Este portal é mágico",
-                    "Todo portal mágico é azul",
-                    "Nenhum portal azul é mágico",
-                ],
-                key="desafio_1315",
-            )
-            correta_desafio = resposta_desafio == "Este portal é mágico"
-            sucesso_desafio = (
-                "✨ Exato! Essa conclusão segue diretamente das informações dadas."
+                opcoes_desafio,
+                key=f"desafio_{faixa}_{etapa_desafio}",
             )
 
-        if st.button(
-            "🌟 Conferir desafio",
-            key=f"conferir_desafio_{faixa}",
-            width="stretch",
-        ):
-            if correta_desafio:
-                st.success(sucesso_desafio)
-            else:
-                st.warning("💜 Quase! Observe mais uma vez.")
+            if st.button(
+                "🌟 Conferir desafio",
+                key=f"conferir_desafio_{faixa}_{etapa_desafio}",
+                width="stretch",
+            ):
+                if resposta_desafio == correta_desafio:
+                    st.success(sucesso_desafio)
+                    st.balloons()
+                    time.sleep(1.1)
+                    st.session_state["desafio_etapa"] = etapa_desafio + 1
+                    st.rerun()
+                else:
+                    st.warning("💜 Quase! Observe mais uma vez.")
 
     st.markdown("---")
     st.caption(
