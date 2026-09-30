@@ -1498,6 +1498,44 @@ div[data-testid="stTextArea"] textarea:focus {
     }
 }
 
+
+/* V12 — catálogo ainda mais compacto no notebook */
+@media (min-width: 641px) and (max-width: 1399px) {
+    [class*="st-key-catalogcard_"] [data-testid="stImage"] img,
+    [class*="st-key-premiumcard_"] [data-testid="stImage"] img {
+        max-height: 118px !important;
+        aspect-ratio: 16 / 9 !important;
+        object-fit: cover !important;
+        border-radius: 11px !important;
+    }
+
+    [class*="st-key-catalogcard_"] .titulo-card,
+    [class*="st-key-premiumcard_"] .titulo-card {
+        font-size: 0.92rem !important;
+        line-height: 1.08 !important;
+        margin-top: 0.16rem !important;
+        margin-bottom: 0.05rem !important;
+    }
+
+    [class*="st-key-cardacoes_"] div[data-testid="stButton"] button {
+        min-height: 38px !important;
+        height: 38px !important;
+        padding: 0.16rem 0.38rem !important;
+        border-radius: 10px !important;
+    }
+
+    [class*="st-key-cardacoes_"] div[data-testid="stButton"] button p {
+        font-size: 0.82rem !important;
+        line-height: 1 !important;
+    }
+
+    .categoria-card {
+        font-size: 0.74rem !important;
+        line-height: 1.05 !important;
+        margin-bottom: 0.10rem !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -2677,14 +2715,14 @@ def mostrar_fileira_catalogo(titulo, itens, contexto, limite=12, marcar_novo=Fal
         unsafe_allow_html=True,
     )
 
-    # 3 cards por linha em notebook/desktop. No celular (<=640 px),
-    # wrap=True faz cada coluna cair para uma linha própria.
-    for inicio in range(0, len(itens), 3):
-        grupo = itens[inicio:inicio + 3]
+    # 4 cards por linha em notebook/desktop para deixar o catálogo
+    # mais compacto. No celular, wrap=True reorganiza os cards.
+    for inicio in range(0, len(itens), 4):
+        grupo = itens[inicio:inicio + 4]
         try:
-            cols = st.columns(3, gap="medium", wrap=True)
+            cols = st.columns(4, gap="small", wrap=True)
         except TypeError:
-            cols = st.columns(3, gap="medium")
+            cols = st.columns(4, gap="small")
 
         for i, item in enumerate(grupo):
             with cols[i]:
