@@ -1643,6 +1643,31 @@ div[data-testid="stTextArea"] textarea:focus {
     }
 }
 
+
+/* V15 — texto visível nos botões de upload */
+div[data-testid="stFileUploader"] button,
+div[data-testid="stFileUploaderDropzone"] button {
+    background: #ffffff !important;
+    color: #2b123f !important;
+    border: 1px solid #c7b6df !important;
+    font-weight: 800 !important;
+}
+
+div[data-testid="stFileUploader"] button p,
+div[data-testid="stFileUploader"] button span,
+div[data-testid="stFileUploaderDropzone"] button p,
+div[data-testid="stFileUploaderDropzone"] button span {
+    color: #2b123f !important;
+    font-weight: 800 !important;
+    opacity: 1 !important;
+}
+
+div[data-testid="stFileUploaderDropzone"] small,
+div[data-testid="stFileUploaderDropzone"] p,
+div[data-testid="stFileUploaderDropzone"] span {
+    color: #cfc4dd !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
