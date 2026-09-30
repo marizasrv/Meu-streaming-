@@ -1391,6 +1391,30 @@ section[data-testid="stSidebar"] label:focus-within {
     font-size: 0.95rem;
 }
 
+
+/* V9 — aproxima o texto das cartas no jogo da memória */
+@media (max-width: 640px) {
+    [class*="st-key-memoria_carta_"] {
+        margin-bottom: 0 !important;
+    }
+
+    [class*="st-key-memoria_carta_"] + div[data-testid="stCaptionContainer"],
+    [class*="st-key-memoria_carta_"] ~ div[data-testid="stCaptionContainer"] {
+        margin-top: -0.15rem !important;
+        margin-bottom: 0.10rem !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        text-align: center !important;
+    }
+
+    [class*="st-key-memoria_carta_"] + div[data-testid="stCaptionContainer"] p,
+    [class*="st-key-memoria_carta_"] ~ div[data-testid="stCaptionContainer"] p {
+        font-size: 0.76rem !important;
+        line-height: 1 !important;
+        margin: 0 !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
