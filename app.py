@@ -1586,6 +1586,63 @@ div[data-testid="stTextArea"] textarea:focus {
     }
 }
 
+
+/* V14 — Gerenciar mais compacto no notebook */
+.admin-video-card {
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 12px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.03);
+    margin-bottom: 7px;
+}
+.admin-video-title {
+    font-weight: 800;
+    font-size: 0.95rem;
+    line-height: 1.15;
+    margin-bottom: 4px;
+}
+.admin-video-meta {
+    opacity: 0.78;
+    font-size: 0.78rem;
+    line-height: 1.1;
+}
+
+@media (min-width: 641px) and (max-width: 1399px) {
+    [class*="st-key-admin_"] input,
+    [class*="st-key-admin_"] select {
+        min-height: 38px !important;
+    }
+
+    [class*="st-key-admin_salvar_assinatura"] button,
+    [class*="st-key-admin_adicionar_creditos"] button {
+        min-height: 38px !important;
+        height: 38px !important;
+        padding: 0.15rem 0.65rem !important;
+        border-radius: 10px !important;
+    }
+
+    [class*="st-key-excluir_"] button {
+        min-height: 36px !important;
+        height: 36px !important;
+        padding: 0.12rem 0.45rem !important;
+        border-radius: 9px !important;
+        font-size: 0.82rem !important;
+    }
+
+    .admin-video-card {
+        padding: 8px 10px !important;
+        border-radius: 10px !important;
+    }
+
+    .admin-video-title {
+        font-size: 0.88rem !important;
+    }
+
+    .admin-video-meta {
+        font-size: 0.72rem !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -5787,31 +5844,40 @@ elif menu == "🗑️ Gerenciar":
     if senha != st.secrets["ADMIN_PASSWORD"]:
         st.info("Digite a senha de administrador.")
     else:
-        st.subheader("💳 Gerenciar assinaturas")
+        st.markdown("### 💳 Assinaturas")
         st.caption(
             "Depois de conferir o pagamento na Kiwify, "
-            "você pode liberar ou retirar o Premium por aqui."
+            "libere ou retire o Premium por aqui."
         )
 
-        email_assinante = st.text_input(
-            "E-mail do assinante",
-            key="admin_email_assinante",
-            placeholder="cliente@exemplo.com"
-        )
+        col_email, col_plano, col_status = st.columns([2.2, 1, 1], gap="small")
 
-        plano_admin = st.selectbox(
-            "Plano",
-            ["Grátis", "Premium"],
-            key="admin_plano_assinante"
-        )
+        with col_email:
+            email_assinante = st.text_input(
+                "E-mail do assinante",
+                key="admin_email_assinante",
+                placeholder="cliente@exemplo.com"
+            )
 
-        status_admin = st.selectbox(
-            "Status",
-            ["ativo", "inativo"],
-            key="admin_status_assinante"
-        )
+        with col_plano:
+            plano_admin = st.selectbox(
+                "Plano",
+                ["Grátis", "Premium"],
+                key="admin_plano_assinante"
+            )
 
-        if st.button("💾 Salvar assinatura", key="admin_salvar_assinatura"):
+        with col_status:
+            status_admin = st.selectbox(
+                "Status",
+                ["ativo", "inativo"],
+                key="admin_status_assinante"
+            )
+
+        if st.button(
+            "💾 Salvar assinatura",
+            key="admin_salvar_assinatura",
+            width="content",
+        ):
             if not email_assinante.strip():
                 st.warning("Digite o e-mail do assinante.")
             else:
@@ -5826,29 +5892,32 @@ elif menu == "🗑️ Gerenciar":
                     st.error(f"Não consegui atualizar a assinatura: {e}")
 
         st.markdown("---")
-        st.subheader("💎 Gerenciar créditos de vídeo")
+        st.markdown("### 💎 Créditos de vídeo")
         st.caption(
-            "Use esta área para adicionar créditos depois de conferir uma compra na Kiwify. "
-            "Quando o webhook de créditos estiver ligado, isso poderá ser automático."
+            "Adicione créditos depois de conferir uma compra na Kiwify."
         )
 
-        email_creditos = st.text_input(
-            "E-mail do cliente para créditos",
-            key="admin_email_creditos",
-            placeholder="cliente@exemplo.com",
-        )
+        col_email_cred, col_qtd_cred = st.columns([2.8, 1], gap="small")
 
-        qtd_creditos = st.selectbox(
-            "Quantidade de créditos",
-            [1, 5, 15, 30],
-            index=1,
-            key="admin_qtd_creditos",
-        )
+        with col_email_cred:
+            email_creditos = st.text_input(
+                "E-mail do cliente para créditos",
+                key="admin_email_creditos",
+                placeholder="cliente@exemplo.com",
+            )
+
+        with col_qtd_cred:
+            qtd_creditos = st.selectbox(
+                "Quantidade",
+                [1, 5, 15, 30],
+                index=1,
+                key="admin_qtd_creditos",
+            )
 
         if st.button(
             "💎 Adicionar créditos",
             key="admin_adicionar_creditos",
-            width="stretch",
+            width="content",
         ):
             if not email_creditos.strip():
                 st.warning("Digite o e-mail do cliente.")
@@ -5860,17 +5929,30 @@ elif menu == "🗑️ Gerenciar":
                     st.error(f"Não consegui adicionar os créditos: {e}")
 
         st.markdown("---")
-        st.subheader("🎞️ Gerenciar vídeos")
+        st.markdown("### 🎞️ Gerenciar vídeos")
 
         if not videos:
             st.info("Não há vídeos cadastrados.")
         else:
-            for item in videos:
-                st.markdown("---")
-                acesso_item = "💎 Premium" if video_premium(item) else "🌙 Grátis"
-                st.write(
-                    f"**{item.get('nome', 'Sem título')}** — "
-                    f"{categoria_base(item)} — {acesso_item}"
-                )
-                if st.button("Excluir", key=f"excluir_{item['id']}"):
-                    excluir_video(item)
+            for inicio in range(0, len(videos), 3):
+                grupo = videos[inicio:inicio + 3]
+                cols_videos = st.columns(3, gap="small")
+
+                for deslocamento, item in enumerate(grupo):
+                    with cols_videos[deslocamento]:
+                        acesso_item = "💎 Premium" if video_premium(item) else "🌙 Grátis"
+                        st.markdown(
+                            f"""
+                            <div class="admin-video-card">
+                                <div class="admin-video-title">{item.get('nome', 'Sem título')}</div>
+                                <div class="admin-video-meta">{categoria_base(item)} · {acesso_item}</div>
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+                        if st.button(
+                            "🗑️ Excluir",
+                            key=f"excluir_{item['id']}",
+                            width="stretch",
+                        ):
+                            excluir_video(item)
