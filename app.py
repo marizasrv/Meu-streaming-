@@ -2302,7 +2302,7 @@ elif menu == "🎬 Criar vídeo com IA":
         fal_configurado = False
 
     if fal_configurado:
-        st.caption("🟢 Provedor alternativo de vídeo: fal.ai configurado")
+        st.caption("🟢 fal.ai configurado • Wan 2.2 Turbo econômico")
     else:
         st.caption("🟣 Provedor alternativo fal.ai: ainda não configurado")
 
@@ -2539,6 +2539,11 @@ elif menu == "🎬 Criar vídeo com IA":
         "Se a conta não tiver saldo ou o modelo estiver indisponível, o app mostrará o motivo."
     )
 
+    if qualidade == "Rápida":
+        st.caption(
+            "💰 Modo econômico: fal.ai Wan 2.2 Turbo em 480p."
+        )
+
     if st.button(
         "✨ Gerar vídeo com IA",
         key="gerar_video_ia",
@@ -2673,9 +2678,9 @@ elif menu == "🎬 Criar vídeo com IA":
                         endpoint_fal = str(
                             st.secrets.get(
                                 "FAL_VIDEO_ENDPOINT",
-                                "fal-ai/wan/v2.2-a14b/image-to-video",
+                                "fal-ai/wan/v2.2-a14b/image-to-video/turbo",
                             )
-                        ).strip() or "fal-ai/wan/v2.2-a14b/image-to-video"
+                        ).strip() or "fal-ai/wan/v2.2-a14b/image-to-video/turbo"
 
                         resolucao_fal = {
                             "Rápida": "480p",
