@@ -1415,6 +1415,30 @@ section[data-testid="stSidebar"] label:focus-within {
     }
 }
 
+
+/* V10 — melhora contraste dos campos de resposta nas atividades */
+div[data-testid="stTextInput"] input,
+div[data-testid="stTextArea"] textarea {
+    color: #1f2937 !important;
+    background: #ffffff !important;
+    caret-color: #1f2937 !important;
+    -webkit-text-fill-color: #1f2937 !important;
+}
+
+div[data-testid="stTextInput"] input::placeholder,
+div[data-testid="stTextArea"] textarea::placeholder {
+    color: #7c8798 !important;
+    opacity: 1 !important;
+    -webkit-text-fill-color: #7c8798 !important;
+}
+
+div[data-testid="stTextInput"] input:focus,
+div[data-testid="stTextArea"] textarea:focus {
+    color: #111827 !important;
+    background: #ffffff !important;
+    -webkit-text-fill-color: #111827 !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
