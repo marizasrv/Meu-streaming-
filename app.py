@@ -3992,32 +3992,148 @@ elif menu in ["🧸 Infantil", "🎬 Filmes", "📺 Séries"]:
                     key=lambda par: par[0],
                 )
 
-                # A temporada vira um menu recolhível. Ao tocar nela,
-                # aparecem somente os episódios daquela temporada.
+                ids_temporada = [str(item["id"]) for _, item in episodios]
+                episodio_aberto_id = str(
+                    st.session_state.get("serie_episodio_aberto_id") or ""
+                )
+                temporada_tem_aberto = episodio_aberto_id in ids_temporada
+
+                # Mantém aberta a temporada que estiver tocando.
                 with st.expander(
                     f"📺 Temporada {numero_temporada} · {len(episodios)} episódio(s)",
-                    expanded=False,
+                    expanded=temporada_tem_aberto,
                 ):
-                    st.caption(
-                        f"Toque em um episódio da Temporada {numero_temporada} para assistir."
-                    )
+                    indice_aberto = None
+                    if temporada_tem_aberto:
+                        for idx, (num_ep, item_ep) in enumerate(episodios):
+                            if str(item_ep["id"]) == episodio_aberto_id:
+                                indice_aberto = idx
+                                break
 
-                    itens_temporada = []
-                    for numero_episodio, item in episodios:
-                        item_exibicao = dict(item)
-                        titulo_original = str(item.get("nome") or "").strip()
-                        item_exibicao["nome"] = (
-                            f"Episódio {numero_episodio}"
+                    if indice_aberto is not None:
+                        numero_ep, item_aberto = episodios[indice_aberto]
+                        titulo_original = str(item_aberto.get("nome") or "").strip()
+                        titulo_exibicao = (
+                            f"Episódio {numero_ep}"
                             + (f" · {titulo_original}" if titulo_original else "")
                         )
-                        itens_temporada.append(item_exibicao)
 
-                    mostrar_fileira_catalogo(
-                        "",
-                        itens_temporada,
-                        f"series_{nome_serie}_{numero_temporada}",
-                        limite=50,
-                    )
+                        st.markdown(f"### ▶ {titulo_exibicao}")
+                        st.caption(
+                            f"{nome_serie} · Temporada {numero_temporada}"
+                        )
+                        reproduzir_video_url(item_aberto.get("video_url"))
+
+                        col_ant, col_fechar, col_prox = st.columns(
+                            [1, 1, 1],
+                            gap="small",
+                        )
+
+                        with col_ant:
+                            if indice_aberto > 0:
+                                if st.button(
+                                    "⬅ Episódio anterior",
+                                    key=f"serie_ant_{nome_serie}_{numero_temporada}_{item_aberto['id']}",
+                                    width="stretch",
+                                ):
+                                    _, anterior = episodios[indice_aberto - 1]
+                                    registrar_assistido(anterior)
+                                    st.session_state["serie_episodio_aberto_id"] = str(anterior["id"])
+                                    st.rerun()
+                            else:
+                                st.button(
+                                    "⬅ Episódio anterior",
+                                    key=f"serie_ant_off_{nome_serie}_{numero_temporada}_{item_aberto['id']}",
+                                    disabled=True,
+                                    width="stretch",
+                                )
+
+                        with col_fechar:
+                            if st.button(
+                                "✖ Fechar",
+                                key=f"serie_fechar_{nome_serie}_{numero_temporada}_{item_aberto['id']}",
+                                width="stretch",
+                            ):
+                                st.session_state["serie_episodio_aberto_id"] = None
+                                st.rerun()
+
+                        with col_prox:
+                            if indice_aberto + 1 < len(episodios):
+                                if st.button(
+                                    "Próximo episódio ➡",
+                                    key=f"serie_prox_{nome_serie}_{numero_temporada}_{item_aberto['id']}",
+                                    width="stretch",
+                                ):
+                                    _, proximo = episodios[indice_aberto + 1]
+                                    registrar_assistido(proximo)
+                                    st.session_state["serie_episodio_aberto_id"] = str(proximo["id"])
+                                    st.rerun()
+                            else:
+                                st.button(
+                                    "Próximo episódio ➡",
+                                    key=f"serie_prox_off_{nome_serie}_{numero_temporada}_{item_aberto['id']}",
+                                    disabled=True,
+                                    width="stretch",
+                                )
+
+                        favorito_aberto = bool(item_aberto.get("favorito", False))
+                        texto_lista = "💖 Na Minha Lista" if favorito_aberto else "🤍 Minha Lista"
+                        if st.button(
+                            texto_lista,
+                            key=f"serie_fav_aberto_{nome_serie}_{numero_temporada}_{item_aberto['id']}",
+                            width="stretch",
+                        ):
+                            alternar_favorito(item_aberto)
+
+                        st.markdown("---")
+                        st.caption("Outros episódios desta temporada")
+
+                    else:
+                        st.caption(
+                            f"Toque em um episódio da Temporada {numero_temporada} para assistir."
+                        )
+
+                    # Lista de episódios. O episódio que já está tocando
+                    # não repete capa nem botões grandes.
+                    episodios_para_mostrar = [
+                        (num_ep, item_ep)
+                        for num_ep, item_ep in episodios
+                        if str(item_ep["id"]) != episodio_aberto_id
+                    ]
+
+                    for num_ep, item_ep in episodios_para_mostrar:
+                        titulo_original = str(item_ep.get("nome") or "").strip()
+                        titulo_ep = (
+                            f"Episódio {num_ep}"
+                            + (f" · {titulo_original}" if titulo_original else "")
+                        )
+
+                        with st.container(
+                            key=f"serie_ep_card_{nome_serie}_{numero_temporada}_{item_ep['id']}",
+                            border=True,
+                        ):
+                            col_capa, col_info = st.columns([1, 2], gap="small")
+
+                            with col_capa:
+                                if item_ep.get("capa_url"):
+                                    st.image(
+                                        item_ep["capa_url"],
+                                        width="stretch",
+                                    )
+
+                            with col_info:
+                                st.markdown(f"**{titulo_ep}**")
+                                st.caption(
+                                    f"Temporada {numero_temporada} · Episódio {num_ep}"
+                                )
+                                if st.button(
+                                    "▶ Assistir",
+                                    key=f"serie_assistir_{nome_serie}_{numero_temporada}_{item_ep['id']}",
+                                    width="stretch",
+                                ):
+                                    registrar_assistido(item_ep)
+                                    st.session_state["serie_episodio_aberto_id"] = str(item_ep["id"])
+                                    st.rerun()
 
 
 elif menu == "🎬 Criar vídeo com IA":
