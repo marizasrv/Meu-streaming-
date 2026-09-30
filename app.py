@@ -5120,7 +5120,7 @@ elif menu == "🎮 Jogos":
 
 elif menu == "📚 Atividades escolares":
     st.markdown("## 📚 Atividades escolares")
-    st.caption("Atividades educativas por idade, com correção na hora e opção para baixar.")
+    st.caption("Atividades educativas por idade, com correção na hora e avanço para a próxima.")
 
     idade = st.selectbox(
         "🎒 Faixa etária",
@@ -5141,169 +5141,263 @@ elif menu == "📚 Atividades escolares":
         key="materia_atividades",
     )
 
-    st.markdown("### ✏️ Atividade do dia")
+    chave_contexto = f"{idade}|{materia}"
+    if st.session_state.get("atividade_contexto") != chave_contexto:
+        st.session_state["atividade_contexto"] = chave_contexto
+        st.session_state["atividade_etapa"] = 0
 
-    atividade_baixar = ""
-    resposta_correta = None
+    etapa_atividade = st.session_state.get("atividade_etapa", 0)
 
-    if materia == "Alfabetização":
-        if idade == "4–5 anos":
-            st.write("Complete a palavra: **L _ N A**")
-            resposta = st.text_input("Digite a letra que falta:", key="resp_alf_45").strip().upper()
-            resposta_correta = resposta == "U"
-            atividade_baixar = "ALFABETIZAÇÃO 4–5 ANOS\nComplete: L _ N A\nCircule as vogais da palavra LUNA."
-        elif idade == "6–7 anos":
-            st.write("Complete a palavra: **C _ E L H O**")
-            resposta = st.text_input("Digite a letra que falta:", key="resp_alf_67").strip().upper()
-            resposta_correta = resposta == "O"
-            atividade_baixar = "ALFABETIZAÇÃO 6–7 ANOS\nComplete: C _ E L H O\nSepare a palavra COELHO em sílabas."
-        else:
-            st.write("Escreva uma frase usando as palavras **Luna**, **livro** e **floresta**.")
-            resposta = st.text_area("Sua frase:", key="resp_alf_89")
-            resposta_correta = len(resposta.strip().split()) >= 5
-            atividade_baixar = "ALFABETIZAÇÃO 8–9 ANOS\nEscreva uma frase usando: Luna, livro e floresta."
+    bancos_atividades = {
+        ("4–5 anos", "Alfabetização"): [
+            ("Complete a palavra: **L _ N A**", "texto", "Digite a letra que falta:", "U",
+             "ALFABETIZAÇÃO 4–5 ANOS\nComplete: L _ N A\nCircule as vogais da palavra LUNA."),
+            ("Complete a palavra: **B _ L A**", "texto", "Digite a letra que falta:", "O",
+             "ALFABETIZAÇÃO 4–5 ANOS\nComplete: B _ L A\nEscreva a palavra BOLA."),
+            ("Complete a palavra: **G _ T O**", "texto", "Digite a letra que falta:", "A",
+             "ALFABETIZAÇÃO 4–5 ANOS\nComplete: G _ T O\nCircule a vogal da palavra GATO."),
+        ],
+        ("6–7 anos", "Alfabetização"): [
+            ("Complete a palavra: **C _ E L H O**", "texto", "Digite a letra que falta:", "O",
+             "ALFABETIZAÇÃO 6–7 ANOS\nComplete: C _ E L H O\nSepare COELHO em sílabas."),
+            ("Complete a palavra: **F L _ R E S T A**", "texto", "Digite a letra que falta:", "O",
+             "ALFABETIZAÇÃO 6–7 ANOS\nComplete: F L _ R E S T A\nEscreva FLORESTA."),
+            ("Complete a palavra: **C A S T _ L O**", "texto", "Digite a letra que falta:", "E",
+             "ALFABETIZAÇÃO 6–7 ANOS\nComplete: C A S T _ L O\nEscreva CASTELO."),
+        ],
+        ("8–9 anos", "Alfabetização"): [
+            ("Escreva uma frase usando **Luna**, **livro** e **floresta**.", "frase", "Sua frase:", 5,
+             "ALFABETIZAÇÃO 8–9 ANOS\nEscreva uma frase usando: Luna, livro e floresta."),
+            ("Escreva uma frase usando **coelhinho**, **castelo** e **estrela**.", "frase", "Sua frase:", 5,
+             "ALFABETIZAÇÃO 8–9 ANOS\nEscreva uma frase usando: coelhinho, castelo e estrela."),
+            ("Escreva uma frase usando **princesa**, **magia** e **aventura**.", "frase", "Sua frase:", 5,
+             "ALFABETIZAÇÃO 8–9 ANOS\nEscreva uma frase usando: princesa, magia e aventura."),
+        ],
+        ("4–5 anos", "Leitura"): [
+            ("Luna viu um coelhinho branco perto da árvore.", "leitura", "O que Luna viu?", "coelh",
+             "LEITURA 4–5 ANOS\nLuna viu um coelhinho branco perto da árvore.\nPergunta: O que Luna viu?"),
+            ("A princesa usava uma coroa dourada.", "leitura", "O que a princesa usava?", "coroa",
+             "LEITURA 4–5 ANOS\nA princesa usava uma coroa dourada.\nPergunta: O que ela usava?"),
+            ("No céu brilhava uma estrela.", "leitura", "O que brilhava no céu?", "estrela",
+             "LEITURA 4–5 ANOS\nNo céu brilhava uma estrela.\nPergunta: O que brilhava no céu?"),
+        ],
+        ("6–7 anos", "Leitura"): [
+            ("Luna abriu seu livro mágico e encontrou um mapa.", "leitura", "O que Luna encontrou?", "mapa",
+             "LEITURA 6–7 ANOS\nLuna abriu seu livro mágico e encontrou um mapa.\nPergunta: O que ela encontrou?"),
+            ("O coelhinho correu até o castelo para chamar a princesa.", "leitura", "Para onde o coelhinho correu?", "castelo",
+             "LEITURA 6–7 ANOS\nO coelhinho correu até o castelo.\nPergunta: Para onde ele correu?"),
+            ("Uma chave dourada estava escondida sob uma pedra.", "leitura", "O que estava sob a pedra?", "chave",
+             "LEITURA 6–7 ANOS\nUma chave dourada estava escondida sob uma pedra.\nPergunta: O que estava escondido?"),
+        ],
+        ("8–9 anos", "Leitura"): [
+            ("Luna abriu seu livro mágico. Uma luz roxa apareceu e ela e o coelhinho chegaram a uma floresta encantada.", "leitura", "Onde Luna e o coelhinho chegaram?", "floresta",
+             "LEITURA 8–9 ANOS\nLuna abriu seu livro mágico e chegou a uma floresta encantada.\nPergunta: Onde ela chegou?"),
+            ("A princesa entregou a Luna uma chave que abria a torre mais alta do castelo.", "leitura", "O que a princesa entregou a Luna?", "chave",
+             "LEITURA 8–9 ANOS\nA princesa entregou a Luna uma chave.\nPergunta: O que ela entregou?"),
+            ("O coelhinho percebeu pegadas brilhantes seguindo em direção ao jardim.", "leitura", "Para onde as pegadas iam?", "jardim",
+             "LEITURA 8–9 ANOS\nHavia pegadas brilhantes indo ao jardim.\nPergunta: Para onde elas iam?"),
+        ],
+        ("4–5 anos", "Matemática"): [
+            ("⭐ ⭐ + ⭐ = ?", "numero", "Sua resposta:", 3, "MATEMÁTICA 4–5 ANOS\n2 estrelas + 1 estrela = ?"),
+            ("🐰 🐰 + 🐰 🐰 = ?", "numero", "Sua resposta:", 4, "MATEMÁTICA 4–5 ANOS\n2 coelhos + 2 coelhos = ?"),
+            ("🌙 🌙 🌙 - 🌙 = ?", "numero", "Sua resposta:", 2, "MATEMÁTICA 4–5 ANOS\n3 luas - 1 lua = ?"),
+        ],
+        ("6–7 anos", "Matemática"): [
+            ("Luna encontrou **4 cenouras** e ganhou mais **3**. Quantas tem?", "numero", "Sua resposta:", 7, "MATEMÁTICA 6–7 ANOS\n4 + 3 = ?"),
+            ("Havia **10 estrelas** e 4 apagaram. Quantas ficaram?", "numero", "Sua resposta:", 6, "MATEMÁTICA 6–7 ANOS\n10 - 4 = ?"),
+            ("3 coelhinhos têm 2 cenouras cada. Quantas cenouras ao todo?", "numero", "Sua resposta:", 6, "MATEMÁTICA 6–7 ANOS\n3 x 2 = ?"),
+        ],
+        ("8–9 anos", "Matemática"): [
+            ("No castelo havia **12 estrelas**. **5 apagaram**. Quantas ficaram?", "numero", "Sua resposta:", 7, "MATEMÁTICA 8–9 ANOS\n12 - 5 = ?"),
+            ("4 caixas têm 6 cristais cada. Quantos cristais ao todo?", "numero", "Sua resposta:", 24, "MATEMÁTICA 8–9 ANOS\n4 x 6 = ?"),
+            ("27 chaves foram divididas em 3 grupos iguais. Quantas por grupo?", "numero", "Sua resposta:", 9, "MATEMÁTICA 8–9 ANOS\n27 dividido por 3 = ?"),
+        ],
+        ("4–5 anos", "Cores e formas"): [
+            ("🟣 Qual é a cor deste círculo?", "opcao", "Escolha:", (["Roxo", "Amarelo", "Verde"], "Roxo"), "CORES E FORMAS 4–5 ANOS\nPinte um círculo de roxo."),
+            ("🔺 Qual é esta forma?", "opcao", "Escolha:", (["Triângulo", "Círculo", "Quadrado"], "Triângulo"), "CORES E FORMAS 4–5 ANOS\nDesenhe um triângulo."),
+            ("🟨 Qual forma tem quatro lados iguais?", "opcao", "Escolha:", (["Quadrado", "Círculo", "Triângulo"], "Quadrado"), "CORES E FORMAS 4–5 ANOS\nDesenhe um quadrado amarelo."),
+        ],
+        ("6–7 anos", "Cores e formas"): [
+            ("Qual destas é uma cor primária?", "opcao", "Escolha:", (["Azul", "Roxo", "Rosa"], "Azul"), "CORES E FORMAS 6–7 ANOS\nPinte uma forma de azul."),
+            ("Qual forma não tem lados?", "opcao", "Escolha:", (["Círculo", "Quadrado", "Triângulo"], "Círculo"), "CORES E FORMAS 6–7 ANOS\nDesenhe um círculo."),
+            ("Qual forma tem 3 lados?", "opcao", "Escolha:", (["Triângulo", "Quadrado", "Círculo"], "Triângulo"), "CORES E FORMAS 6–7 ANOS\nDesenhe um triângulo."),
+        ],
+        ("8–9 anos", "Cores e formas"): [
+            ("Qual forma tem 4 lados e lados opostos iguais?", "opcao", "Escolha:", (["Retângulo", "Círculo", "Triângulo"], "Retângulo"), "CORES E FORMAS 8–9 ANOS\nDesenhe um retângulo."),
+            ("Misturar azul e amarelo forma qual cor?", "opcao", "Escolha:", (["Verde", "Roxo", "Laranja"], "Verde"), "CORES E FORMAS 8–9 ANOS\nMisture azul e amarelo."),
+            ("Qual destas formas tem 5 lados?", "opcao", "Escolha:", (["Pentágono", "Triângulo", "Quadrado"], "Pentágono"), "CORES E FORMAS 8–9 ANOS\nDesenhe um pentágono."),
+        ],
+        ("4–5 anos", "Animais"): [
+            ("🐰 Qual animal acompanha Luna?", "opcao", "Escolha:", (["Coelho", "Gato", "Cachorro"], "Coelho"), "ANIMAIS 4–5 ANOS\nCircule o COELHO."),
+            ("🐱 Qual destes animais mia?", "opcao", "Escolha:", (["Gato", "Coelho", "Peixe"], "Gato"), "ANIMAIS 4–5 ANOS\nCircule o GATO."),
+            ("🐶 Qual destes animais late?", "opcao", "Escolha:", (["Cachorro", "Peixe", "Pássaro"], "Cachorro"), "ANIMAIS 4–5 ANOS\nCircule o CACHORRO."),
+        ],
+        ("6–7 anos", "Animais"): [
+            ("Qual animal vive na água?", "opcao", "Escolha:", (["Peixe", "Coelho", "Gato"], "Peixe"), "ANIMAIS 6–7 ANOS\nEscreva PEIXE."),
+            ("Qual animal tem penas?", "opcao", "Escolha:", (["Pássaro", "Cachorro", "Coelho"], "Pássaro"), "ANIMAIS 6–7 ANOS\nEscreva PÁSSARO."),
+            ("Qual animal costuma viver em uma toca?", "opcao", "Escolha:", (["Coelho", "Peixe", "Galinha"], "Coelho"), "ANIMAIS 6–7 ANOS\nEscreva COELHO."),
+        ],
+        ("8–9 anos", "Animais"): [
+            ("Qual destes é um mamífero?", "opcao", "Escolha:", (["Coelho", "Galinha", "Peixe"], "Coelho"), "ANIMAIS 8–9 ANOS\nExplique por que o coelho é mamífero."),
+            ("Qual destes animais põe ovos?", "opcao", "Escolha:", (["Galinha", "Cachorro", "Gato"], "Galinha"), "ANIMAIS 8–9 ANOS\nEscreva uma frase sobre a galinha."),
+            ("Qual destes animais respira por brânquias?", "opcao", "Escolha:", (["Peixe", "Coelho", "Pássaro"], "Peixe"), "ANIMAIS 8–9 ANOS\nEscreva uma frase sobre o peixe."),
+        ],
+        ("4–5 anos", "Atividade para colorir"): [
+            ("🎨 Desenhe Luna, o coelhinho e um castelo. Acrescente 5 estrelas.", "criativa", "", None, "ATIVIDADE PARA COLORIR 4–5 ANOS\nDesenhe Luna, o coelhinho e um castelo.\nAcrescente 5 estrelas."),
+            ("🎨 Desenhe uma lua grande e pinte o céu.", "criativa", "", None, "ATIVIDADE PARA COLORIR 4–5 ANOS\nDesenhe uma lua grande e pinte o céu."),
+            ("🎨 Desenhe o coelhinho em um jardim com flores.", "criativa", "", None, "ATIVIDADE PARA COLORIR 4–5 ANOS\nDesenhe o coelhinho em um jardim com flores."),
+        ],
+        ("6–7 anos", "Atividade para colorir"): [
+            ("🎨 Desenhe Luna segurando seu livro mágico.", "criativa", "", None, "ATIVIDADE PARA COLORIR 6–7 ANOS\nDesenhe Luna segurando seu livro mágico."),
+            ("🎨 Desenhe o castelo com 4 torres.", "criativa", "", None, "ATIVIDADE PARA COLORIR 6–7 ANOS\nDesenhe um castelo com 4 torres."),
+            ("🎨 Desenhe uma floresta com 6 estrelas mágicas.", "criativa", "", None, "ATIVIDADE PARA COLORIR 6–7 ANOS\nDesenhe uma floresta com 6 estrelas mágicas."),
+        ],
+        ("8–9 anos", "Atividade para colorir"): [
+            ("🎨 Crie uma cena de Luna entrando no castelo.", "criativa", "", None, "ATIVIDADE PARA COLORIR 8–9 ANOS\nCrie uma cena de Luna entrando no castelo."),
+            ("🎨 Desenhe um mapa da floresta encantada.", "criativa", "", None, "ATIVIDADE PARA COLORIR 8–9 ANOS\nDesenhe um mapa da floresta encantada."),
+            ("🎨 Desenhe uma nova sala mágica do castelo.", "criativa", "", None, "ATIVIDADE PARA COLORIR 8–9 ANOS\nDesenhe uma nova sala mágica do castelo."),
+        ],
+    }
 
-    elif materia == "Leitura":
-        texto_leitura = (
-            "Luna abriu seu livro mágico. Uma luz roxa apareceu e, de repente, "
-            "ela e o coelhinho chegaram a uma floresta encantada."
-        )
-        st.info(texto_leitura)
-        pergunta = "Onde Luna e o coelhinho chegaram?"
-        st.write(f"**Pergunta:** {pergunta}")
-        resposta = st.text_input("Resposta:", key=f"resp_leitura_{idade}")
-        resposta_correta = "floresta" in resposta.lower()
-        atividade_baixar = (
-            f"LEITURA {idade}\n\n{texto_leitura}\n\n"
-            f"Pergunta: {pergunta}\nResposta: ________________________"
-        )
+    atividades = bancos_atividades[(idade, materia)]
 
-    elif materia == "Matemática":
-        if idade == "4–5 anos":
-            st.write("⭐ ⭐ + ⭐ = ?")
-            correta = 3
-        elif idade == "6–7 anos":
-            st.write("🐰 Luna encontrou 4 cenouras e ganhou mais 3. Quantas cenouras ela tem?")
-            correta = 7
-        else:
-            st.write("🏰 No castelo havia 12 estrelas. 5 apagaram. Quantas ficaram acesas?")
-            correta = 7
-
-        resposta = st.number_input(
-            "Sua resposta:",
-            min_value=0,
-            max_value=100,
-            step=1,
-            key=f"resp_mat_{idade}",
-        )
-        resposta_correta = int(resposta) == correta
-        if idade == "4–5 anos":
-            atividade_baixar = (
-                f"MATEMÁTICA {idade}\n"
-                "Conte as estrelas: 2 estrelas + 1 estrela = ?\n"
-                "Resposta: __________"
-            )
-        elif idade == "6–7 anos":
-            atividade_baixar = (
-                f"MATEMÁTICA {idade}\n"
-                "Luna encontrou 4 cenouras e ganhou mais 3. "
-                "Quantas cenouras ela tem?\n"
-                "Resposta: __________"
-            )
-        else:
-            atividade_baixar = (
-                f"MATEMÁTICA {idade}\n"
-                "No castelo havia 12 estrelas. 5 apagaram. "
-                "Quantas ficaram acesas?\n"
-                "Resposta: __________"
-            )
-
-    elif materia == "Cores e formas":
-        st.write("🟣 Qual é a cor deste círculo?")
-        resposta = st.radio(
-            "Escolha:",
-            ["Roxo", "Amarelo", "Verde"],
-            key=f"resp_cores_{idade}",
-            horizontal=True,
-        )
-        resposta_correta = resposta == "Roxo"
-        atividade_baixar = f"CORES E FORMAS {idade}\nPinte um círculo de roxo e desenhe um quadrado amarelo."
-
-    elif materia == "Animais":
-        st.write("🐰 Qual é o animal que acompanha Luna?")
-        resposta = st.radio(
-            "Escolha:",
-            ["Coelho", "Gato", "Cachorro"],
-            key=f"resp_animais_{idade}",
-            horizontal=True,
-        )
-        resposta_correta = resposta == "Coelho"
-        atividade_baixar = f"ANIMAIS {idade}\nEscreva o nome do animal que acompanha Luna: __________________"
-
-    else:
-        st.write("🎨 Desenhe Luna, o coelhinho e um castelo. Depois pinte do seu jeito.")
-        st.write("⭐ Desafio: acrescente 5 estrelas no céu.")
-        atividade_baixar = (
-            f"ATIVIDADE PARA COLORIR {idade}\n\n"
-            "Desenhe Luna, o coelhinho e um castelo.\n"
-            "Acrescente 5 estrelas no céu e pinte a cena."
-        )
-
-    if materia != "Atividade para colorir":
+    if etapa_atividade >= len(atividades):
+        st.progress(1.0, text="Todas as atividades concluídas!", width="stretch")
+        st.success("🏆 Parabéns! Você terminou todas as atividades desta matéria!")
+        st.balloons()
         if st.button(
-            "✅ Conferir atividade",
-            key=f"conferir_atividade_{idade}_{materia}",
+            "🔄 Fazer atividades novamente",
+            key=f"reiniciar_atividades_{idade}_{materia}",
             width="stretch",
         ):
-            if resposta_correta:
-                st.success("🎉 Muito bem! Resposta correta!")
-            else:
-                st.warning("💜 Quase! Tente novamente.")
+            st.session_state["atividade_etapa"] = 0
+            st.rerun()
+    else:
+        enunciado, tipo, rotulo, esperado, atividade_baixar = atividades[etapa_atividade]
 
-    nome_arquivo_base = (
-        f"atividade_{materia.lower().replace(' ', '_')}_"
-        f"{idade.replace('–','-')}"
-    )
-
-    try:
-        pdf_atividade = criar_pdf_atividade(
-            idade,
-            materia,
-            atividade_baixar,
-        )
-
-        st.caption("💜 PDF colorido com cabeçalho, espaço para responder e botão para voltar ao site.")
-        st.download_button(
-            label="Baixar folha em PDF",
-            icon="📄",
-            data=pdf_atividade,
-            file_name=f"{nome_arquivo_base}_folha_colorida.pdf",
-            mime="application/pdf",
+        st.markdown("### ✏️ Atividade do dia")
+        st.progress(
+            etapa_atividade / len(atividades),
+            text=f"Atividade {etapa_atividade + 1} de {len(atividades)}",
             width="stretch",
-            key=f"baixar_pdf_atividade_{idade}_{materia}",
         )
-    except Exception as e:
-        st.warning(
-            "Não consegui preparar o PDF agora. "
-            "O arquivo de texto continua disponível abaixo."
-        )
-        with st.expander("Ver detalhe do PDF"):
-            st.code(str(e))
+        st.write(enunciado)
 
-    with st.expander("Opcional: baixar somente o texto da atividade"):
-        st.download_button(
-            label="Baixar atividade em texto",
-            icon="⬇️",
-            data=atividade_baixar.encode("utf-8"),
-            file_name=f"{nome_arquivo_base}.txt",
-            mime="text/plain",
-            width="stretch",
-            key=f"baixar_txt_atividade_{idade}_{materia}",
+        resposta_correta = None
+
+        if tipo == "texto":
+            resposta = st.text_input(
+                rotulo,
+                key=f"resp_atividade_{idade}_{materia}_{etapa_atividade}",
+            ).strip().upper()
+            resposta_correta = resposta == str(esperado).upper()
+
+        elif tipo == "frase":
+            resposta = st.text_area(
+                rotulo,
+                key=f"resp_atividade_{idade}_{materia}_{etapa_atividade}",
+            )
+            resposta_correta = len(resposta.strip().split()) >= int(esperado)
+
+        elif tipo == "leitura":
+            st.info(enunciado)
+            st.write(f"**Pergunta:** {rotulo}")
+            resposta = st.text_input(
+                "Resposta:",
+                key=f"resp_atividade_{idade}_{materia}_{etapa_atividade}",
+            )
+            resposta_correta = str(esperado).lower() in resposta.lower()
+
+        elif tipo == "numero":
+            resposta = st.number_input(
+                rotulo,
+                min_value=0,
+                max_value=500,
+                step=1,
+                key=f"resp_atividade_{idade}_{materia}_{etapa_atividade}",
+            )
+            resposta_correta = int(resposta) == int(esperado)
+
+        elif tipo == "opcao":
+            opcoes, correta = esperado
+            resposta = st.radio(
+                rotulo,
+                opcoes,
+                key=f"resp_atividade_{idade}_{materia}_{etapa_atividade}",
+            )
+            resposta_correta = resposta == correta
+
+        if tipo != "criativa":
+            if st.button(
+                "✅ Conferir atividade",
+                key=f"conferir_atividade_{idade}_{materia}_{etapa_atividade}",
+                width="stretch",
+            ):
+                if resposta_correta:
+                    st.success("🎉 Muito bem! Resposta correta!")
+                    st.balloons()
+                    time.sleep(1.0)
+                    st.session_state["atividade_etapa"] = etapa_atividade + 1
+                    st.rerun()
+                else:
+                    st.warning("💜 Quase! Tente novamente.")
+        else:
+            if st.button(
+                "✅ Terminei esta atividade",
+                key=f"terminar_atividade_{idade}_{materia}_{etapa_atividade}",
+                width="stretch",
+            ):
+                st.success("🎨 Muito bem! Vamos para a próxima atividade.")
+                st.balloons()
+                time.sleep(0.8)
+                st.session_state["atividade_etapa"] = etapa_atividade + 1
+                st.rerun()
+
+        nome_arquivo_base = (
+            f"atividade_{materia.lower().replace(' ', '_')}_"
+            f"{idade.replace('–','-')}_"
+            f"{etapa_atividade + 1}"
         )
 
-    st.caption(
-        "PDF em folha A4, pronto para imprimir ou salvar no celular."
-    )
+        try:
+            pdf_atividade = criar_pdf_atividade(
+                idade,
+                materia,
+                atividade_baixar,
+            )
+
+            st.caption("💜 PDF colorido com cabeçalho, espaço para responder e botão para voltar ao site.")
+            st.download_button(
+                label="Baixar folha em PDF",
+                icon="📄",
+                data=pdf_atividade,
+                file_name=f"{nome_arquivo_base}_folha_colorida.pdf",
+                mime="application/pdf",
+                width="stretch",
+                key=f"baixar_pdf_atividade_{idade}_{materia}_{etapa_atividade}",
+            )
+        except Exception as e:
+            st.warning(
+                "Não consegui preparar o PDF agora. "
+                "O arquivo de texto continua disponível abaixo."
+            )
+            with st.expander("Ver detalhe do PDF"):
+                st.code(str(e))
+
+        with st.expander("Opcional: baixar somente o texto da atividade"):
+            st.download_button(
+                label="Baixar atividade em texto",
+                icon="⬇️",
+                data=atividade_baixar.encode("utf-8"),
+                file_name=f"{nome_arquivo_base}.txt",
+                mime="text/plain",
+                width="stretch",
+                key=f"baixar_txt_atividade_{idade}_{materia}_{etapa_atividade}",
+            )
+
+        st.caption(
+            "PDF em folha A4, pronto para imprimir ou salvar no celular."
+        )
 
 
 elif menu == "🗑️ Gerenciar":
