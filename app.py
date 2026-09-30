@@ -1536,6 +1536,56 @@ div[data-testid="stTextArea"] textarea:focus {
     }
 }
 
+
+/* V13 — Jogos mais compactos no notebook */
+@media (min-width: 641px) and (max-width: 1399px) {
+    [class*="st-key-memoria_carta_"] button {
+        min-height: 74px !important;
+        height: 74px !important;
+        font-size: 2.15rem !important;
+        border-radius: 14px !important;
+        padding: 0.15rem !important;
+    }
+
+    [class*="st-key-memoria_carta_"] button p,
+    [class*="st-key-memoria_carta_"] button span,
+    [class*="st-key-memoria_carta_"] button [data-testid="stMarkdownContainer"] p {
+        font-size: 2.15rem !important;
+        line-height: 1 !important;
+    }
+
+    [class*="st-key-memoria_carta_"] + div[data-testid="stCaptionContainer"],
+    [class*="st-key-memoria_carta_"] ~ div[data-testid="stCaptionContainer"] {
+        margin-top: -0.05rem !important;
+        margin-bottom: 0.05rem !important;
+    }
+
+    [class*="st-key-memoria_carta_"] + div[data-testid="stCaptionContainer"] p,
+    [class*="st-key-memoria_carta_"] ~ div[data-testid="stCaptionContainer"] p {
+        font-size: 0.70rem !important;
+        line-height: 1 !important;
+    }
+
+    [class*="st-key-memoria_novo_jogo"] button,
+    [class*="st-key-memoria_continuar"] button {
+        min-height: 38px !important;
+        height: 38px !important;
+        border-radius: 11px !important;
+        padding: 0.16rem 0.45rem !important;
+    }
+
+    [class*="st-key-memoria_novo_jogo"] button p,
+    [class*="st-key-memoria_continuar"] button p {
+        font-size: 0.84rem !important;
+        line-height: 1 !important;
+    }
+
+    div[data-testid="stProgress"] {
+        margin-top: 0.20rem !important;
+        margin-bottom: 0.35rem !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
