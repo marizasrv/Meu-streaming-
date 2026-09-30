@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
 from supabase import create_client, Client
 from datetime import datetime, timezone
 from streamlit_js_eval import streamlit_js_eval
@@ -1623,57 +1622,6 @@ def upload_arquivo(arquivo, pasta):
     return nome_unico, url
 
 
-
-def mostrar_video_streaming(url):
-    """Reproduz MP4 comum ou streaming HLS (.m3u8)."""
-    url = str(url or "").strip()
-
-    if not url:
-        st.warning("Este vídeo ainda não possui um endereço válido.")
-        return
-
-    if ".m3u8" not in url.lower():
-        st.video(url)
-        return
-
-    player_id = f"hls_{uuid.uuid4().hex}"
-    url_js = json.dumps(url)
-
-    components.html(
-        f"""
-        <div style="width:100%;background:#000;border-radius:16px;overflow:hidden;">
-            <video
-                id="{player_id}"
-                controls
-                playsinline
-                style="width:100%;height:auto;display:block;background:#000;"
-            ></video>
-        </div>
-
-        <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-        <script>
-            const video = document.getElementById("{player_id}");
-            const src = {url_js};
-
-            if (video.canPlayType("application/vnd.apple.mpegurl")) {{
-                video.src = src;
-            }} else if (window.Hls && Hls.isSupported()) {{
-                const hls = new Hls();
-                hls.loadSource(src);
-                hls.attachMedia(video);
-            }} else {{
-                video.outerHTML =
-                    '<div style="padding:16px;color:white;background:#2b123f;">' +
-                    'Este navegador não conseguiu abrir o streaming HLS.' +
-                    '</div>';
-            }}
-        </script>
-        """,
-        height=520,
-        scrolling=False,
-    )
-
-
 def excluir_video(item):
     try:
         caminhos = []
@@ -1823,7 +1771,7 @@ def mostrar_card(item, contexto, em_minha_lista=False, compacto=False):
             alternar_favorito(item)
 
     if st.session_state.get(f"aberto_{contexto}_{item['id']}", False):
-        mostrar_video_streaming(item["video_url"])
+        st.video(item["video_url"])
 
 
 def mostrar_card_horizontal(item, contexto, novo=False):
@@ -1890,7 +1838,7 @@ def mostrar_card_horizontal(item, contexto, novo=False):
             alternar_favorito(item)
 
     if st.session_state.get(chave, False):
-        mostrar_video_streaming(item["video_url"])
+        st.video(item["video_url"])
 
 
 def mostrar_fileira_premium(titulo, itens, contexto, limite=12, marcar_novo=False):
@@ -1992,7 +1940,7 @@ def mostrar_card_catalogo(item, contexto, novo=False):
             alternar_favorito(item)
 
     if st.session_state.get(chave, False):
-        mostrar_video_streaming(item["video_url"])
+        st.video(item["video_url"])
 
 
 def mostrar_fileira_catalogo(titulo, itens, contexto, limite=12, marcar_novo=False):
@@ -2216,20 +2164,57 @@ if menu == "🏠 Início":
 
 elif menu == "🔎 Buscar":
     st.subheader("🔎 Buscar vídeos")
-
-    termo = st.text_input("Digite o nome do vídeo", placeholder="Ex.: Luna")
-    categoria_busca = st.selectbox(
-        "Filtrar por categoria",
-        ["Todas", "Infantil", "Filmes", "Séries"]
+    st.caption(
+        "Encontre seus vídeos pelo nome, categoria e tipo de acesso."
     )
 
-    filtrados = videos_gratis(videos)
+    # Mantém o plano atualizado para decidir se a busca pode mostrar Premium.
+    if st.session_state.usuario_logado:
+        carregar_plano_usuario()
+
+    premium_ativo_busca = (
+        st.session_state.usuario_logado
+        and st.session_state.plano_atual == "Premium"
+        and st.session_state.status_assinatura == "ativo"
+    )
+
+    termo = st.text_input(
+        "🔎 Digite o nome do vídeo",
+        placeholder="Ex.: Luna",
+        key="busca_termo",
+    )
+
+    categoria_busca = st.selectbox(
+        "🎞️ Categoria",
+        ["Todas", "Infantil", "Filmes", "Séries"],
+        key="busca_categoria",
+    )
+
+    if premium_ativo_busca:
+        acesso_busca = st.selectbox(
+            "💎 Tipo de acesso",
+            ["Todos", "Grátis", "Premium"],
+            key="busca_acesso",
+        )
+        st.caption(
+            "💎 Seu Premium está ativo: os conteúdos exclusivos também aparecem na busca."
+        )
+        disponiveis_busca = list(videos)
+    else:
+        acesso_busca = "Grátis"
+        disponiveis_busca = videos_gratis(videos)
+        st.caption(
+            "🌙 A busca mostra os conteúdos gratuitos. "
+            "Assinantes Premium também encontram os exclusivos aqui."
+        )
+
+    filtrados = list(disponiveis_busca)
 
     if termo.strip():
         termo_lower = termo.lower().strip()
         filtrados = [
             v for v in filtrados
-            if termo_lower in v.get("nome", "").lower()
+            if termo_lower in str(v.get("nome") or "").lower()
         ]
 
     if categoria_busca != "Todas":
@@ -2238,13 +2223,46 @@ elif menu == "🔎 Buscar":
             if categoria_base(v) == categoria_busca
         ]
 
+    if premium_ativo_busca and acesso_busca != "Todos":
+        if acesso_busca == "Premium":
+            filtrados = [
+                v for v in filtrados
+                if video_premium(v)
+            ]
+        else:
+            filtrados = [
+                v for v in filtrados
+                if not video_premium(v)
+            ]
+
+    st.markdown("---")
+
     if not filtrados:
-        st.info("Nenhum vídeo encontrado.")
+        st.info(
+            "Nenhum vídeo encontrado com esses filtros. "
+            "Tente outro nome ou categoria."
+        )
     else:
-        cols = st.columns(2)
-        for i, item in enumerate(filtrados):
-            with cols[i % 2]:
-                mostrar_card(item, f"busca_{i}")
+        quantidade_resultados = len(filtrados)
+
+        st.markdown(
+            f"### ✨ {quantidade_resultados} "
+            f"{'resultado' if quantidade_resultados == 1 else 'resultados'}"
+        )
+
+        st.markdown(
+            '<div class="dica-deslize">'
+            'Deslize para o lado para ver os resultados. 💜'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+
+        mostrar_fileira_catalogo(
+            "🔎 Resultados",
+            filtrados,
+            "busca_resultados",
+            limite=30,
+        )
 
 elif menu == "🆕 Novidades":
     st.subheader("🆕 Novidades")
@@ -2824,8 +2842,8 @@ elif menu == "📤 Enviar vídeo":
                             video_path, video_url = upload_arquivo(video, "videos")
                             nome_padrao = video.name
                         else:
-                            video_path = None
                             video_url = video_url_grande.strip()
+                            video_path = video_url
                             nome_padrao = "Vídeo grande"
 
                         capa_path = None
