@@ -4409,16 +4409,77 @@ elif menu == "🎬 Criar vídeo com IA":
             st.rerun()
 
     try:
+        tokia_api_key = str(st.secrets.get("TOKIA_API_KEY", "")).strip()
+        tokia_configurada = bool(tokia_api_key)
+    except Exception:
+        tokia_api_key = ""
+        tokia_configurada = False
+
+    try:
         fal_configurado = bool(
             str(st.secrets.get("FAL_API_KEY", "")).strip()
         )
     except Exception:
         fal_configurado = False
 
-    if fal_configurado:
-        st.caption("🟢 fal.ai configurado • Wan 2.2 Turbo econômico • prioridade ativa")
+    if tokia_configurada:
+        st.caption("🟢 Tokia configurada • saldo em reais/Pix • prioridade para a próxima integração")
+    elif fal_configurado:
+        st.caption("🟡 fal.ai configurado • usado enquanto finalizamos a integração Tokia")
     else:
-        st.caption("🟣 Provedor alternativo fal.ai: ainda não configurado")
+        st.caption("🟣 Nenhum provedor de vídeo configurado")
+
+    if tokia_configurada:
+        if st.button(
+            "🔎 Testar conexão com a Tokia",
+            key="testar_tokia_video",
+            width="stretch",
+        ):
+            try:
+                import json as _json
+                import urllib.request as _urlrequest
+
+                requisicao_tokia = _urlrequest.Request(
+                    "https://api.usetokia.com/v1/models",
+                    headers={
+                        "Authorization": f"Bearer {tokia_api_key}",
+                        "Accept": "application/json",
+                    },
+                )
+
+                with _urlrequest.urlopen(requisicao_tokia, timeout=30) as resposta_tokia:
+                    dados_tokia = _json.loads(
+                        resposta_tokia.read().decode("utf-8")
+                    )
+
+                modelos_tokia = dados_tokia.get("data", []) if isinstance(dados_tokia, dict) else []
+                ids_tokia = [
+                    str(item.get("id", ""))
+                    for item in modelos_tokia
+                    if isinstance(item, dict)
+                ]
+                video_tokia = [
+                    mid for mid in ids_tokia
+                    if "kling" in mid.lower() or "video" in mid.lower()
+                ]
+
+                st.success("✅ Chave Tokia conectada com sucesso.")
+
+                if video_tokia:
+                    st.info(
+                        "🎬 Modelos de vídeo encontrados: "
+                        + ", ".join(video_tokia[:8])
+                    )
+                else:
+                    st.warning(
+                        "A conexão funcionou, mas a lista devolvida para esta chave "
+                        "não mostrou um modelo com nome Kling/Video. "
+                        "Vou manter o gerador atual até confirmarmos o modelo de vídeo correto."
+                    )
+            except Exception as erro_tokia:
+                st.error("Não consegui validar a chave Tokia ainda.")
+                with st.expander("🔧 Ver detalhe técnico"):
+                    st.code(str(erro_tokia))
 
     pacotes = links_pacotes_creditos()
     links_configurados = any(pacotes.values())
