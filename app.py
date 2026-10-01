@@ -4458,23 +4458,38 @@ elif menu == "🎬 Criar vídeo com IA":
                     for item in modelos_tokia
                     if isinstance(item, dict)
                 ]
+                def parece_modelo_video_tokia(model_id):
+                    mid = str(model_id or "").strip().lower()
+                    partes = [
+                        p for p in mid.replace(":", "/").replace("-", "/").split("/")
+                        if p
+                    ]
+                    return (
+                        mid.startswith("kling")
+                        or "/kling" in mid
+                        or any(p == "kling" for p in partes)
+                        or any(p == "video" for p in partes)
+                        or "image-to-video" in mid
+                        or "text-to-video" in mid
+                    )
+
                 video_tokia = [
                     mid for mid in ids_tokia
-                    if "kling" in mid.lower() or "video" in mid.lower()
+                    if parece_modelo_video_tokia(mid)
                 ]
 
                 st.success("✅ Chave Tokia conectada com sucesso.")
 
                 if video_tokia:
                     st.info(
-                        "🎬 Modelos de vídeo encontrados: "
+                        "🎬 Possíveis modelos de vídeo encontrados: "
                         + ", ".join(video_tokia[:8])
                     )
                 else:
                     st.warning(
-                        "A conexão funcionou, mas a lista devolvida para esta chave "
-                        "não mostrou um modelo com nome Kling/Video. "
-                        "Vou manter o gerador atual até confirmarmos o modelo de vídeo correto."
+                        "A conexão funcionou, mas a lista atual desta chave "
+                        "não mostrou um modelo de vídeo confirmado. "
+                        "Não vou gastar seu saldo tentando um modelo errado."
                     )
             except Exception as erro_tokia:
                 st.error("Não consegui validar a chave Tokia ainda.")
