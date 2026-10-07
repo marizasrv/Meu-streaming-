@@ -1,1058 +1,1346 @@
-"""Validação e visualização dos jogos criados."""
+from datetime import datetime, timezone
+from uuid import UUID, uuid4
 
-import json
+import streamlit as st
+
+from game_builder_core import validate_game, game_html
 
 
-def validate_game(title, kind, content):
+BUCKET_IMAGENS = "jogos-imagens"
 
-    title = str(title).strip()
+TIPOS_IMAGEM = {
+    "image/jpeg": ".jpg",
+    "image/png": ".png",
+    "image/webp": ".webp",
+}
 
-    if not 1 <= len(title) <= 80:
+LIMITE_IMAGEM = 10 * 1024 * 1024
+
+
+def enviar_imagens(client, usuario_id, arquivos):
+
+    if len(arquivos) < 2:
         raise ValueError(
-            "Escreva um nome de até 80 caracteres para o jogo."
+            "Escolha pelo menos 2 imagens."
         )
+
+    if len(arquivos) > 8:
+        raise ValueError(
+            "Você pode usar no máximo 8 imagens."
+        )
+
+
+    caminhos = []
+
+
+    try:
+
+        for arquivo in arquivos:
+
+            tipo = arquivo.type or ""
+
+            if tipo not in TIPOS_IMAGEM:
+                raise ValueError(
+                    "Use somente imagens JPG, PNG ou WEBP."
+                )
+
+
+            dados = arquivo.getvalue()
+
+            if len(dados) > LIMITE_IMAGEM:
+                raise ValueError(
+                    "Cada imagem pode ter no máximo 10 MB."
+                )
+
+
+            extensao = TIPOS_IMAGEM[tipo]
+
+
+            nome_arquivo = (
+                str(usuario_id)
+                + "/"
+                + uuid4().hex
+                + extensao
+            )
+
+
+            client.storage.from_(
+                BUCKET_IMAGENS
+            ).upload(
+                nome_arquivo,
+                dados,
+                {
+                    "content-type": tipo,
+                    "upsert": "false",
+                },
+            )
+
+
+            caminhos.append(
+                nome_arquivo
+            )
+
+
+        return caminhos
+
+
+    except Exception:
+
+        if caminhos:
+
+            try:
+
+                client.storage.from_(
+                    BUCKET_IMAGENS
+                ).remove(
+                    caminhos
+                )
+
+            except Exception:
+                pass
+
+
+        raise
+
+
+
+def url_temporaria(
+    client,
+    caminho,
+):
+
+    try:
+
+        resposta = (
+            client
+            .storage
+            .from_(
+                BUCKET_IMAGENS
+            )
+            .create_signed_url(
+                caminho,
+                3600,
+            )
+        )
+
+
+        if isinstance(
+            resposta,
+            dict
+        ):
+
+            return (
+                resposta.get(
+                    "signedURL"
+                )
+                or
+                resposta.get(
+                    "signedUrl"
+                )
+                or
+                resposta.get(
+                    "signed_url"
+                )
+            )
+
+
+        try:
+
+            return (
+                resposta.signed_url
+            )
+
+        except Exception:
+            pass
+
+
+    except Exception:
+        pass
+
+
+    return None
+
+
+
+def montar_urls_imagens(
+    client,
+    caminhos,
+):
+
+    urls = {}
+
+
+    for caminho in caminhos:
+
+        url = url_temporaria(
+            client,
+            caminho,
+        )
+
+
+        if url:
+
+            urls[
+                caminho
+            ] = url
+
+
+    return urls
+
+
+
+def render_game_builder(
+    user_id,
+    client,
+):
+
+    st.subheader(
+        "🎨 Faça seu próprio jogo"
+    )
+
+
+    st.caption(
+        "Crie jogos de memória e quiz. "
+        "Você também pode usar suas próprias imagens."
+    )
+
+
+    if not user_id:
+
+        st.info(
+            "Entre em Minha conta para criar e guardar seus jogos."
+        )
+
+        return
+
+
+    usuario_id = str(
+        UUID(
+            str(user_id)
+        )
+    )
+
+
+    if client is None:
+
+        st.warning(
+            "Entre novamente na sua conta para acessar seus jogos."
+        )
+
+        return
+
+
+    try:
+
+        resposta = (
+            client
+            .table(
+                "jogos_criados"
+            )
+            .select(
+                "id,title,kind,content,updated_at"
+            )
+            .eq(
+                "user_id",
+                usuario_id,
+            )
+            .order(
+                "updated_at",
+                desc=True,
+            )
+            .limit(
+                100
+            )
+            .execute()
+        )
+
+
+        jogos = (
+            resposta.data
+            or []
+        )
+
+
+    except Exception:
+
+        st.error(
+            "Não foi possível carregar seus jogos. "
+            "Tente novamente em instantes."
+        )
+
+        return
+
+
+
+    opcoes = [
+        "novo"
+    ]
+
+
+    jogos_por_id = {}
+
+
+    for jogo in jogos:
+
+        opcoes.append(
+            jogo["id"]
+        )
+
+        jogos_por_id[
+            jogo["id"]
+        ] = jogo
+
+
+
+    selecionado = st.selectbox(
+        "Criar ou editar",
+        opcoes,
+        format_func=lambda valor:
+            "➕ Novo jogo"
+            if valor == "novo"
+            else jogos_por_id[
+                valor
+            ]["title"],
+    )
+
+
+    jogo_existente = (
+        jogos_por_id.get(
+            selecionado
+        )
+    )
+
+
+    tipos = {
+        "memory":
+            "🧠 Jogo da Memória",
+
+        "quiz":
+            "❓ Perguntas e respostas",
+    }
+
+
+    indice_tipo = 0
+
+
+    if (
+        jogo_existente
+        and
+        jogo_existente[
+            "kind"
+        ] == "quiz"
+    ):
+
+        indice_tipo = 1
+
+
+    tipo = st.selectbox(
+        "Tipo de jogo",
+        list(
+            tipos.keys()
+        ),
+        index=indice_tipo,
+        format_func=lambda valor:
+            tipos[valor],
+    )
+
+
+    conteudo_antigo = {}
+
+
+    if (
+        jogo_existente
+        and
+        jogo_existente[
+            "kind"
+        ] == tipo
+    ):
+
+        conteudo_antigo = (
+            jogo_existente.get(
+                "content"
+            )
+            or {}
+        )
+
 
 
     # =========================================================
     # JOGO DA MEMÓRIA
     # =========================================================
 
-    if kind == "memory":
+    if tipo == "memory":
 
-        mode = content.get(
-            "mode",
-            "text",
+        modo_antigo = (
+            conteudo_antigo.get(
+                "mode",
+                "text",
+            )
         )
 
 
-        # -----------------------------------------------------
-        # MEMÓRIA COM IMAGENS
-        # -----------------------------------------------------
+        modo = st.radio(
+            "O que você quer usar nas cartas?",
+            [
+                "text",
+                "images",
+            ],
+            format_func=lambda valor:
+                "📝 Palavras"
+                if valor == "text"
+                else "🖼️ Minhas imagens",
+            index=(
+                1
+                if modo_antigo
+                == "images"
+                else 0
+            ),
+            horizontal=True,
+        )
 
-        if mode == "images":
 
-            items = []
+        nome = st.text_input(
+            "Nome do jogo",
+            value=(
+                jogo_existente[
+                    "title"
+                ]
+                if jogo_existente
+                else ""
+            ),
+            placeholder=
+                "Ex: Memória da Família",
+            max_chars=80,
+        )
 
-            for item in content.get(
-                "items",
-                [],
+
+
+        # =====================================================
+        # MEMÓRIA COM PALAVRAS
+        # =====================================================
+
+        if modo == "text":
+
+            palavras_anteriores = (
+                conteudo_antigo.get(
+                    "items",
+                    [
+                        "Luna",
+                        "Coelho",
+                        "Castelo",
+                    ],
+                )
+            )
+
+
+            if (
+                conteudo_antigo.get(
+                    "mode"
+                )
+                == "images"
             ):
 
-                item = str(
-                    item
-                ).strip()
+                palavras_anteriores = [
+                    "Luna",
+                    "Coelho",
+                    "Castelo",
+                ]
 
-                if item:
-                    items.append(
-                        item
+
+            palavras = st.text_area(
+                "Escreva uma palavra por linha",
+                value="\n".join(
+                    palavras_anteriores
+                ),
+                height=180,
+            )
+
+
+            if st.button(
+                "💾 Salvar meu jogo",
+                key=
+                    "salvar_memoria_palavras",
+            ):
+
+                try:
+
+                    dados = {
+                        "mode":
+                            "text",
+
+                        "items":
+                            palavras.splitlines(),
+                    }
+
+
+                    jogo_limpo = (
+                        validate_game(
+                            nome,
+                            "memory",
+                            dados,
+                        )
                     )
 
 
-            if not 2 <= len(items) <= 8:
-
-                raise ValueError(
-                    "Use entre 2 e 8 imagens no jogo da memória."
-                )
-
-
-            if len(set(items)) != len(items):
-
-                raise ValueError(
-                    "Use imagens diferentes para formar os pares."
-                )
-
-
-            for item in items:
-
-                if len(item) > 500:
-
-                    raise ValueError(
-                        "Uma das imagens não é válida."
+                    jogo_limpo[
+                        "updated_at"
+                    ] = (
+                        datetime.now(
+                            timezone.utc
+                        ).isoformat()
                     )
 
 
-                if ".." in item:
+                    if jogo_existente:
 
-                    raise ValueError(
-                        "Uma das imagens não é válida."
+                        resposta_salvar = (
+                            client
+                            .table(
+                                "jogos_criados"
+                            )
+                            .update(
+                                jogo_limpo
+                            )
+                            .eq(
+                                "id",
+                                jogo_existente[
+                                    "id"
+                                ],
+                            )
+                            .eq(
+                                "user_id",
+                                usuario_id,
+                            )
+                            .execute()
+                        )
+
+                    else:
+
+                        jogo_limpo[
+                            "user_id"
+                        ] = usuario_id
+
+
+                        resposta_salvar = (
+                            client
+                            .table(
+                                "jogos_criados"
+                            )
+                            .insert(
+                                jogo_limpo
+                            )
+                            .execute()
+                        )
+
+
+                    if not resposta_salvar.data:
+
+                        st.error(
+                            "O jogo não foi salvo."
+                        )
+
+                        return
+
+
+                    st.success(
+                        "✅ Jogo salvo!"
                     )
 
 
-                if "/" not in item:
-
-                    raise ValueError(
-                        "Uma das imagens não é válida."
+                    st.markdown(
+                        "### ▶ Testar meu jogo"
                     )
 
 
-            clean = {
-
-                "mode":
-                    "images",
-
-                "items":
-                    items,
-
-            }
+                    st.iframe(
+                        game_html(
+                            jogo_limpo
+                        ),
+                        height=600,
+                    )
 
 
-        # -----------------------------------------------------
-        # MEMÓRIA COM PALAVRAS
-        # -----------------------------------------------------
+                except ValueError as erro:
+
+                    st.warning(
+                        str(erro)
+                    )
+
+
+                except Exception:
+
+                    st.error(
+                        "Não foi possível salvar o jogo."
+                    )
+
+
+
+        # =====================================================
+        # MEMÓRIA COM IMAGENS
+        # =====================================================
 
         else:
 
-            items = []
+            st.markdown(
+                "### 🖼️ Minhas imagens"
+            )
 
-            for item in content.get(
-                "items",
-                [],
+
+            st.write(
+                "Escolha de 2 até 8 imagens."
+            )
+
+
+            st.caption(
+                "Aceitamos JPG, PNG e WEBP. "
+                "Cada imagem pode ter até 10 MB."
+            )
+
+
+            caminhos_antigos = []
+
+
+            if (
+                conteudo_antigo.get(
+                    "mode"
+                )
+                == "images"
             ):
 
-                item = str(
-                    item
-                ).strip()
+                caminhos_antigos = (
+                    conteudo_antigo.get(
+                        "items",
+                        [],
+                    )
+                )
 
-                if item:
-                    items.append(
-                        item
+
+
+            # MOSTRAR IMAGENS JÁ SALVAS
+
+            if caminhos_antigos:
+
+                st.success(
+                    str(
+                        len(
+                            caminhos_antigos
+                        )
+                    )
+                    +
+                    " imagens já estão salvas neste jogo."
+                )
+
+
+                mapa_antigo = (
+                    montar_urls_imagens(
+                        client,
+                        caminhos_antigos,
+                    )
+                )
+
+
+                imagens_preview = []
+
+
+                for caminho in caminhos_antigos:
+
+                    url = mapa_antigo.get(
+                        caminho
+                    )
+
+                    if url:
+
+                        imagens_preview.append(
+                            url
+                        )
+
+
+                if imagens_preview:
+
+                    st.image(
+                        imagens_preview,
+                        width=140,
                     )
 
 
-            if not 2 <= len(items) <= 12:
 
-                raise ValueError(
-                    "Use entre 2 e 12 palavras ou pares."
+            arquivos = st.file_uploader(
+                "Enviar minhas imagens",
+                type=[
+                    "jpg",
+                    "jpeg",
+                    "png",
+                    "webp",
+                ],
+                accept_multiple_files=True,
+                key=
+                    "upload_imagens_jogo",
+            )
+
+
+
+            if arquivos:
+
+                st.markdown(
+                    "### Imagens escolhidas"
                 )
 
 
-            for item in items:
+                st.image(
+                    arquivos,
+                    width=140,
+                )
 
-                if len(item) > 40:
 
-                    raise ValueError(
-                        "Cada palavra ou frase pode ter até 40 caracteres."
+
+            if st.button(
+                "💾 Salvar jogo com minhas imagens",
+                key=
+                    "salvar_memoria_imagens",
+            ):
+
+                novos_caminhos = []
+
+
+                try:
+
+                    # Se o usuário escolheu novas imagens,
+                    # fazemos novo upload.
+
+                    if arquivos:
+
+                        novos_caminhos = (
+                            enviar_imagens(
+                                client,
+                                usuario_id,
+                                arquivos,
+                            )
+                        )
+
+
+                        caminhos_jogo = (
+                            novos_caminhos
+                        )
+
+
+                    # Caso não escolha novas imagens,
+                    # preservamos as já salvas.
+
+                    elif caminhos_antigos:
+
+                        caminhos_jogo = (
+                            caminhos_antigos
+                        )
+
+
+                    else:
+
+                        raise ValueError(
+                            "Escolha pelo menos 2 imagens."
+                        )
+
+
+
+                    dados = {
+                        "mode":
+                            "images",
+
+                        "items":
+                            caminhos_jogo,
+                    }
+
+
+
+                    jogo_limpo = (
+                        validate_game(
+                            nome,
+                            "memory",
+                            dados,
+                        )
                     )
 
 
-            palavras_unicas = set()
+                    jogo_limpo[
+                        "updated_at"
+                    ] = (
+                        datetime.now(
+                            timezone.utc
+                        ).isoformat()
+                    )
 
-            for item in items:
 
-                palavras_unicas.add(
-                    item.casefold()
+
+                    if jogo_existente:
+
+                        resposta_salvar = (
+                            client
+                            .table(
+                                "jogos_criados"
+                            )
+                            .update(
+                                jogo_limpo
+                            )
+                            .eq(
+                                "id",
+                                jogo_existente[
+                                    "id"
+                                ],
+                            )
+                            .eq(
+                                "user_id",
+                                usuario_id,
+                            )
+                            .execute()
+                        )
+
+                    else:
+
+                        jogo_limpo[
+                            "user_id"
+                        ] = usuario_id
+
+
+                        resposta_salvar = (
+                            client
+                            .table(
+                                "jogos_criados"
+                            )
+                            .insert(
+                                jogo_limpo
+                            )
+                            .execute()
+                        )
+
+
+
+                    if not resposta_salvar.data:
+
+                        raise RuntimeError(
+                            "Jogo não foi salvo."
+                        )
+
+
+
+                    # Depois que o jogo foi salvo,
+                    # removemos imagens antigas apenas
+                    # se novas imagens substituíram as anteriores.
+
+                    if (
+                        novos_caminhos
+                        and
+                        caminhos_antigos
+                    ):
+
+                        try:
+
+                            client.storage.from_(
+                                BUCKET_IMAGENS
+                            ).remove(
+                                caminhos_antigos
+                            )
+
+                        except Exception:
+                            pass
+
+
+
+                    st.success(
+                        "✅ Jogo salvo com suas imagens!"
+                    )
+
+
+                    st.info(
+                        "As imagens ficaram guardadas "
+                        "na sua conta."
+                    )
+
+
+
+                    # =========================================
+                    # GERAR LINKS TEMPORÁRIOS PARA TESTAR
+                    # =========================================
+
+                    urls_jogo = (
+                        montar_urls_imagens(
+                            client,
+                            caminhos_jogo,
+                        )
+                    )
+
+
+                    if (
+                        len(
+                            urls_jogo
+                        )
+                        ==
+                        len(
+                            caminhos_jogo
+                        )
+                    ):
+
+                        st.markdown(
+                            "### ▶ Testar meu jogo"
+                        )
+
+
+                        st.iframe(
+                            game_html(
+                                jogo_limpo,
+                                image_urls=
+                                    urls_jogo,
+                            ),
+                            height=650,
+                        )
+
+
+                    else:
+
+                        st.warning(
+                            "O jogo foi salvo, mas alguma imagem "
+                            "não pôde ser aberta no teste."
+                        )
+
+
+
+                except ValueError as erro:
+
+                    st.warning(
+                        str(erro)
+                    )
+
+
+                except Exception:
+
+                    # Se o jogo falhar antes de salvar,
+                    # removemos as novas imagens que acabaram
+                    # de ser enviadas.
+
+                    if novos_caminhos:
+
+                        try:
+
+                            client.storage.from_(
+                                BUCKET_IMAGENS
+                            ).remove(
+                                novos_caminhos
+                            )
+
+                        except Exception:
+                            pass
+
+
+                    st.error(
+                        "Não foi possível salvar as imagens agora."
+                    )
+
+
+
+        # =====================================================
+        # MOSTRAR VERSÃO SALVA
+        # =====================================================
+
+        if jogo_existente:
+
+            st.markdown(
+                "---"
+            )
+
+
+            st.markdown(
+                "### 🎮 Versão salva"
+            )
+
+
+            conteudo_salvo = (
+                jogo_existente.get(
+                    "content"
+                )
+                or {}
+            )
+
+
+            if (
+                conteudo_salvo.get(
+                    "mode"
+                )
+                == "images"
+            ):
+
+                caminhos_salvos = (
+                    conteudo_salvo.get(
+                        "items",
+                        [],
+                    )
                 )
 
 
-            if len(
-                palavras_unicas
-            ) != len(items):
-
-                raise ValueError(
-                    "Escreva cada palavra uma vez. "
-                    "O jogo cria o par automaticamente."
+                urls_salvas = (
+                    montar_urls_imagens(
+                        client,
+                        caminhos_salvos,
+                    )
                 )
 
 
-            clean = {
+                if urls_salvas:
 
-                "mode":
-                    "text",
+                    st.iframe(
+                        game_html(
+                            jogo_existente,
+                            image_urls=
+                                urls_salvas,
+                        ),
+                        height=650,
+                    )
 
-                "items":
-                    items,
 
-            }
+            else:
+
+                st.iframe(
+                    game_html(
+                        jogo_existente
+                    ),
+                    height=600,
+                )
+
 
 
     # =========================================================
     # QUIZ
     # =========================================================
 
-    elif kind == "quiz":
-
-        questions = content.get(
-            "questions",
-            [],
-        )
-
-
-        if not 1 <= len(questions) <= 20:
-
-            raise ValueError(
-                "O jogo precisa de 1 a 20 perguntas."
-            )
-
-
-        clean_questions = []
-
-
-        for number, question in enumerate(
-            questions,
-            1,
-        ):
-
-            prompt = str(
-                question.get(
-                    "prompt",
-                    "",
-                )
-            ).strip()
-
-
-            options = []
-
-            for option in question.get(
-                "options",
-                [],
-            ):
-
-                options.append(
-                    str(
-                        option
-                    ).strip()
-                )
-
-
-            answer = question.get(
-                "answer"
-            )
-
-
-            if not 1 <= len(prompt) <= 300:
-
-                raise ValueError(
-                    "Pergunta "
-                    + str(number)
-                    + ": escreva um enunciado de até 300 caracteres."
-                )
-
-
-            if not 2 <= len(options) <= 4:
-
-                raise ValueError(
-                    "Pergunta "
-                    + str(number)
-                    + ": use de 2 a 4 respostas."
-                )
-
-
-            for option in options:
-
-                if not option:
-
-                    raise ValueError(
-                        "Pergunta "
-                        + str(number)
-                        + ": preencha todas as respostas."
-                    )
-
-
-                if len(option) > 100:
-
-                    raise ValueError(
-                        "Pergunta "
-                        + str(number)
-                        + ": cada resposta pode ter até 100 caracteres."
-                    )
-
-
-            respostas_unicas = set()
-
-            for option in options:
-
-                respostas_unicas.add(
-                    option.casefold()
-                )
-
-
-            if len(
-                respostas_unicas
-            ) != len(options):
-
-                raise ValueError(
-                    "Pergunta "
-                    + str(number)
-                    + ": as respostas precisam ser diferentes."
-                )
-
-
-            if type(answer) is not int:
-
-                raise ValueError(
-                    "Pergunta "
-                    + str(number)
-                    + ": escolha a resposta correta."
-                )
-
-
-            if not 0 <= answer < len(options):
-
-                raise ValueError(
-                    "Pergunta "
-                    + str(number)
-                    + ": escolha a resposta correta."
-                )
-
-
-            clean_questions.append({
-
-                "prompt":
-                    prompt,
-
-                "options":
-                    options,
-
-                "answer":
-                    answer,
-
-            })
-
-
-        clean = {
-
-            "questions":
-                clean_questions,
-
-        }
-
-
     else:
 
-        raise ValueError(
-            "Escolha Memória ou Perguntas e respostas."
+        nome = st.text_input(
+            "Nome do Quiz",
+            value=(
+                jogo_existente[
+                    "title"
+                ]
+                if jogo_existente
+                else ""
+            ),
+            max_chars=80,
         )
 
 
-    return {
-
-        "title":
-            title,
-
-        "kind":
-            kind,
-
-        "content":
-            clean,
-
-    }
-
-
-
-# =============================================================
-# HTML DO JOGO
-# =============================================================
-
-def game_html(
-    game,
-    image_urls=None,
-):
-
-    clean = validate_game(
-        game["title"],
-        game["kind"],
-        game["content"],
-    )
-
-
-    payload = {
-
-        "game":
-            clean,
-
-        "image_urls":
-            image_urls or {},
-
-    }
-
-
-    data = json.dumps(
-        payload,
-        ensure_ascii=True,
-    )
-
-
-    data = data.replace(
-        "<",
-        "\\u003c",
-    )
-
-    data = data.replace(
-        ">",
-        "\\u003e",
-    )
-
-    data = data.replace(
-        "&",
-        "\\u0026",
-    )
-
-
-    html = """
-<!doctype html>
-
-<html lang="pt-BR">
-
-<head>
-
-<meta charset="utf-8">
-
-<meta
-name="viewport"
-content="width=device-width, initial-scale=1"
->
-
-<style>
-
-body {
-
-    font-family: Arial, sans-serif;
-
-    background: #28123f;
-
-    color: white;
-
-    padding: 12px;
-
-    text-align: center;
-
-}
-
-
-button {
-
-    font-family: Arial, sans-serif;
-
-    font-size: 18px;
-
-    background: #d7b8f5;
-
-    color: #24103f;
-
-    padding: 16px;
-
-    margin: 6px;
-
-    border: 3px solid #b794d6;
-
-    border-radius: 12px;
-
-    cursor: pointer;
-
-}
-
-
-button:focus {
-
-    outline: 4px solid gold;
-
-}
-
-
-#board {
-
-    display: flex;
-
-    flex-wrap: wrap;
-
-    justify-content: center;
-
-}
-
-
-#status {
-
-    min-height: 30px;
-
-    color: #ffe490;
-
-}
-
-
-.card {
-
-    width: 135px;
-
-    min-height: 95px;
-
-}
-
-
-.card img {
-
-    max-width: 100px;
-
-    max-height: 70px;
-
-    border-radius: 8px;
-
-}
-
-</style>
-
-</head>
-
-
-<body>
-
-
-<h2 id="title"></h2>
-
-
-<p
-id="status"
-role="status">
-</p>
-
-
-<div id="board"></div>
-
-
-<button id="restart">
-
-Novo jogo
-
-</button>
-
-
-<script>
-
-
-var payload =
-""" + data + """;
-
-
-var game =
-payload.game;
-
-
-var urlMap =
-payload.image_urls || {};
-
-
-var board =
-document.getElementById(
-    "board"
-);
-
-
-var statusEl =
-document.getElementById(
-    "status"
-);
-
-
-var generation =
-0;
-
-
-document.getElementById(
-    "title"
-).textContent =
-game.title;
-
-
-
-function button(
-    text,
-    fn
-) {
-
-    var b =
-    document.createElement(
-        "button"
-    );
-
-
-    b.type =
-    "button";
-
-
-    b.textContent =
-    text;
-
-
-    b.onclick =
-    fn;
-
-
-    board.appendChild(
-        b
-    );
-
-
-    return b;
-
-}
-
-
-
-function showCard(
-    elemento,
-    item
-) {
-
-    elemento.innerHTML =
-    "";
-
-
-    if (
-        game.kind === "memory"
-        &&
-        game.content.mode
-        === "images"
-    ) {
-
-        var img =
-        document.createElement(
-            "img"
-        );
-
-
-        img.alt =
-        "Imagem do jogo";
-
-
-        img.src =
-        urlMap[item]
-        || "";
-
-
-        elemento.appendChild(
-            img
-        );
-
-    }
-
-    else {
-
-        elemento.textContent =
-        item;
-
-    }
-
-}
-
-
-
-function start() {
-
-    generation++;
-
-
-    board.innerHTML =
-    "";
-
-
-    statusEl.textContent =
-    "";
-
-
-    if (
-        game.kind
-        ===
-        "memory"
-    ) {
-
-        memory();
-
-    }
-
-    else {
-
-        quiz(0);
-
-    }
-
-}
-
-
-
-function memory() {
-
-    var run =
-    generation;
-
-
-    var deck =
-    game.content.items.concat(
-        game.content.items
-    );
-
-
-    var picked =
-    [];
-
-
-    var matched =
-    {};
-
-
-    var busy =
-    false;
-
-
-    var hits =
-    0;
-
-
-    var cards =
-    [];
-
-
-    var i;
-
-
-    for (
-        i = deck.length - 1;
-        i > 0;
-        i--
-    ) {
-
-        var j =
-        Math.floor(
-            Math.random()
-            *
-            (i + 1)
-        );
-
-
-        var temp =
-        deck[i];
-
-
-        deck[i] =
-        deck[j];
-
-
-        deck[j] =
-        temp;
-
-    }
-
-
-    deck.forEach(
-        function(
-            item,
-            index
-        ) {
-
-
-            var b =
-            button(
-                "?",
-                function() {
-
-
-                    if (
-                        busy
-                        ||
-                        matched[index]
-                        ||
-                        picked.indexOf(
-                            index
-                        ) >= 0
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    showCard(
-                        b,
-                        item
-                    );
-
-
-                    picked.push(
-                        index
-                    );
-
-
-                    if (
-                        picked.length
-                        ===
-                        2
-                    ) {
-
-                        var a =
-                        picked[0];
-
-
-                        var c =
-                        picked[1];
-
-
-                        if (
-                            deck[a]
-                            ===
-                            deck[c]
-                        ) {
-
-                            matched[a] =
-                            true;
-
-
-                            matched[c] =
-                            true;
-
-
-                            picked =
-                            [];
-
-
-                            hits++;
-
-
-                            if (
-                                hits
-                                ===
-                                game.content.items.length
-                            ) {
-
-                                statusEl.textContent =
-                                "Parabéns! Todos os pares encontrados.";
-
-                            }
-
-                            else {
-
-                                statusEl.textContent =
-                                "Par encontrado!";
-
-                            }
-
-                        }
-
-                        else {
-
-                            busy =
-                            true;
-
-
-                            setTimeout(
-                                function() {
-
-
-                                    if (
-                                        run
-                                        !==
-                                        generation
-                                    ) {
-
-                                        return;
-
-                                    }
-
-
-                                    cards[a]
-                                    .innerHTML =
-                                    "?";
-
-
-                                    cards[c]
-                                    .innerHTML =
-                                    "?";
-
-
-                                    picked =
-                                    [];
-
-
-                                    busy =
-                                    false;
-
-
-                                },
-                                1000
-                            );
-
-                        }
-
-                    }
-
+        perguntas_antigas = (
+            conteudo_antigo.get(
+                "questions",
+                [],
+            )
+        )
+
+
+        quantidade = int(
+            st.number_input(
+                "Quantidade de perguntas",
+                min_value=1,
+                max_value=20,
+                value=max(
+                    1,
+                    len(
+                        perguntas_antigas
+                    ),
+                ),
+            )
+        )
+
+
+        perguntas = []
+
+
+        for numero in range(
+            quantidade
+        ):
+
+            antiga = (
+                perguntas_antigas[
+                    numero
+                ]
+                if numero
+                <
+                len(
+                    perguntas_antigas
+                )
+                else {}
+            )
+
+
+            st.markdown(
+                "### Pergunta "
+                +
+                str(
+                    numero + 1
+                )
+            )
+
+
+            pergunta = st.text_input(
+                "Pergunta",
+                value=
+                    antiga.get(
+                        "prompt",
+                        "",
+                    ),
+                max_chars=300,
+                key=
+                    "pergunta_"
+                    + str(numero),
+            )
+
+
+            respostas_antigas = (
+                antiga.get(
+                    "options",
+                    [
+                        "",
+                        "",
+                        "",
+                    ],
+                )
+            )
+
+
+            respostas = []
+
+
+            for resposta_numero in range(
+                3
+            ):
+
+                valor = ""
+
+
+                if (
+                    resposta_numero
+                    <
+                    len(
+                        respostas_antigas
+                    )
+                ):
+
+                    valor = (
+                        respostas_antigas[
+                            resposta_numero
+                        ]
+                    )
+
+
+                resposta = st.text_input(
+                    "Resposta "
+                    +
+                    str(
+                        resposta_numero
+                        + 1
+                    ),
+                    value=valor,
+                    max_chars=100,
+                    key=(
+                        "resp_"
+                        + str(numero)
+                        + "_"
+                        + str(
+                            resposta_numero
+                        )
+                    ),
+                )
+
+
+                respostas.append(
+                    resposta
+                )
+
+
+            resposta_antiga = (
+                antiga.get(
+                    "answer",
+                    0,
+                )
+            )
+
+
+            if resposta_antiga not in [
+                0,
+                1,
+                2,
+            ]:
+
+                resposta_antiga = 0
+
+
+            correta = st.radio(
+                "Qual resposta está correta?",
+                [
+                    0,
+                    1,
+                    2,
+                ],
+                index=
+                    resposta_antiga,
+                format_func=lambda n:
+                    "Resposta "
+                    +
+                    str(
+                        n + 1
+                    ),
+                horizontal=True,
+                key=
+                    "correta_"
+                    + str(numero),
+            )
+
+
+            perguntas.append(
+                {
+                    "prompt":
+                        pergunta,
+
+                    "options":
+                        respostas,
+
+                    "answer":
+                        correta,
                 }
-            );
+            )
+
 
 
-            b.className =
-            "card";
+        if st.button(
+            "💾 Salvar Quiz",
+            key=
+                "salvar_quiz",
+        ):
 
+            try:
 
-            cards.push(
-                b
-            );
+                jogo_limpo = (
+                    validate_game(
+                        nome,
+                        "quiz",
+                        {
+                            "questions":
+                                perguntas
+                        },
+                    )
+                )
 
-        }
-    );
 
-}
+                jogo_limpo[
+                    "updated_at"
+                ] = (
+                    datetime.now(
+                        timezone.utc
+                    ).isoformat()
+                )
 
 
+                if jogo_existente:
 
-function quiz(
-    index
-) {
+                    resposta_salvar = (
+                        client
+                        .table(
+                            "jogos_criados"
+                        )
+                        .update(
+                            jogo_limpo
+                        )
+                        .eq(
+                            "id",
+                            jogo_existente[
+                                "id"
+                            ],
+                        )
+                        .eq(
+                            "user_id",
+                            usuario_id,
+                        )
+                        .execute()
+                    )
 
-    board.innerHTML =
-    "";
+                else:
 
+                    jogo_limpo[
+                        "user_id"
+                    ] = usuario_id
 
-    statusEl.textContent =
-    "";
 
+                    resposta_salvar = (
+                        client
+                        .table(
+                            "jogos_criados"
+                        )
+                        .insert(
+                            jogo_limpo
+                        )
+                        .execute()
+                    )
 
-    var q =
-    game.content.questions[
-        index
-    ];
 
 
-    var p =
-    document.createElement(
-        "p"
-    );
+                if not resposta_salvar.data:
 
+                    st.error(
+                        "O Quiz não foi salvo."
+                    )
 
-    var solved =
-    false;
+                    return
 
 
-    p.textContent =
-    q.prompt;
+                st.success(
+                    "✅ Quiz salvo!"
+                )
 
 
-    p.style.width =
-    "100%";
+                st.markdown(
+                    "### ▶ Testar meu Quiz"
+                )
 
 
-    board.appendChild(
-        p
-    );
+                st.iframe(
+                    game_html(
+                        jogo_limpo
+                    ),
+                    height=600,
+                )
 
 
-    q.options.forEach(
-        function(
-            text,
-            i
-        ) {
+            except ValueError as erro:
 
+                st.warning(
+                    str(erro)
+                )
 
-            button(
-                text,
-                function() {
 
+            except Exception:
 
-                    if (
-                        solved
-                    ) {
+                st.error(
+                    "Não foi possível salvar o Quiz."
+                )
 
-                        return;
 
-                    }
 
+        elif jogo_existente:
 
-                    if (
-                        i
-                        !==
-                        q.answer
-                    ) {
+            st.markdown(
+                "### 🎮 Jogar a versão salva"
+            )
 
-                        statusEl.textContent =
-                        "Tente novamente!";
 
+            st.iframe(
+                game_html(
+                    jogo_existente
+                ),
+                height=600,
+            )
 
-                        return;
 
-                    }
 
+    st.markdown(
+        "---"
+    )
 
-                    solved =
-                    true;
 
-
-                    statusEl.textContent =
-                    "Você acertou!";
-
-
-                    var textoBotao =
-                    "Concluir";
-
-
-                    if (
-                        index + 1
-                        <
-                        game.content.questions.length
-                    ) {
-
-                        textoBotao =
-                        "Próxima pergunta";
-
-                    }
-
-
-                    var proximo =
-                    button(
-                        textoBotao,
-                        function() {
-
-
-                            if (
-                                index + 1
-                                <
-                                game.content.questions.length
-                            ) {
-
-                                quiz(
-                                    index + 1
-                                );
-
-                            }
-
-                            else {
-
-                                board.innerHTML =
-                                "";
-
-
-                                statusEl.textContent =
-                                "Parabéns! Você concluiu o jogo.";
-
-                            }
-
-                        }
-                    );
-
-
-                    proximo.focus();
-
-                }
-            );
-
-        }
-    );
-
-}
-
-
-
-document.getElementById(
-    "restart"
-).onclick =
-start;
-
-
-start();
-
-
-</script>
-
-
-</body>
-
-</html>
-"""
-
-
-    return html
+    st.info(
+        "🔒 Cada cliente vê apenas os próprios jogos e imagens."
+    )
