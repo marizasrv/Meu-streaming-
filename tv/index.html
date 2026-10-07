@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mundo da Luna TV</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;font-family:Arial,sans-serif;background:#201035;color:#fff}body{background:linear-gradient(135deg,#311449,#160b28)}
+header{height:115px;padding:22px 36px;border-bottom:1px solid #846647}h1{font-size:34px;margin:0 0 8px;color:#f9db80}h2{font-size:30px;margin:12px 0 22px}h3{font-size:24px}p{line-height:1.55;font-size:23px}.muted{color:#d8cbe9;font-size:19px}#content{padding:20px 36px 42px;height:calc(100% - 115px);overflow:auto}#message{padding:10px 0;color:#ffe6a2;font-size:22px;min-height:40px}
+button,input,select{font:24px Arial,sans-serif;border-radius:14px;border:3px solid #a489bd;padding:14px;margin:8px;color:#25123d;background:#d4b4f1;min-height:65px}button{font-weight:bold;cursor:pointer}button:focus,input:focus,select:focus{outline:5px solid #ffdc65;background:#f0ddff;color:#25123d}button:disabled{opacity:.45}input{background:#fff;min-width:350px}label{display:block;font-size:23px;margin:12px 0}.row{display:flex;flex-wrap:wrap;align-items:center}.menu button{width:260px;min-height:95px;text-align:left}.panel{padding:22px;background:rgba(255,255,255,.07);border:1px solid #79604f;border-radius:20px;margin:14px 0}.cards{display:flex;flex-wrap:wrap}.card{width:260px;min-height:240px;vertical-align:top;display:inline-block;text-align:left}.card img{display:block;width:220px;height:125px;object-fit:cover;margin-bottom:12px;background:#3b215b}.card small{display:block;font-size:17px;margin-top:8px}.story{font-size:29px;line-height:1.65;max-width:1100px}.memory{max-width:1000px}.memory button{width:125px;height:100px;font-size:30px}.feedback{font-size:27px;color:#ffe497}.link{overflow-wrap:break-word;word-wrap:break-word;color:#f6d477;font-size:21px}
+#player{display:none;position:fixed;inset:0;top:0;left:0;width:100%;height:100%;background:transparent;z-index:5}#av-player,#html-player{position:absolute;top:0;left:0;width:100%;height:100%}#html-player{background:#000}#playerBar{position:absolute;bottom:0;left:0;right:0;padding:12px 24px;background:rgba(20,8,34,.9)}#playerStatus{font-size:23px;color:#fff;padding:8px}body.playing,body.playing html{background:transparent}body.playing #appShell{display:none}
+</style>
+</head>
+<body>
+<div id="appShell"><header><h1>Mundo da Luna TV Premium</h1><span id="accountLabel" class="muted">TV Samsung · versão 0.3.0</span></header><main id="content"></main></div>
+<section id="player"><object id="av-player" type="application/avplayer"></object><video id="html-player" preload="metadata"></video><div id="playerBar"><div id="playerStatus" role="status"></div><button id="playPause">Play / Pausar</button><button id="rewind">− 10 segundos</button><button id="forward">+ 10 segundos</button><button id="closePlayer">Voltar ao catálogo</button></div></section>
+<script src="$WEBAPIS/webapis/webapis.js"></script>
+<script>
+var TV_CONFIG = {"url": "https://npzfyeccomvwsbladiwc.supabase.co", "key": "sb_publishable_gIfnBFaQYjV4ZYBO2KaHJw_LTgi2JW_", "site": "https://ixezjhaxppbzpmjpit6gee.streamlit.app/"};
+var TV_CONTENT = {"stories": [{"titulo": "Luna e o Livro M\u00e1gico", "capitulos": [["Cap\u00edtulo 1 \u00b7 O livro misterioso", "Luna encontrou um antigo livro brilhante escondido em casa. Quando abriu a primeira p\u00e1gina, letras douradas come\u00e7aram a se mover e uma luz suave envolveu Luna e seu coelhinho."], ["Cap\u00edtulo 2 \u00b7 A floresta encantada", "Em um instante, Luna e o coelhinho foram transportados para uma floresta cheia de \u00e1rvores luminosas, flores m\u00e1gicas e caminhos que pareciam mudar de lugar."], ["Cap\u00edtulo 3 \u00b7 O castelo da princesa", "Seguindo um caminho de estrelas, Luna chegou a um grande castelo. L\u00e1 conheceu uma jovem princesa que guardava um segredo sobre o livro m\u00e1gico."]]}, {"titulo": "Luna e o Espelho Encantado", "capitulos": [["Cap\u00edtulo 1 \u00b7 O reflexo diferente", "No quarto, Luna percebeu que seu reflexo no espelho n\u00e3o repetia exatamente seus movimentos. O coelhinho ficou atento enquanto pequenas part\u00edculas roxas surgiam ao redor da moldura."], ["Cap\u00edtulo 2 \u00b7 A varinha de luz", "Luna ergueu sua varinha brilhante diante do espelho. A luz aumentou e revelou uma passagem escondida atr\u00e1s do reflexo."], ["Cap\u00edtulo 3 \u00b7 O segredo do outro lado", "Ao atravessar o espelho, Luna descobriu um lugar silencioso e misterioso. Para voltar para casa, ela precisaria encontrar a verdadeira origem da magia."]]}, {"titulo": "Luna e o Segredo do Castelo", "capitulos": [["Cap\u00edtulo 1 \u00b7 A porta fechada", "Luna voltou ao castelo e encontrou uma porta que nunca havia visto antes. Nenhuma chave comum conseguia abri-la."], ["Cap\u00edtulo 2 \u00b7 A chave dourada", "Com a ajuda do coelhinho e da princesa, Luna encontrou uma pequena chave dourada escondida em um jardim iluminado pela lua."], ["Cap\u00edtulo 3 \u00b7 A sala das estrelas", "Atr\u00e1s da porta havia uma sala cheia de estrelas suspensas no ar. No centro, Luna encontrou uma nova p\u00e1gina para seu livro m\u00e1gico."]]}], "words": {"4\u20135 anos": [{"pergunta": "Complete a palavra: **L _ N A**", "rotulo": "Qual letra est\u00e1 faltando?", "opcoes": ["A", "U", "O"], "correta": "U", "mensagem": "\ud83c\udf89 Muito bem! A palavra \u00e9 LUNA."}, {"pergunta": "Complete a palavra: **B _ L A**", "rotulo": "Qual letra est\u00e1 faltando?", "opcoes": ["O", "A", "E"], "correta": "O", "mensagem": "\ud83c\udf89 Isso! A palavra \u00e9 BOLA."}, {"pergunta": "Complete a palavra: **G _ T O**", "rotulo": "Qual letra est\u00e1 faltando?", "opcoes": ["A", "E", "I"], "correta": "A", "mensagem": "\ud83c\udf89 Certo! A palavra \u00e9 GATO."}], "6\u20137 anos": [{"pergunta": "Complete a palavra: **C _ E L H O**", "rotulo": "Qual letra est\u00e1 faltando?", "opcoes": ["A", "O", "U"], "correta": "O", "mensagem": "\ud83c\udf89 Muito bem! A palavra \u00e9 COELHO."}, {"pergunta": "Complete a palavra: **F L _ R E S T A**", "rotulo": "Qual letra est\u00e1 faltando?", "opcoes": ["O", "A", "E"], "correta": "O", "mensagem": "\ud83c\udf89 Certo! A palavra \u00e9 FLORESTA."}, {"pergunta": "Complete a palavra: **C A S T _ L O**", "rotulo": "Qual letra est\u00e1 faltando?", "opcoes": ["E", "A", "I"], "correta": "E", "mensagem": "\ud83c\udf89 Isso! A palavra \u00e9 CASTELO."}], "8\u20139 anos": [{"pergunta": "Complete a frase: **Luna abriu o ____ m\u00e1gico.**", "rotulo": "Escolha a palavra correta:", "opcoes": ["livro", "sapato", "bolo"], "correta": "livro", "mensagem": "\ud83c\udf89 Certo! Luna abriu o livro m\u00e1gico."}, {"pergunta": "Complete a frase: **O coelhinho entrou na ____.**", "rotulo": "Escolha a palavra correta:", "opcoes": ["floresta", "garagem", "cozinha"], "correta": "floresta", "mensagem": "\ud83c\udf89 Muito bem! O coelhinho entrou na floresta."}, {"pergunta": "Complete a frase: **A princesa mora no ____.**", "rotulo": "Escolha a palavra correta:", "opcoes": ["castelo", "barco", "mercado"], "correta": "castelo", "mensagem": "\ud83c\udf89 Isso! A princesa mora no castelo."}], "10\u201312 anos": [{"pergunta": "Qual palavra completa melhor a frase? **Luna ficou ____ ao perceber que o caminho havia mudado.**", "rotulo": "Escolha:", "opcoes": ["intrigada", "adormecida", "invis\u00edvel"], "correta": "intrigada", "mensagem": "\u2728 Isso! 'Intrigada' combina com algu\u00e9m curioso diante de um mist\u00e9rio."}, {"pergunta": "Qual palavra completa melhor? **O castelo parecia ____ durante a tempestade.**", "rotulo": "Escolha:", "opcoes": ["sombrio", "redondo", "doce"], "correta": "sombrio", "mensagem": "\u2728 Certo! 'Sombrio' combina com a cena."}, {"pergunta": "Complete: **Luna seguiu as pistas com muita ____.**", "rotulo": "Escolha:", "opcoes": ["aten\u00e7\u00e3o", "fome", "pressa"], "correta": "aten\u00e7\u00e3o", "mensagem": "\u2728 Muito bem! 'Aten\u00e7\u00e3o' completa a frase."}], "13\u201315 anos": [{"pergunta": "Qual alternativa apresenta um **sin\u00f4nimo** de 'misterioso'?", "rotulo": "Escolha:", "opcoes": ["enigm\u00e1tico", "barulhento", "veloz"], "correta": "enigm\u00e1tico", "mensagem": "\u2728 Certo! 'Enigm\u00e1tico' \u00e9 um sin\u00f4nimo de 'misterioso'."}, {"pergunta": "Qual palavra \u00e9 sin\u00f4nimo de **corajoso**?", "rotulo": "Escolha:", "opcoes": ["valente", "distra\u00eddo", "quieto"], "correta": "valente", "mensagem": "\u2728 Isso! 'Valente' \u00e9 sin\u00f4nimo de 'corajoso'."}, {"pergunta": "Qual palavra \u00e9 o contr\u00e1rio de **escuro**?", "rotulo": "Escolha:", "opcoes": ["claro", "forte", "lento"], "correta": "claro", "mensagem": "\u2728 Muito bem! 'Claro' \u00e9 o contr\u00e1rio de 'escuro'."}]}, "activities": [{"idade": "4\u20135 anos", "materia": "Alfabetiza\u00e7\u00e3o", "fases": [["Complete a palavra: **L _ N A**", "texto", "Digite a letra que falta:", "U", "ALFABETIZA\u00c7\u00c3O 4\u20135 ANOS\nComplete: L _ N A\nCircule as vogais da palavra LUNA."], ["Complete a palavra: **B _ L A**", "texto", "Digite a letra que falta:", "O", "ALFABETIZA\u00c7\u00c3O 4\u20135 ANOS\nComplete: B _ L A\nEscreva a palavra BOLA."], ["Complete a palavra: **G _ T O**", "texto", "Digite a letra que falta:", "A", "ALFABETIZA\u00c7\u00c3O 4\u20135 ANOS\nComplete: G _ T O\nCircule a vogal da palavra GATO."]]}, {"idade": "6\u20137 anos", "materia": "Alfabetiza\u00e7\u00e3o", "fases": [["Complete a palavra: **C _ E L H O**", "texto", "Digite a letra que falta:", "O", "ALFABETIZA\u00c7\u00c3O 6\u20137 ANOS\nComplete: C _ E L H O\nSepare COELHO em s\u00edlabas."], ["Complete a palavra: **F L _ R E S T A**", "texto", "Digite a letra que falta:", "O", "ALFABETIZA\u00c7\u00c3O 6\u20137 ANOS\nComplete: F L _ R E S T A\nEscreva FLORESTA."], ["Complete a palavra: **C A S T _ L O**", "texto", "Digite a letra que falta:", "E", "ALFABETIZA\u00c7\u00c3O 6\u20137 ANOS\nComplete: C A S T _ L O\nEscreva CASTELO."]]}, {"idade": "8\u20139 anos", "materia": "Alfabetiza\u00e7\u00e3o", "fases": [["Escreva uma frase usando **Luna**, **livro** e **floresta**.", "frase", "Sua frase:", 5, "ALFABETIZA\u00c7\u00c3O 8\u20139 ANOS\nEscreva uma frase usando: Luna, livro e floresta."], ["Escreva uma frase usando **coelhinho**, **castelo** e **estrela**.", "frase", "Sua frase:", 5, "ALFABETIZA\u00c7\u00c3O 8\u20139 ANOS\nEscreva uma frase usando: coelhinho, castelo e estrela."], ["Escreva uma frase usando **princesa**, **magia** e **aventura**.", "frase", "Sua frase:", 5, "ALFABETIZA\u00c7\u00c3O 8\u20139 ANOS\nEscreva uma frase usando: princesa, magia e aventura."]]}, {"idade": "4\u20135 anos", "materia": "Leitura", "fases": [["Luna viu um coelhinho branco perto da \u00e1rvore.", "leitura", "O que Luna viu?", "coelh", "LEITURA 4\u20135 ANOS\nLuna viu um coelhinho branco perto da \u00e1rvore.\nPergunta: O que Luna viu?"], ["A princesa usava uma coroa dourada.", "leitura", "O que a princesa usava?", "coroa", "LEITURA 4\u20135 ANOS\nA princesa usava uma coroa dourada.\nPergunta: O que ela usava?"], ["No c\u00e9u brilhava uma estrela.", "leitura", "O que brilhava no c\u00e9u?", "estrela", "LEITURA 4\u20135 ANOS\nNo c\u00e9u brilhava uma estrela.\nPergunta: O que brilhava no c\u00e9u?"]]}, {"idade": "6\u20137 anos", "materia": "Leitura", "fases": [["Luna abriu seu livro m\u00e1gico e encontrou um mapa.", "leitura", "O que Luna encontrou?", "mapa", "LEITURA 6\u20137 ANOS\nLuna abriu seu livro m\u00e1gico e encontrou um mapa.\nPergunta: O que ela encontrou?"], ["O coelhinho correu at\u00e9 o castelo para chamar a princesa.", "leitura", "Para onde o coelhinho correu?", "castelo", "LEITURA 6\u20137 ANOS\nO coelhinho correu at\u00e9 o castelo.\nPergunta: Para onde ele correu?"], ["Uma chave dourada estava escondida sob uma pedra.", "leitura", "O que estava sob a pedra?", "chave", "LEITURA 6\u20137 ANOS\nUma chave dourada estava escondida sob uma pedra.\nPergunta: O que estava escondido?"]]}, {"idade": "8\u20139 anos", "materia": "Leitura", "fases": [["Luna abriu seu livro m\u00e1gico. Uma luz roxa apareceu e ela e o coelhinho chegaram a uma floresta encantada.", "leitura", "Onde Luna e o coelhinho chegaram?", "floresta", "LEITURA 8\u20139 ANOS\nLuna abriu seu livro m\u00e1gico e chegou a uma floresta encantada.\nPergunta: Onde ela chegou?"], ["A princesa entregou a Luna uma chave que abria a torre mais alta do castelo.", "leitura", "O que a princesa entregou a Luna?", "chave", "LEITURA 8\u20139 ANOS\nA princesa entregou a Luna uma chave.\nPergunta: O que ela entregou?"], ["O coelhinho percebeu pegadas brilhantes seguindo em dire\u00e7\u00e3o ao jardim.", "leitura", "Para onde as pegadas iam?", "jardim", "LEITURA 8\u20139 ANOS\nHavia pegadas brilhantes indo ao jardim.\nPergunta: Para onde elas iam?"]]}, {"idade": "4\u20135 anos", "materia": "Matem\u00e1tica", "fases": [["\u2b50 \u2b50 + \u2b50 = ?", "numero", "Sua resposta:", 3, "MATEM\u00c1TICA 4\u20135 ANOS\n2 estrelas + 1 estrela = ?"], ["\ud83d\udc30 \ud83d\udc30 + \ud83d\udc30 \ud83d\udc30 = ?", "numero", "Sua resposta:", 4, "MATEM\u00c1TICA 4\u20135 ANOS\n2 coelhos + 2 coelhos = ?"], ["\ud83c\udf19 \ud83c\udf19 \ud83c\udf19 - \ud83c\udf19 = ?", "numero", "Sua resposta:", 2, "MATEM\u00c1TICA 4\u20135 ANOS\n3 luas - 1 lua = ?"]]}, {"idade": "6\u20137 anos", "materia": "Matem\u00e1tica", "fases": [["Luna encontrou **4 cenouras** e ganhou mais **3**. Quantas tem?", "numero", "Sua resposta:", 7, "MATEM\u00c1TICA 6\u20137 ANOS\n4 + 3 = ?"], ["Havia **10 estrelas** e 4 apagaram. Quantas ficaram?", "numero", "Sua resposta:", 6, "MATEM\u00c1TICA 6\u20137 ANOS\n10 - 4 = ?"], ["3 coelhinhos t\u00eam 2 cenouras cada. Quantas cenouras ao todo?", "numero", "Sua resposta:", 6, "MATEM\u00c1TICA 6\u20137 ANOS\n3 x 2 = ?"]]}, {"idade": "8\u20139 anos", "materia": "Matem\u00e1tica", "fases": [["No castelo havia **12 estrelas**. **5 apagaram**. Quantas ficaram?", "numero", "Sua resposta:", 7, "MATEM\u00c1TICA 8\u20139 ANOS\n12 - 5 = ?"], ["4 caixas t\u00eam 6 cristais cada. Quantos cristais ao todo?", "numero", "Sua resposta:", 24, "MATEM\u00c1TICA 8\u20139 ANOS\n4 x 6 = ?"], ["27 chaves foram divididas em 3 grupos iguais. Quantas por grupo?", "numero", "Sua resposta:", 9, "MATEM\u00c1TICA 8\u20139 ANOS\n27 dividido por 3 = ?"]]}, {"idade": "4\u20135 anos", "materia": "Cores e formas", "fases": [["\ud83d\udfe3 Qual \u00e9 a cor deste c\u00edrculo?", "opcao", "Escolha:", [["Roxo", "Amarelo", "Verde"], "Roxo"], "CORES E FORMAS 4\u20135 ANOS\nPinte um c\u00edrculo de roxo."], ["\ud83d\udd3a Qual \u00e9 esta forma?", "opcao", "Escolha:", [["Tri\u00e2ngulo", "C\u00edrculo", "Quadrado"], "Tri\u00e2ngulo"], "CORES E FORMAS 4\u20135 ANOS\nDesenhe um tri\u00e2ngulo."], ["\ud83d\udfe8 Qual forma tem quatro lados iguais?", "opcao", "Escolha:", [["Quadrado", "C\u00edrculo", "Tri\u00e2ngulo"], "Quadrado"], "CORES E FORMAS 4\u20135 ANOS\nDesenhe um quadrado amarelo."]]}, {"idade": "6\u20137 anos", "materia": "Cores e formas", "fases": [["Qual destas \u00e9 uma cor prim\u00e1ria?", "opcao", "Escolha:", [["Azul", "Roxo", "Rosa"], "Azul"], "CORES E FORMAS 6\u20137 ANOS\nPinte uma forma de azul."], ["Qual forma n\u00e3o tem lados?", "opcao", "Escolha:", [["C\u00edrculo", "Quadrado", "Tri\u00e2ngulo"], "C\u00edrculo"], "CORES E FORMAS 6\u20137 ANOS\nDesenhe um c\u00edrculo."], ["Qual forma tem 3 lados?", "opcao", "Escolha:", [["Tri\u00e2ngulo", "Quadrado", "C\u00edrculo"], "Tri\u00e2ngulo"], "CORES E FORMAS 6\u20137 ANOS\nDesenhe um tri\u00e2ngulo."]]}, {"idade": "8\u20139 anos", "materia": "Cores e formas", "fases": [["Qual forma tem 4 lados e lados opostos iguais?", "opcao", "Escolha:", [["Ret\u00e2ngulo", "C\u00edrculo", "Tri\u00e2ngulo"], "Ret\u00e2ngulo"], "CORES E FORMAS 8\u20139 ANOS\nDesenhe um ret\u00e2ngulo."], ["Misturar azul e amarelo forma qual cor?", "opcao", "Escolha:", [["Verde", "Roxo", "Laranja"], "Verde"], "CORES E FORMAS 8\u20139 ANOS\nMisture azul e amarelo."], ["Qual destas formas tem 5 lados?", "opcao", "Escolha:", [["Pent\u00e1gono", "Tri\u00e2ngulo", "Quadrado"], "Pent\u00e1gono"], "CORES E FORMAS 8\u20139 ANOS\nDesenhe um pent\u00e1gono."]]}, {"idade": "4\u20135 anos", "materia": "Animais", "fases": [["\ud83d\udc30 Qual animal acompanha Luna?", "opcao", "Escolha:", [["Coelho", "Gato", "Cachorro"], "Coelho"], "ANIMAIS 4\u20135 ANOS\nCircule o COELHO."], ["\ud83d\udc31 Qual destes animais mia?", "opcao", "Escolha:", [["Gato", "Coelho", "Peixe"], "Gato"], "ANIMAIS 4\u20135 ANOS\nCircule o GATO."], ["\ud83d\udc36 Qual destes animais late?", "opcao", "Escolha:", [["Cachorro", "Peixe", "P\u00e1ssaro"], "Cachorro"], "ANIMAIS 4\u20135 ANOS\nCircule o CACHORRO."]]}, {"idade": "6\u20137 anos", "materia": "Animais", "fases": [["Qual animal vive na \u00e1gua?", "opcao", "Escolha:", [["Peixe", "Coelho", "Gato"], "Peixe"], "ANIMAIS 6\u20137 ANOS\nEscreva PEIXE."], ["Qual animal tem penas?", "opcao", "Escolha:", [["P\u00e1ssaro", "Cachorro", "Coelho"], "P\u00e1ssaro"], "ANIMAIS 6\u20137 ANOS\nEscreva P\u00c1SSARO."], ["Qual animal costuma viver em uma toca?", "opcao", "Escolha:", [["Coelho", "Peixe", "Galinha"], "Coelho"], "ANIMAIS 6\u20137 ANOS\nEscreva COELHO."]]}, {"idade": "8\u20139 anos", "materia": "Animais", "fases": [["Qual destes \u00e9 um mam\u00edfero?", "opcao", "Escolha:", [["Coelho", "Galinha", "Peixe"], "Coelho"], "ANIMAIS 8\u20139 ANOS\nExplique por que o coelho \u00e9 mam\u00edfero."], ["Qual destes animais p\u00f5e ovos?", "opcao", "Escolha:", [["Galinha", "Cachorro", "Gato"], "Galinha"], "ANIMAIS 8\u20139 ANOS\nEscreva uma frase sobre a galinha."], ["Qual destes animais respira por br\u00e2nquias?", "opcao", "Escolha:", [["Peixe", "Coelho", "P\u00e1ssaro"], "Peixe"], "ANIMAIS 8\u20139 ANOS\nEscreva uma frase sobre o peixe."]]}, {"idade": "4\u20135 anos", "materia": "Atividade para colorir", "fases": [["\ud83c\udfa8 Desenhe Luna, o coelhinho e um castelo. Acrescente 5 estrelas.", "criativa", "", null, "ATIVIDADE PARA COLORIR 4\u20135 ANOS\nDesenhe Luna, o coelhinho e um castelo.\nAcrescente 5 estrelas."], ["\ud83c\udfa8 Desenhe uma lua grande e pinte o c\u00e9u.", "criativa", "", null, "ATIVIDADE PARA COLORIR 4\u20135 ANOS\nDesenhe uma lua grande e pinte o c\u00e9u."], ["\ud83c\udfa8 Desenhe o coelhinho em um jardim com flores.", "criativa", "", null, "ATIVIDADE PARA COLORIR 4\u20135 ANOS\nDesenhe o coelhinho em um jardim com flores."]]}, {"idade": "6\u20137 anos", "materia": "Atividade para colorir", "fases": [["\ud83c\udfa8 Desenhe Luna segurando seu livro m\u00e1gico.", "criativa", "", null, "ATIVIDADE PARA COLORIR 6\u20137 ANOS\nDesenhe Luna segurando seu livro m\u00e1gico."], ["\ud83c\udfa8 Desenhe o castelo com 4 torres.", "criativa", "", null, "ATIVIDADE PARA COLORIR 6\u20137 ANOS\nDesenhe um castelo com 4 torres."], ["\ud83c\udfa8 Desenhe uma floresta com 6 estrelas m\u00e1gicas.", "criativa", "", null, "ATIVIDADE PARA COLORIR 6\u20137 ANOS\nDesenhe uma floresta com 6 estrelas m\u00e1gicas."]]}, {"idade": "8\u20139 anos", "materia": "Atividade para colorir", "fases": [["\ud83c\udfa8 Crie uma cena de Luna entrando no castelo.", "criativa", "", null, "ATIVIDADE PARA COLORIR 8\u20139 ANOS\nCrie uma cena de Luna entrando no castelo."], ["\ud83c\udfa8 Desenhe um mapa da floresta encantada.", "criativa", "", null, "ATIVIDADE PARA COLORIR 8\u20139 ANOS\nDesenhe um mapa da floresta encantada."], ["\ud83c\udfa8 Desenhe uma nova sala m\u00e1gica do castelo.", "criativa", "", null, "ATIVIDADE PARA COLORIR 8\u20139 ANOS\nDesenhe uma nova sala m\u00e1gica do castelo."]]}]};
+(function () {
+    'use strict';
+    var content = document.getElementById('content');
+    var session = null, account = null, catalog = null, catalogTime = 0;
+    var revision = 0, history = [], renderCurrent = null, timers = [];
+    var playing = false, nativePlayer = false, playerReady = false, playRevision = 0;
+    var returnFocus = null, refreshQueue = null;
+    var htmlVideo = document.getElementById('html-player');
+    var apiUrl = TV_CONFIG.url + '/functions/v1/luna-tv-api/';
+    var menuItems = [
+        ['inicio', 'Início'], ['tv', 'Modo TV'], ['buscar', 'Buscar'],
+        ['novidades', 'Novidades'], ['lista', 'Minha Lista'], ['recentes', 'Recentes'],
+        ['conta', 'Minha conta'], ['planos', 'Planos'], ['premium', 'Premium'],
+        ['enviar', 'Enviar vídeo'], ['infantil', 'Infantil'], ['filmes', 'Filmes'],
+        ['series', 'Séries'], ['historias', 'Histórias da Luna'],
+        ['ia', 'Criar vídeo com IA'], ['jogos', 'Jogos'],
+        ['atividades', 'Atividades escolares'], ['criar-jogo', 'Faça seu próprio jogo'], ['gerenciar', 'Gerenciar']
+    ];
+    function el(tag, text, parent, className) {
+        var node = document.createElement(tag);
+        if (text !== null && text !== undefined) { node.textContent = text; }
+        if (className) { node.className = className; }
+        if (parent) { parent.appendChild(node); }
+        return node;
+    }
+    function button(text, action, parent, className) {
+        var b = el('button', text, parent || content, className);
+        b.type = 'button'; b.onclick = action; return b;
+    }
+    function later(fn, ms) { var t = window.setTimeout(fn, ms); timers.push(t); return t; }
+    function notice(text) {
+        var n = document.getElementById('message');
+        if (n) { n.textContent = text || ''; }
+    }
+    function firstFocus() {
+        var n = content.querySelector('button:not([disabled]),input');
+        if (n) { n.focus(); }
+    }
+    function header(title) {
+        var bar = el('div', null, content, 'row');
+        if (history.length) { button('← Voltar', back, bar); }
+        button('Menu da TV', home, bar);
+        el('h2', title, content);
+        var m = el('div', '', content); m.id = 'message'; m.setAttribute('role', 'status');
+    }
+    function page(fn, push) {
+        if (playing) { closePlayer(); }
+        if (push !== false && renderCurrent) { history.push(renderCurrent); }
+        revision++;
+        for (var i = 0; i < timers.length; i++) { clearTimeout(timers[i]); }
+        timers = [];
+        if (window.speechSynthesis) { window.speechSynthesis.cancel(); }
+        renderCurrent = fn; content.innerHTML = ''; content.scrollTop = 0;
+        fn(); firstFocus();
+    }
+    function back() {
+        if (playing) { closePlayer(); return; }
+        if (history.length) { page(history.pop(), false); } else { home(); }
+    }
+    function home() {
+        history = [];
+        page(function () {
+            el('h2', 'O que vamos descobrir hoje?', content);
+            el('p', 'Filmes, histórias e diversão com a Luna.', content, 'muted');
+            var grid = el('div', null, content, 'row menu');
+            menuItems.forEach(function (item) {
+                button(item[1], function () { route(item[0]); }, grid);
+            });
+            el('p', 'Use as setas e OK. Voltar retorna à tela anterior.', content, 'muted');
+        }, false);
+    }
+    function route(slug) {
+        if (slug === 'inicio') { home(); }
+        else if (slug === 'conta') { page(showAccount); }
+        else if (slug === 'historias') { page(stories); }
+        else if (slug === 'jogos') { page(games); }
+        else if (slug === 'criar-jogo') { page(myGames); }
+        else if (slug === 'atividades') { page(activities); }
+        else if (['planos', 'enviar', 'ia', 'gerenciar'].indexOf(slug) >= 0) { page(function () { companion(slug); }); }
+        else { page(function () { showCatalog(slug); }); }
+    }
+    function xhr(method, url, body, token, done) {
+        var request = new XMLHttpRequest(), finished = false;
+        function finish(err, result, status) {
+            if (finished) { return; } finished = true; done(err, result, status);
+        }
+        request.open(method, url, true); request.timeout = 20000;
+        request.setRequestHeader('apikey', TV_CONFIG.key);
+        if (token) { request.setRequestHeader('Authorization', 'Bearer ' + token); }
+        if (body !== null) { request.setRequestHeader('Content-Type', 'application/json'); }
+        request.onload = function () {
+            var data;
+            try { data = JSON.parse(request.responseText); }
+            catch (_) { finish('O servidor não retornou uma resposta válida.', null, request.status); return; }
+            if (request.status < 200 || request.status >= 300) {
+                var message = data.error || data.msg || data.message || data.error_description;
+                if (typeof message !== 'string') { message = 'Não foi possível concluir o pedido.'; }
+                finish(message, null, request.status);
+            } else { finish(null, data, request.status); }
+        };
+        request.onerror = function () { finish('Falha de conexão. Confira a internet e a data/hora da TV.', null, 0); };
+        request.ontimeout = function () { finish('A conexão demorou demais. Tente novamente.', null, 0); };
+        try { request.send(body === null ? null : JSON.stringify(body)); }
+        catch (_) { finish('Não foi possível conectar ao serviço.', null, 0); }
+    }
+    function setSession(data) {
+        session = {access_token: data.access_token, refresh_token: data.refresh_token,
+            expires_at: Date.now() + Number(data.expires_in || 3600) * 1000};
+    }
+    function refresh(done) {
+        if (!session) { done('Entre na sua conta.'); return; }
+        if (refreshQueue) { refreshQueue.push(done); return; }
+        refreshQueue = [done];
+        var expected = session;
+        xhr('POST', TV_CONFIG.url + '/auth/v1/token?grant_type=refresh_token',
+            {refresh_token: session.refresh_token}, null, function (err, data, status) {
+                if (session !== expected) { err = 'A conta foi alterada. Tente novamente.'; }
+                else if (!err) { setSession(data); }
+                else if (status === 400 || status === 401 || status === 403) { forgetSession(); }
+                var queue = refreshQueue || []; refreshQueue = null;
+                queue.forEach(function (fn) { fn(err); });
+            });
+    }
+    function api(path, done, retried) {
+        if (!session) { done('Entre na sua conta para acessar o catálogo.'); return; }
+        if (!retried && session.expires_at < Date.now() + 30000) {
+            refresh(function (err) { if (err) { done(err); } else { api(path, done, true); } }); return;
+        }
+        var expected = session;
+        xhr('GET', apiUrl + path, null, session.access_token, function (err, data, status) {
+            if (session !== expected) { done('A conta foi alterada. Tente novamente.'); return; }
+            if (status === 401 && !retried) {
+                refresh(function (e) { if (e) { done(e); } else { api(path, done, true); } }); return;
+            }
+            if (status === 401) { forgetSession(); }
+            done(err, data);
+        });
+    }
+    function accountLabel() {
+        document.getElementById('accountLabel').textContent = account ?
+            account.email + ' · ' + account.plano + ' (' + account.status + ')' : 'TV Samsung · Entre em Minha conta';
+    }
+    function forgetSession() { session = null; account = null; catalog = null; catalogTime = 0; accountLabel(); }
+    function showAccount() {
+        header('Minha conta');
+        var ticket = revision;
+        if (session) {
+            notice('Conferindo sua assinatura…');
+            api('account', function (err, data) {
+                if (ticket !== revision) { return; }
+                if (err) { notice(err); return; }
+                account = data; accountLabel(); notice('Conta conectada.');
+                el('p', data.email + ' — ' + data.plano + ' (' + data.status + ')', content);
+            });
+            button('Atualizar conta', function () { page(showAccount, false); });
+            button('Ir para os vídeos', function () { route('tv'); });
+            button('Sair da conta', function () {
+                var oldToken = session && session.access_token;
+                forgetSession();
+                if (oldToken) { xhr('POST', TV_CONFIG.url + '/auth/v1/logout?scope=local', {}, oldToken, function () {}); }
+                page(showAccount, false);
+            });
+            el('p', 'Sua senha não é guardada. Ao fechar o aplicativo, entre novamente.', content, 'muted');
+            return;
+        }
+        el('p', 'Use o mesmo e-mail e senha do app no celular.', content);
+        var form = el('form', null, content, 'panel');
+        var emailLabel = el('label', 'E-mail', form);
+        var email = el('input', null, emailLabel); email.type = 'email'; email.required = true; email.id = 'email'; email.autocomplete = 'username';
+        var passLabel = el('label', 'Senha', form);
+        var pass = el('input', null, passLabel); pass.type = 'password'; pass.required = true; pass.id = 'password'; pass.autocomplete = 'current-password';
+        var submit = el('button', 'Entrar', form); submit.type = 'submit';
+        var busy = false;
+        form.onsubmit = function (event) {
+            event.preventDefault(); if (busy) { return; } busy = true; submit.disabled = true;
+            notice('Entrando…');
+            xhr('POST', TV_CONFIG.url + '/auth/v1/token?grant_type=password',
+                {email: email.value.replace(/^\s+|\s+$/g, ''), password: pass.value}, null,
+                function (err, data, status) {
+                    pass.value = ''; busy = false; submit.disabled = false;
+                    if (ticket !== revision) { return; }
+                    if (err) {
+                        notice(status === 400 ? 'Confira o e-mail e a senha. Se necessário, recupere a senha no celular.' : err);
+                        submit.focus(); return;
+                    }
+                    setSession(data); catalog = null;
+                    page(showAccount, false);
+                });
+        };
+        el('p', 'Cadastro e recuperação de senha: use Minha conta no celular ou notebook.', content, 'muted');
+    }
+    function localData() {
+        var key = 'luna.tv.' + (account ? account.id : 'visitor');
+        try { return JSON.parse(localStorage.getItem(key)) || {favorites: {}, recent: {}}; }
+        catch (_) { return {favorites: {}, recent: {}}; }
+    }
+    function saveLocal(data) {
+        try { localStorage.setItem('luna.tv.' + (account ? account.id : 'visitor'), JSON.stringify(data)); }
+        catch (_) { notice('A TV não conseguiu guardar a lista neste aparelho.'); }
+    }
+    function getCatalog(ticket, done, force) {
+        if (!session) { done('Entre em Minha conta para ver os vídeos.'); return; }
+        if (!force && catalog && Date.now() - catalogTime < 30000) { done(null, catalog); return; }
+        notice('Carregando seu catálogo…');
+        api('account', function (err, data) {
+            if (ticket !== revision) { return; }
+            if (err) { done(err); return; }
+            account = data; accountLabel();
+            var all = [];
+            function batch(offset) {
+                api('catalog?offset=' + offset, function (error, response) {
+                    if (ticket !== revision) { return; }
+                    if (error) { done(error); return; }
+                    all = all.concat(response.items);
+                    if (response.next !== null && all.length < 10000) { batch(response.next); }
+                    else { catalog = all; catalogTime = Date.now(); done(null, all); }
+                });
+            }
+            batch(0);
+        });
+    }
+    function baseCategory(v) { return String(v.categoria || '').replace(/^Premium::/, ''); }
+    function plain(s) { return String(s).replace(/\*\*/g, ''); }
+    function showCatalog(slug, force) {
+        var names = {tv: 'Todos os vídeos', filmes: 'Filmes', series: 'Séries', infantil: 'Infantil', buscar: 'Buscar', novidades: 'Novidades', premium: 'Premium', lista: 'Minha Lista', recentes: 'Recentes'};
+        header(names[slug] || 'Vídeos');
+        var ticket = revision;
+        if (!session) { notice('Entre na sua conta para carregar os vídeos.'); button('Entrar', function () { route('conta'); }); return; }
+        button('Atualizar catálogo', function () { page(function () { showCatalog(slug, true); }, false); });
+        if (slug === 'lista' || slug === 'recentes') { el('p', 'Esta lista é guardada apenas nesta TV, separada por conta.', content, 'muted'); }
+        var search = null;
+        if (slug === 'buscar') {
+            var label = el('label', 'Título do vídeo ou série', content);
+            search = el('input', null, label); search.type = 'search'; search.id = 'search';
+        }
+        var results = el('div', null, content, 'cards');
+        getCatalog(ticket, function (err, items) {
+            if (err) { notice(err); if (!session) { button('Entrar', function () { route('conta'); }); } return; }
+            notice(items.length + ' vídeos no catálogo.');
+            function draw() {
+                results.innerHTML = '';
+                var data = localData();
+                var list = items.filter(function (v) {
+                    if (slug === 'filmes' && baseCategory(v) !== 'Filmes') { return false; }
+                    if (slug === 'series' && baseCategory(v) !== 'Séries') { return false; }
+                    if (slug === 'infantil' && baseCategory(v) !== 'Infantil') { return false; }
+                    if (slug === 'premium' && !v.premium) { return false; }
+                    if (slug === 'lista' && !data.favorites[v.id]) { return false; }
+                    if (slug === 'recentes' && !data.recent[v.id]) { return false; }
+                    return !search || (v.nome + ' ' + (v.serie_nome || '')).toLowerCase().indexOf(search.value.toLowerCase()) >= 0;
+                });
+                if (slug === 'recentes') { list.sort(function (a, b) { return data.recent[b.id] - data.recent[a.id]; }); }
+                if (slug === 'novidades') { list = list.slice(0, 20); }
+                if (!list.length) { el('p', 'Nenhum vídeo nesta seleção.', results); }
+                if (slug === 'series') { seriesGroups(list, results); }
+                else { list.forEach(function (v) { videoCard(v, results); }); }
+            }
+            if (search) { search.oninput = draw; }
+            draw();
+        }, force);
+    }
+    function seriesGroups(list, parent) {
+        var groups = {};
+        list.forEach(function (v) { var name = v.serie_nome || v.nome || 'Série'; if (!groups[name]) { groups[name] = []; } groups[name].push(v); });
+        Object.keys(groups).forEach(function (name) {
+            button(name, function () {
+                page(function () {
+                    header(name);
+                    var seasons = {};
+                    groups[name].forEach(function (v) { var s = String(v.temporada || 1); if (!seasons[s]) { seasons[s] = []; } seasons[s].push(v); });
+                    Object.keys(seasons).sort(function (a, b) { return Number(a) - Number(b); }).forEach(function (s) {
+                        button('Temporada ' + s, function () {
+                            page(function () {
+                                header(name + ' · Temporada ' + s);
+                                var grid = el('div', null, content, 'cards');
+                                seasons[s].sort(function (a, b) { return (a.episodio || 1) - (b.episodio || 1); }).forEach(function (v) { videoCard(v, grid); });
+                            });
+                        });
+                    });
+                });
+            }, parent, 'card');
+        });
+    }
+    function videoCard(v, parent) {
+        var b = button('', function () { page(function () { detail(v); }); }, parent, 'card');
+        if (/^https?:\/\//i.test(v.capa_url || '')) {
+            var img = el('img', null, b); img.alt = ''; img.src = v.capa_url;
+            img.onerror = function () { this.style.display = 'none'; };
+        }
+        el('span', v.nome || 'Sem título', b);
+        el('small', baseCategory(v) + (v.premium ? ' · Premium' : ' · Grátis'), b);
+        if (baseCategory(v) === 'Séries') { el('small', 'Temporada ' + (v.temporada || 1) + ' · Episódio ' + (v.episodio || 1), b); }
+    }
+    function detail(v) {
+        header(v.nome || 'Vídeo');
+        el('p', baseCategory(v) + (v.premium ? ' · Premium' : ' · Grátis'), content);
+        button('▶ Assistir', function () { openPlayer(v); });
+        var data = localData();
+        var favorite = button(data.favorites[v.id] ? 'Remover da Minha Lista' : 'Adicionar à Minha Lista', function () {
+            var d = localData();
+            if (d.favorites[v.id]) { delete d.favorites[v.id]; } else { d.favorites[v.id] = true; }
+            saveLocal(d); favorite.textContent = d.favorites[v.id] ? 'Remover da Minha Lista' : 'Adicionar à Minha Lista';
+        });
+    }
+    function playerStatus(message) { document.getElementById('playerStatus').textContent = message; }
+    function closePlayer() {
+        playRevision++; playing = false; playerReady = false;
+        try { if (nativePlayer) { webapis.avplay.stop(); } } catch (_) {}
+        try { if (nativePlayer) { webapis.avplay.close(); } } catch (_) {}
+        htmlVideo.pause(); htmlVideo.removeAttribute('src'); htmlVideo.load();
+        document.getElementById('player').style.display = 'none';
+        document.body.className = ''; document.documentElement.style.background = '';
+        if (returnFocus && document.body.contains(returnFocus)) { returnFocus.focus(); }
+        nativePlayer = false;
+    }
+    function markRecent(v) { var d = localData(); d.recent[v.id] = Date.now(); saveLocal(d); }
+    function openPlayer(v) {
+        var ticket = revision;
+        notice('Verificando acesso ao vídeo…');
+        api('play?id=' + encodeURIComponent(v.id), function (err, data) {
+            if (ticket !== revision || playing) { return; }
+            if (err) { notice(err); return; }
+            returnFocus = document.activeElement;
+            playing = true; playerReady = false; var run = ++playRevision;
+            document.body.className = 'playing'; document.documentElement.style.background = 'transparent';
+            document.getElementById('player').style.display = 'block';
+            document.getElementById('closePlayer').focus(); playerStatus('Preparando ' + v.nome + '…');
+            nativePlayer = !!(window.webapis && webapis.avplay);
+            htmlVideo.style.display = nativePlayer ? 'none' : 'block';
+            document.getElementById('av-player').style.display = nativePlayer ? 'block' : 'none';
+            var timeout = window.setTimeout(function () {
+                if (run === playRevision && !playerReady) { playerStatus('O vídeo demorou para abrir. Use Voltar e tente outro vídeo.'); }
+            }, 25000);
+            function ready() {
+                clearTimeout(timeout); if (run !== playRevision) { return; }
+                playerReady = true; markRecent(v); playerStatus(v.nome + ' · Reproduzindo');
+            }
+            function failed() { clearTimeout(timeout); if (run === playRevision) { playerStatus('Não foi possível reproduzir este vídeo. O link ou o formato pode ser incompatível. Use Voltar.'); } }
+            if (nativePlayer) {
+                try {
+                    webapis.avplay.open(data.url);
+                    webapis.avplay.setDisplayRect(0, 0, 1920, 1080);
+                    webapis.avplay.setListener({
+                        onerror: failed,
+                        onbufferingstart: function () { if (run === playRevision) { playerStatus('Carregando vídeo…'); } },
+                        onbufferingcomplete: function () { if (run === playRevision) { playerStatus(v.nome); } },
+                        onstreamcompleted: function () { if (run === playRevision) { closePlayer(); notice('Vídeo concluído.'); } }
+                    });
+                    webapis.avplay.prepareAsync(function () {
+                        if (run !== playRevision || !playing) { return; }
+                        try { webapis.avplay.play(); ready(); } catch (_) { failed(); }
+                    }, failed);
+                } catch (_) { failed(); }
+            } else {
+                htmlVideo.onplaying = ready; htmlVideo.onerror = failed;
+                htmlVideo.onended = function () { closePlayer(); notice('Vídeo concluído.'); };
+                htmlVideo.src = data.url;
+                try { var promise = htmlVideo.play(); if (promise && promise.catch) { promise.catch(failed); } } catch (_) { failed(); }
+            }
+        });
+    }
+    function pausePlay(force) {
+        if (!playing || !playerReady) { return; }
+        try {
+            var paused = nativePlayer ? webapis.avplay.getState() === 'PAUSED' : htmlVideo.paused;
+            var shouldPlay = force === 'play' || (force !== 'pause' && paused);
+            if (nativePlayer) { if (shouldPlay) { webapis.avplay.play(); } else { webapis.avplay.pause(); } }
+            else if (shouldPlay) { var p = htmlVideo.play(); if (p && p.catch) { p.catch(function () { playerStatus('Não foi possível retomar. Use Voltar.'); }); } }
+            else { htmlVideo.pause(); }
+            playerStatus(shouldPlay ? 'Reproduzindo' : 'Pausado');
+        } catch (_) { playerStatus('Não foi possível alterar a reprodução. Use Voltar.'); }
+    }
+    function seek(seconds) {
+        if (!playing || !playerReady) { return; }
+        try {
+            if (nativePlayer) {
+                var duration = webapis.avplay.getDuration();
+                if (duration > 0) { webapis.avplay.seekTo(Math.max(0, Math.min(duration - 1000, webapis.avplay.getCurrentTime() + seconds * 1000))); }
+            } else if (isFinite(htmlVideo.duration)) { htmlVideo.currentTime = Math.max(0, Math.min(htmlVideo.duration - 0.1, htmlVideo.currentTime + seconds)); }
+        } catch (_) { playerStatus('Este vídeo não permite avançar neste momento.'); }
+    }
+    document.getElementById('playPause').onclick = function () { pausePlay(); };
+    document.getElementById('rewind').onclick = function () { seek(-10); };
+    document.getElementById('forward').onclick = function () { seek(10); };
+    document.getElementById('closePlayer').onclick = closePlayer;
+    function companion(slug) {
+        var labels = {ia: 'Criar vídeo com IA', enviar: 'Enviar vídeo', gerenciar: 'Gerenciar', planos: 'Planos'};
+        header(labels[slug]);
+        el('p', 'Continue esta função no celular ou notebook, no mesmo app da Luna.', content, 'story');
+        el('p', 'Abra o site e escolha “' + labels[slug] + '” no menu.', content);
+        el('p', TV_CONFIG.site, content, 'link');
+        el('p', 'Depois de enviar vídeos ou atualizar seu plano, volte à TV e escolha Atualizar catálogo.', content, 'muted');
+        button('Ir para Minha conta', function () { route('conta'); });
+    }
+    function stories() {
+        header('Histórias da Luna');
+        TV_CONTENT.stories.forEach(function (s, i) { button(s.titulo, function () { page(function () { chapter(i, 0); }); }); });
+    }
+    function chapter(story, number) {
+        var s = TV_CONTENT.stories[story], c = s.capitulos[number];
+        header(s.titulo); el('h3', c[0], content); el('p', c[1], content, 'story');
+        if (number > 0) { button('Capítulo anterior', function () { page(function () { chapter(story, number - 1); }, false); }); }
+        if (number < s.capitulos.length - 1) { button('Próximo capítulo', function () { page(function () { chapter(story, number + 1); }, false); }); }
+        if (window.speechSynthesis && window.SpeechSynthesisUtterance) {
+            button('Ouvir história', function () {
+                window.speechSynthesis.cancel(); var voice = new SpeechSynthesisUtterance(c[1]); voice.lang = 'pt-BR'; voice.rate = 0.9;
+                voice.onerror = function () { notice('A narração não está disponível neste aparelho.'); };
+                window.speechSynthesis.speak(voice);
+            });
+            button('Parar narração', function () { window.speechSynthesis.cancel(); });
+        }
+    }
+    function games() {
+        header('Jogos da Luna');
+        button('Memória', function () { page(function () { memory(1); }); });
+        button('Palavras', function () { page(wordAges); });
+        button('Números', function () { page(function () { numbers(1, false); }); });
+        button('Desafio Mágico', function () { page(function () { numbers(1, true); }); });
+    }
+    function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+    function memory(level, custom) {
+        header('Memória · Nível ' + level);
+        var count = custom ? custom.content.items.length : Math.min(8, level + 2), deck = [], chosen = [], matched = {}, busy = false, hits = 0;
+        var names = custom ? custom.content.items : ['LUA', 'SOL', 'FLOR', 'LUNA', 'GATO', 'LIVRO', 'BOLA', 'FADA'];
+        if (custom) { el('h3', custom.title, content); }
+        for (var i = 0; i < count; i++) { deck.push(names[i], names[i]); } shuffle(deck);
+        var grid = el('div', null, content, 'row memory'), cards = [];
+        deck.forEach(function (name, index) {
+            var b = button('?', function () {
+                if (busy || matched[index] || chosen.indexOf(index) >= 0) { return; }
+                b.textContent = name; b.setAttribute('aria-label', name); chosen.push(index);
+                if (chosen.length === 2) {
+                    var a = chosen[0], c = chosen[1];
+                    if (deck[a] === deck[c]) {
+                        matched[a] = matched[c] = true; chosen = []; hits++;
+                        notice('Par encontrado! ' + hits + ' de ' + count);
+                        if (hits === count) {
+                            notice('Você encontrou todos os pares!');
+                            var next = button(custom ? 'Jogar novamente' : 'Próximo nível', function () { page(function () { memory(custom ? level : level + 1, custom); }, false); }); next.focus();
+                        }
+                    } else {
+                        busy = true; notice('Observe as palavras e tente outro par.');
+                        later(function () { cards[a].textContent = '?'; cards[c].textContent = '?'; cards[a].setAttribute('aria-label', 'Carta ' + (a + 1)); cards[c].setAttribute('aria-label', 'Carta ' + (c + 1)); chosen = []; busy = false; }, 1000);
+                    }
+                }
+            }, grid);
+            b.setAttribute('aria-label', 'Carta ' + (index + 1)); cards.push(b);
+        });
+        button('Novo jogo', function () { page(function () { memory(level, custom); }, false); });
+    }
+    function wordAges() {
+        header('Palavras · Escolha a idade');
+        Object.keys(TV_CONTENT.words).forEach(function (age) { button(age, function () { page(function () { wordQuestion(age, 0); }); }); });
+    }
+    function choices(question, options, correct, next) {
+        el('p', plain(question), content, 'story');
+        var solved = false;
+        options.forEach(function (option) {
+            button(String(option), function () {
+                if (solved) { return; }
+                if (String(option) === String(correct)) {
+                    solved = true; notice('Muito bem! Você acertou.');
+                    var b = button('Próxima fase', next); b.focus();
+                } else { notice('Vamos tentar outra vez!'); }
+            });
+        });
+    }
+    function wordQuestion(age, index) {
+        var questions = TV_CONTENT.words[age], q = questions[index % questions.length];
+        header('Palavras · ' + age + ' · Fase ' + (index + 1));
+        choices(q.pergunta, q.opcoes, q.correta, function () {
+            if (index + 1 < questions.length) { page(function () { wordQuestion(age, index + 1); }, false); }
+            else { page(function () { header('Parabéns!'); el('p', 'Você completou as palavras desta idade.', content); button('Jogar novamente', function () { page(function () { wordQuestion(age, 0); }, false); }); }, false); }
+        });
+    }
+    function numbers(level, magic) {
+        header((magic ? 'Desafio Mágico' : 'Números') + ' · Fase ' + level);
+        var a = 1 + Math.floor(Math.random() * Math.min(30, 4 + level)), b = 1 + Math.floor(Math.random() * 5);
+        var result = magic ? a + 3 * b : a + b;
+        var q = magic ? 'Qual número continua a sequência? ' + a + ', ' + (a + b) + ', ' + (a + 2 * b) + ', …' : a + ' + ' + b + ' = ?';
+        choices(q, shuffle([result, result + 1, result + 2]), result, function () { page(function () { numbers(level + 1, magic); }, false); });
+    }
+    function activities() {
+        header('Atividades escolares · Escolha a idade');
+        ['4–5 anos', '6–7 anos', '8–9 anos'].forEach(function (age) {
+            button(age, function () {
+                page(function () {
+                    header('Atividades · ' + age);
+                    TV_CONTENT.activities.forEach(function (group, index) {
+                        if (group.idade === age) { button(group.materia, function () { page(function () { activity(index, 0); }); }); }
+                    });
+                });
+            });
+        });
+    }
+    function normalized(s) { return String(s).toLowerCase().replace(/^\s+|\s+$/g, '').replace(/[áàâã]/g,'a').replace(/[éê]/g,'e').replace(/[í]/g,'i').replace(/[óôõ]/g,'o').replace(/[ú]/g,'u').replace(/ç/g,'c'); }
+    function activity(groupIndex, index) {
+        var group = TV_CONTENT.activities[groupIndex], task = group.fases[index];
+        header(group.materia + ' · ' + group.idade + ' · Fase ' + (index + 1));
+        el('p', plain(task[0]), content, 'story');
+        if (group.materia === 'Atividade para colorir') {
+            el('p', task[4], content, 'story');
+            el('p', 'Use papel e lápis de cor. Para imprimir, abra Atividades escolares no notebook.', content);
+            button('Próxima atividade', advance); return;
+        }
+        if (task[1] === 'opcao') { choices(task[2], task[3][0], task[3][1], advance); return; }
+        var form = el('form', null, content);
+        var label = el('label', task[2], form), answer = el('input', null, label);
+        answer.type = task[1] === 'numero' ? 'number' : 'text'; answer.required = true;
+        var submit = el('button', 'Confirmar resposta', form); submit.type = 'submit';
+        var solved = false;
+        form.onsubmit = function (event) {
+            event.preventDefault(); if (solved) { return; }
+            var ok = task[1] === 'leitura' ? normalized(answer.value).indexOf(normalized(task[3])) >= 0 : task[1] === 'frase' ? answer.value.trim().split(/\s+/).length >= Number(task[3]) : normalized(answer.value) === normalized(task[3]);
+            if (ok) { solved = true; notice('Muito bem! Resposta correta.'); var b = button('Próxima atividade', advance); b.focus(); }
+            else { notice('Tente novamente. Você consegue!'); }
+        };
+        function advance() { if (index + 1 < group.fases.length) { page(function () { activity(groupIndex, index + 1); }, false); } else { page(function () { header('Atividades concluídas!'); button('Escolher outra atividade', function () { page(activities, false); }); }, false); } }
+    }
+    function myGames() {
+        header('Faça seu próprio jogo');
+        el('p', 'Crie no celular ou notebook, na aba Faça seu próprio jogo. Depois, jogue aqui com a mesma conta.', content);
+        el('p', TV_CONFIG.site, content, 'link');
+        if (!session) { button('Entrar na minha conta', function () { route('conta'); }); return; }
+        button('Atualizar meus jogos', function () { page(myGames, false); });
+        var ticket = revision;
+        notice('Buscando seus jogos…');
+        api('games', function (err, data) {
+            if (ticket !== revision) { return; }
+            if (err) { notice(err); return; }
+            notice(data.items.length ? 'Escolha um jogo.' : 'Você ainda não salvou jogos nesta conta.');
+            data.items.forEach(function (g) {
+                button(g.title, function () {
+                    page(function () {
+                        if (g.kind === 'memory' && g.content && g.content.items && g.content.items.length >= 2 && g.content.items.length <= 12) { memory(1, g); }
+                        else if (g.kind === 'quiz' && g.content && g.content.questions && g.content.questions.length) { customQuiz(g, 0); }
+                        else { header('Jogo indisponível'); notice('Edite e salve novamente este jogo no celular.'); }
+                    });
+                });
+            });
+        });
+    }
+    function customQuiz(game, index) {
+        var q = game.content.questions[index];
+        header(game.title + ' · Pergunta ' + (index + 1));
+        if (!q || !q.options || q.options[q.answer] === undefined) { notice('Esta pergunta precisa ser revisada no editor.'); return; }
+        choices(q.prompt, q.options, q.options[q.answer], function () {
+            if (index + 1 < game.content.questions.length) { page(function () { customQuiz(game, index + 1); }, false); }
+            else { page(function () { header('Parabéns!'); el('p', 'Você concluiu o jogo.', content); button('Jogar novamente', function () { page(function () { customQuiz(game, 0); }, false); }); }, false); }
+        });
+    }
+    function visibleControls() {
+        var area = playing ? document.getElementById('playerBar') : content;
+        return Array.prototype.filter.call(area.querySelectorAll('button,input'), function (n) { return !n.disabled && n.offsetWidth > 0 && n.offsetHeight > 0; });
+    }
+    function moveFocus(key) {
+        var nodes = visibleControls(), current = document.activeElement, best = null, score = Infinity;
+        if (!nodes.length) { return; }
+        if (nodes.indexOf(current) < 0) { nodes[0].focus(); return; }
+        var rect = current.getBoundingClientRect(), x = rect.left + rect.width / 2, y = rect.top + rect.height / 2;
+        nodes.forEach(function (n) {
+            if (n === current) { return; }
+            var r = n.getBoundingClientRect(), dx = r.left + r.width / 2 - x, dy = r.top + r.height / 2 - y;
+            if ((key === 37 && dx >= -5) || (key === 39 && dx <= 5) || (key === 38 && dy >= -5) || (key === 40 && dy <= 5)) { return; }
+            var along = key === 37 || key === 39 ? Math.abs(dx) : Math.abs(dy);
+            var across = key === 37 || key === 39 ? Math.abs(dy) : Math.abs(dx);
+            var distance = along + across * 3;
+            if (distance < score) { score = distance; best = n; }
+        });
+        if (best) {
+            best.focus();
+            var b = best.getBoundingClientRect(), c = content.getBoundingClientRect();
+            if (!playing && (b.top < c.top || b.bottom > c.bottom)) { best.scrollIntoView(false); }
+        }
+    }
+    document.addEventListener('keydown', function (event) {
+        var key = event.keyCode, active = document.activeElement;
+        if (key === 10009 || key === 27) {
+            event.preventDefault();
+            if (active && active.tagName === 'INPUT') { active.blur(); firstFocus(); } else { back(); }
+            return;
+        }
+        if (playing && [415, 19, 10252, 413, 417, 412].indexOf(key) >= 0) {
+            event.preventDefault();
+            if (key === 413) { closePlayer(); }
+            else if (key === 417 || key === 412) { seek(key === 417 ? 10 : -10); }
+            else { pausePlay(key === 415 ? 'play' : key === 19 ? 'pause' : null); }
+            return;
+        }
+        if (key >= 37 && key <= 40) {
+            if (active && active.tagName === 'INPUT' && (key === 37 || key === 39)) { return; }
+            event.preventDefault(); moveFocus(key);
+        }
+        // Native Enter activates buttons once; forms handle Enter in input fields.
+    });
+    document.addEventListener('visibilitychange', function () { if (document.hidden && playing) { pausePlay('pause'); } });
+    window.addEventListener('pagehide', closePlayer);
+    try {
+        if (window.tizen && tizen.tvinputdevice) {
+            ['MediaPlay','MediaPause','MediaPlayPause','MediaStop','MediaFastForward','MediaRewind'].forEach(function (key) { try { tizen.tvinputdevice.registerKey(key); } catch (_) {} });
+        }
+    } catch (_) {}
+    accountLabel(); home();
+})();
+
+</script>
+</body></html>

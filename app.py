@@ -3055,7 +3055,7 @@ def mostrar_card_tv(item, contexto):
 
 
 # INICIO ADAPTACAO TV — só ativa com tv=1; mantém as funções do app original.
-_LUNA_TV_PAGINAS = {'inicio': '🏠 Início', 'tv': '📺 Modo TV', 'buscar': '🔎 Buscar', 'novidades': '🆕 Novidades', 'lista': '❤️ Minha Lista', 'recentes': '🕒 Recentes', 'conta': '👤 Entrar / Minha conta', 'planos': '💎 Planos', 'premium': '🔒 Premium', 'enviar': '📤 Enviar vídeo', 'infantil': '🧸 Infantil', 'filmes': '🎬 Filmes', 'series': '📺 Séries', 'historias': '🌙 Histórias da Luna', 'ia': '🎬 Criar vídeo com IA', 'jogos': '🎮 Jogos', 'atividades': '📚 Atividades escolares', 'gerenciar': '🗑️ Gerenciar'}
+_LUNA_TV_PAGINAS = {'inicio': '🏠 Início', 'tv': '📺 Modo TV', 'buscar': '🔎 Buscar', 'novidades': '🆕 Novidades', 'lista': '❤️ Minha Lista', 'recentes': '🕒 Recentes', 'conta': '👤 Entrar / Minha conta', 'planos': '💎 Planos', 'premium': '🔒 Premium', 'enviar': '📤 Enviar vídeo', 'infantil': '🧸 Infantil', 'filmes': '🎬 Filmes', 'series': '📺 Séries', 'historias': '🌙 Histórias da Luna', 'ia': '🎬 Criar vídeo com IA', 'jogos': '🎮 Jogos', 'atividades': '📚 Atividades escolares', 'gerenciar': '🗑️ Gerenciar', 'criar-jogo': '🎨 Faça seu próprio jogo'}
 _luna_tv_ativa = str(st.query_params.get("tv", "0")) == "1"
 if _luna_tv_ativa:
     _luna_pagina = str(st.query_params.get("pagina", "inicio"))
@@ -3097,6 +3097,7 @@ menu = st.sidebar.radio(
         "🌙 Histórias da Luna",
         "🎬 Criar vídeo com IA",
         "🎮 Jogos",
+        "🎨 Faça seu próprio jogo",
         "📚 Atividades escolares",
         "🗑️ Gerenciar"
     ],
@@ -5140,6 +5141,19 @@ elif menu == "🎬 Criar vídeo com IA":
             key="baixar_video_ia",
         )
 
+
+elif menu == "🎨 Faça seu próprio jogo":
+    from game_builder import render_game_builder
+    # The creator always scopes reads and writes to the authenticated session.
+    _jogos_cliente = None
+    if st.session_state.get("usuario_id"):
+        try:
+            _jogos_cliente = cliente_admin_assinaturas()
+            if _jogos_cliente is None:
+                _jogos_cliente = cliente_usuario_autenticado()
+        except Exception:
+            _jogos_cliente = None
+    render_game_builder(st.session_state.get("usuario_id"), _jogos_cliente)
 
 elif menu == "🎮 Jogos":
     st.markdown("## 🎮 Jogos do Mundo da Luna")

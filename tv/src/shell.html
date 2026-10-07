@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mundo da Luna TV</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;font-family:Arial,sans-serif;background:#201035;color:#fff}body{background:linear-gradient(135deg,#311449,#160b28)}
+header{height:115px;padding:22px 36px;border-bottom:1px solid #846647}h1{font-size:34px;margin:0 0 8px;color:#f9db80}h2{font-size:30px;margin:12px 0 22px}h3{font-size:24px}p{line-height:1.55;font-size:23px}.muted{color:#d8cbe9;font-size:19px}#content{padding:20px 36px 42px;height:calc(100% - 115px);overflow:auto}#message{padding:10px 0;color:#ffe6a2;font-size:22px;min-height:40px}
+button,input,select{font:24px Arial,sans-serif;border-radius:14px;border:3px solid #a489bd;padding:14px;margin:8px;color:#25123d;background:#d4b4f1;min-height:65px}button{font-weight:bold;cursor:pointer}button:focus,input:focus,select:focus{outline:5px solid #ffdc65;background:#f0ddff;color:#25123d}button:disabled{opacity:.45}input{background:#fff;min-width:350px}label{display:block;font-size:23px;margin:12px 0}.row{display:flex;flex-wrap:wrap;align-items:center}.menu button{width:260px;min-height:95px;text-align:left}.panel{padding:22px;background:rgba(255,255,255,.07);border:1px solid #79604f;border-radius:20px;margin:14px 0}.cards{display:flex;flex-wrap:wrap}.card{width:260px;min-height:240px;vertical-align:top;display:inline-block;text-align:left}.card img{display:block;width:220px;height:125px;object-fit:cover;margin-bottom:12px;background:#3b215b}.card small{display:block;font-size:17px;margin-top:8px}.story{font-size:29px;line-height:1.65;max-width:1100px}.memory{max-width:1000px}.memory button{width:125px;height:100px;font-size:30px}.feedback{font-size:27px;color:#ffe497}.link{overflow-wrap:break-word;word-wrap:break-word;color:#f6d477;font-size:21px}
+#player{display:none;position:fixed;inset:0;top:0;left:0;width:100%;height:100%;background:transparent;z-index:5}#av-player,#html-player{position:absolute;top:0;left:0;width:100%;height:100%}#html-player{background:#000}#playerBar{position:absolute;bottom:0;left:0;right:0;padding:12px 24px;background:rgba(20,8,34,.9)}#playerStatus{font-size:23px;color:#fff;padding:8px}body.playing,body.playing html{background:transparent}body.playing #appShell{display:none}
+</style>
+</head>
+<body>
+<div id="appShell"><header><h1>Mundo da Luna TV Premium</h1><span id="accountLabel" class="muted">TV Samsung · versão 0.3.0</span></header><main id="content"></main></div>
+<section id="player"><object id="av-player" type="application/avplayer"></object><video id="html-player" preload="metadata"></video><div id="playerBar"><div id="playerStatus" role="status"></div><button id="playPause">Play / Pausar</button><button id="rewind">− 10 segundos</button><button id="forward">+ 10 segundos</button><button id="closePlayer">Voltar ao catálogo</button></div></section>
+<script src="$WEBAPIS/webapis/webapis.js"></script>
+<script>
+/*__DATA__*/
+/*__APP__*/
+</script>
+</body></html>

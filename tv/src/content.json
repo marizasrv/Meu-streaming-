@@ -1,0 +1,846 @@
+{
+  "stories": [
+    {
+      "titulo": "Luna e o Livro Mágico",
+      "capitulos": [
+        [
+          "Capítulo 1 · O livro misterioso",
+          "Luna encontrou um antigo livro brilhante escondido em casa. Quando abriu a primeira página, letras douradas começaram a se mover e uma luz suave envolveu Luna e seu coelhinho."
+        ],
+        [
+          "Capítulo 2 · A floresta encantada",
+          "Em um instante, Luna e o coelhinho foram transportados para uma floresta cheia de árvores luminosas, flores mágicas e caminhos que pareciam mudar de lugar."
+        ],
+        [
+          "Capítulo 3 · O castelo da princesa",
+          "Seguindo um caminho de estrelas, Luna chegou a um grande castelo. Lá conheceu uma jovem princesa que guardava um segredo sobre o livro mágico."
+        ]
+      ]
+    },
+    {
+      "titulo": "Luna e o Espelho Encantado",
+      "capitulos": [
+        [
+          "Capítulo 1 · O reflexo diferente",
+          "No quarto, Luna percebeu que seu reflexo no espelho não repetia exatamente seus movimentos. O coelhinho ficou atento enquanto pequenas partículas roxas surgiam ao redor da moldura."
+        ],
+        [
+          "Capítulo 2 · A varinha de luz",
+          "Luna ergueu sua varinha brilhante diante do espelho. A luz aumentou e revelou uma passagem escondida atrás do reflexo."
+        ],
+        [
+          "Capítulo 3 · O segredo do outro lado",
+          "Ao atravessar o espelho, Luna descobriu um lugar silencioso e misterioso. Para voltar para casa, ela precisaria encontrar a verdadeira origem da magia."
+        ]
+      ]
+    },
+    {
+      "titulo": "Luna e o Segredo do Castelo",
+      "capitulos": [
+        [
+          "Capítulo 1 · A porta fechada",
+          "Luna voltou ao castelo e encontrou uma porta que nunca havia visto antes. Nenhuma chave comum conseguia abri-la."
+        ],
+        [
+          "Capítulo 2 · A chave dourada",
+          "Com a ajuda do coelhinho e da princesa, Luna encontrou uma pequena chave dourada escondida em um jardim iluminado pela lua."
+        ],
+        [
+          "Capítulo 3 · A sala das estrelas",
+          "Atrás da porta havia uma sala cheia de estrelas suspensas no ar. No centro, Luna encontrou uma nova página para seu livro mágico."
+        ]
+      ]
+    }
+  ],
+  "words": {
+    "4–5 anos": [
+      {
+        "pergunta": "Complete a palavra: **L _ N A**",
+        "rotulo": "Qual letra está faltando?",
+        "opcoes": [
+          "A",
+          "U",
+          "O"
+        ],
+        "correta": "U",
+        "mensagem": "🎉 Muito bem! A palavra é LUNA."
+      },
+      {
+        "pergunta": "Complete a palavra: **B _ L A**",
+        "rotulo": "Qual letra está faltando?",
+        "opcoes": [
+          "O",
+          "A",
+          "E"
+        ],
+        "correta": "O",
+        "mensagem": "🎉 Isso! A palavra é BOLA."
+      },
+      {
+        "pergunta": "Complete a palavra: **G _ T O**",
+        "rotulo": "Qual letra está faltando?",
+        "opcoes": [
+          "A",
+          "E",
+          "I"
+        ],
+        "correta": "A",
+        "mensagem": "🎉 Certo! A palavra é GATO."
+      }
+    ],
+    "6–7 anos": [
+      {
+        "pergunta": "Complete a palavra: **C _ E L H O**",
+        "rotulo": "Qual letra está faltando?",
+        "opcoes": [
+          "A",
+          "O",
+          "U"
+        ],
+        "correta": "O",
+        "mensagem": "🎉 Muito bem! A palavra é COELHO."
+      },
+      {
+        "pergunta": "Complete a palavra: **F L _ R E S T A**",
+        "rotulo": "Qual letra está faltando?",
+        "opcoes": [
+          "O",
+          "A",
+          "E"
+        ],
+        "correta": "O",
+        "mensagem": "🎉 Certo! A palavra é FLORESTA."
+      },
+      {
+        "pergunta": "Complete a palavra: **C A S T _ L O**",
+        "rotulo": "Qual letra está faltando?",
+        "opcoes": [
+          "E",
+          "A",
+          "I"
+        ],
+        "correta": "E",
+        "mensagem": "🎉 Isso! A palavra é CASTELO."
+      }
+    ],
+    "8–9 anos": [
+      {
+        "pergunta": "Complete a frase: **Luna abriu o ____ mágico.**",
+        "rotulo": "Escolha a palavra correta:",
+        "opcoes": [
+          "livro",
+          "sapato",
+          "bolo"
+        ],
+        "correta": "livro",
+        "mensagem": "🎉 Certo! Luna abriu o livro mágico."
+      },
+      {
+        "pergunta": "Complete a frase: **O coelhinho entrou na ____.**",
+        "rotulo": "Escolha a palavra correta:",
+        "opcoes": [
+          "floresta",
+          "garagem",
+          "cozinha"
+        ],
+        "correta": "floresta",
+        "mensagem": "🎉 Muito bem! O coelhinho entrou na floresta."
+      },
+      {
+        "pergunta": "Complete a frase: **A princesa mora no ____.**",
+        "rotulo": "Escolha a palavra correta:",
+        "opcoes": [
+          "castelo",
+          "barco",
+          "mercado"
+        ],
+        "correta": "castelo",
+        "mensagem": "🎉 Isso! A princesa mora no castelo."
+      }
+    ],
+    "10–12 anos": [
+      {
+        "pergunta": "Qual palavra completa melhor a frase? **Luna ficou ____ ao perceber que o caminho havia mudado.**",
+        "rotulo": "Escolha:",
+        "opcoes": [
+          "intrigada",
+          "adormecida",
+          "invisível"
+        ],
+        "correta": "intrigada",
+        "mensagem": "✨ Isso! 'Intrigada' combina com alguém curioso diante de um mistério."
+      },
+      {
+        "pergunta": "Qual palavra completa melhor? **O castelo parecia ____ durante a tempestade.**",
+        "rotulo": "Escolha:",
+        "opcoes": [
+          "sombrio",
+          "redondo",
+          "doce"
+        ],
+        "correta": "sombrio",
+        "mensagem": "✨ Certo! 'Sombrio' combina com a cena."
+      },
+      {
+        "pergunta": "Complete: **Luna seguiu as pistas com muita ____.**",
+        "rotulo": "Escolha:",
+        "opcoes": [
+          "atenção",
+          "fome",
+          "pressa"
+        ],
+        "correta": "atenção",
+        "mensagem": "✨ Muito bem! 'Atenção' completa a frase."
+      }
+    ],
+    "13–15 anos": [
+      {
+        "pergunta": "Qual alternativa apresenta um **sinônimo** de 'misterioso'?",
+        "rotulo": "Escolha:",
+        "opcoes": [
+          "enigmático",
+          "barulhento",
+          "veloz"
+        ],
+        "correta": "enigmático",
+        "mensagem": "✨ Certo! 'Enigmático' é um sinônimo de 'misterioso'."
+      },
+      {
+        "pergunta": "Qual palavra é sinônimo de **corajoso**?",
+        "rotulo": "Escolha:",
+        "opcoes": [
+          "valente",
+          "distraído",
+          "quieto"
+        ],
+        "correta": "valente",
+        "mensagem": "✨ Isso! 'Valente' é sinônimo de 'corajoso'."
+      },
+      {
+        "pergunta": "Qual palavra é o contrário de **escuro**?",
+        "rotulo": "Escolha:",
+        "opcoes": [
+          "claro",
+          "forte",
+          "lento"
+        ],
+        "correta": "claro",
+        "mensagem": "✨ Muito bem! 'Claro' é o contrário de 'escuro'."
+      }
+    ]
+  },
+  "activities": [
+    {
+      "idade": "4–5 anos",
+      "materia": "Alfabetização",
+      "fases": [
+        [
+          "Complete a palavra: **L _ N A**",
+          "texto",
+          "Digite a letra que falta:",
+          "U",
+          "ALFABETIZAÇÃO 4–5 ANOS\nComplete: L _ N A\nCircule as vogais da palavra LUNA."
+        ],
+        [
+          "Complete a palavra: **B _ L A**",
+          "texto",
+          "Digite a letra que falta:",
+          "O",
+          "ALFABETIZAÇÃO 4–5 ANOS\nComplete: B _ L A\nEscreva a palavra BOLA."
+        ],
+        [
+          "Complete a palavra: **G _ T O**",
+          "texto",
+          "Digite a letra que falta:",
+          "A",
+          "ALFABETIZAÇÃO 4–5 ANOS\nComplete: G _ T O\nCircule a vogal da palavra GATO."
+        ]
+      ]
+    },
+    {
+      "idade": "6–7 anos",
+      "materia": "Alfabetização",
+      "fases": [
+        [
+          "Complete a palavra: **C _ E L H O**",
+          "texto",
+          "Digite a letra que falta:",
+          "O",
+          "ALFABETIZAÇÃO 6–7 ANOS\nComplete: C _ E L H O\nSepare COELHO em sílabas."
+        ],
+        [
+          "Complete a palavra: **F L _ R E S T A**",
+          "texto",
+          "Digite a letra que falta:",
+          "O",
+          "ALFABETIZAÇÃO 6–7 ANOS\nComplete: F L _ R E S T A\nEscreva FLORESTA."
+        ],
+        [
+          "Complete a palavra: **C A S T _ L O**",
+          "texto",
+          "Digite a letra que falta:",
+          "E",
+          "ALFABETIZAÇÃO 6–7 ANOS\nComplete: C A S T _ L O\nEscreva CASTELO."
+        ]
+      ]
+    },
+    {
+      "idade": "8–9 anos",
+      "materia": "Alfabetização",
+      "fases": [
+        [
+          "Escreva uma frase usando **Luna**, **livro** e **floresta**.",
+          "frase",
+          "Sua frase:",
+          5,
+          "ALFABETIZAÇÃO 8–9 ANOS\nEscreva uma frase usando: Luna, livro e floresta."
+        ],
+        [
+          "Escreva uma frase usando **coelhinho**, **castelo** e **estrela**.",
+          "frase",
+          "Sua frase:",
+          5,
+          "ALFABETIZAÇÃO 8–9 ANOS\nEscreva uma frase usando: coelhinho, castelo e estrela."
+        ],
+        [
+          "Escreva uma frase usando **princesa**, **magia** e **aventura**.",
+          "frase",
+          "Sua frase:",
+          5,
+          "ALFABETIZAÇÃO 8–9 ANOS\nEscreva uma frase usando: princesa, magia e aventura."
+        ]
+      ]
+    },
+    {
+      "idade": "4–5 anos",
+      "materia": "Leitura",
+      "fases": [
+        [
+          "Luna viu um coelhinho branco perto da árvore.",
+          "leitura",
+          "O que Luna viu?",
+          "coelh",
+          "LEITURA 4–5 ANOS\nLuna viu um coelhinho branco perto da árvore.\nPergunta: O que Luna viu?"
+        ],
+        [
+          "A princesa usava uma coroa dourada.",
+          "leitura",
+          "O que a princesa usava?",
+          "coroa",
+          "LEITURA 4–5 ANOS\nA princesa usava uma coroa dourada.\nPergunta: O que ela usava?"
+        ],
+        [
+          "No céu brilhava uma estrela.",
+          "leitura",
+          "O que brilhava no céu?",
+          "estrela",
+          "LEITURA 4–5 ANOS\nNo céu brilhava uma estrela.\nPergunta: O que brilhava no céu?"
+        ]
+      ]
+    },
+    {
+      "idade": "6–7 anos",
+      "materia": "Leitura",
+      "fases": [
+        [
+          "Luna abriu seu livro mágico e encontrou um mapa.",
+          "leitura",
+          "O que Luna encontrou?",
+          "mapa",
+          "LEITURA 6–7 ANOS\nLuna abriu seu livro mágico e encontrou um mapa.\nPergunta: O que ela encontrou?"
+        ],
+        [
+          "O coelhinho correu até o castelo para chamar a princesa.",
+          "leitura",
+          "Para onde o coelhinho correu?",
+          "castelo",
+          "LEITURA 6–7 ANOS\nO coelhinho correu até o castelo.\nPergunta: Para onde ele correu?"
+        ],
+        [
+          "Uma chave dourada estava escondida sob uma pedra.",
+          "leitura",
+          "O que estava sob a pedra?",
+          "chave",
+          "LEITURA 6–7 ANOS\nUma chave dourada estava escondida sob uma pedra.\nPergunta: O que estava escondido?"
+        ]
+      ]
+    },
+    {
+      "idade": "8–9 anos",
+      "materia": "Leitura",
+      "fases": [
+        [
+          "Luna abriu seu livro mágico. Uma luz roxa apareceu e ela e o coelhinho chegaram a uma floresta encantada.",
+          "leitura",
+          "Onde Luna e o coelhinho chegaram?",
+          "floresta",
+          "LEITURA 8–9 ANOS\nLuna abriu seu livro mágico e chegou a uma floresta encantada.\nPergunta: Onde ela chegou?"
+        ],
+        [
+          "A princesa entregou a Luna uma chave que abria a torre mais alta do castelo.",
+          "leitura",
+          "O que a princesa entregou a Luna?",
+          "chave",
+          "LEITURA 8–9 ANOS\nA princesa entregou a Luna uma chave.\nPergunta: O que ela entregou?"
+        ],
+        [
+          "O coelhinho percebeu pegadas brilhantes seguindo em direção ao jardim.",
+          "leitura",
+          "Para onde as pegadas iam?",
+          "jardim",
+          "LEITURA 8–9 ANOS\nHavia pegadas brilhantes indo ao jardim.\nPergunta: Para onde elas iam?"
+        ]
+      ]
+    },
+    {
+      "idade": "4–5 anos",
+      "materia": "Matemática",
+      "fases": [
+        [
+          "⭐ ⭐ + ⭐ = ?",
+          "numero",
+          "Sua resposta:",
+          3,
+          "MATEMÁTICA 4–5 ANOS\n2 estrelas + 1 estrela = ?"
+        ],
+        [
+          "🐰 🐰 + 🐰 🐰 = ?",
+          "numero",
+          "Sua resposta:",
+          4,
+          "MATEMÁTICA 4–5 ANOS\n2 coelhos + 2 coelhos = ?"
+        ],
+        [
+          "🌙 🌙 🌙 - 🌙 = ?",
+          "numero",
+          "Sua resposta:",
+          2,
+          "MATEMÁTICA 4–5 ANOS\n3 luas - 1 lua = ?"
+        ]
+      ]
+    },
+    {
+      "idade": "6–7 anos",
+      "materia": "Matemática",
+      "fases": [
+        [
+          "Luna encontrou **4 cenouras** e ganhou mais **3**. Quantas tem?",
+          "numero",
+          "Sua resposta:",
+          7,
+          "MATEMÁTICA 6–7 ANOS\n4 + 3 = ?"
+        ],
+        [
+          "Havia **10 estrelas** e 4 apagaram. Quantas ficaram?",
+          "numero",
+          "Sua resposta:",
+          6,
+          "MATEMÁTICA 6–7 ANOS\n10 - 4 = ?"
+        ],
+        [
+          "3 coelhinhos têm 2 cenouras cada. Quantas cenouras ao todo?",
+          "numero",
+          "Sua resposta:",
+          6,
+          "MATEMÁTICA 6–7 ANOS\n3 x 2 = ?"
+        ]
+      ]
+    },
+    {
+      "idade": "8–9 anos",
+      "materia": "Matemática",
+      "fases": [
+        [
+          "No castelo havia **12 estrelas**. **5 apagaram**. Quantas ficaram?",
+          "numero",
+          "Sua resposta:",
+          7,
+          "MATEMÁTICA 8–9 ANOS\n12 - 5 = ?"
+        ],
+        [
+          "4 caixas têm 6 cristais cada. Quantos cristais ao todo?",
+          "numero",
+          "Sua resposta:",
+          24,
+          "MATEMÁTICA 8–9 ANOS\n4 x 6 = ?"
+        ],
+        [
+          "27 chaves foram divididas em 3 grupos iguais. Quantas por grupo?",
+          "numero",
+          "Sua resposta:",
+          9,
+          "MATEMÁTICA 8–9 ANOS\n27 dividido por 3 = ?"
+        ]
+      ]
+    },
+    {
+      "idade": "4–5 anos",
+      "materia": "Cores e formas",
+      "fases": [
+        [
+          "🟣 Qual é a cor deste círculo?",
+          "opcao",
+          "Escolha:",
+          [
+            [
+              "Roxo",
+              "Amarelo",
+              "Verde"
+            ],
+            "Roxo"
+          ],
+          "CORES E FORMAS 4–5 ANOS\nPinte um círculo de roxo."
+        ],
+        [
+          "🔺 Qual é esta forma?",
+          "opcao",
+          "Escolha:",
+          [
+            [
+              "Triângulo",
+              "Círculo",
+              "Quadrado"
+            ],
+            "Triângulo"
+          ],
+          "CORES E FORMAS 4–5 ANOS\nDesenhe um triângulo."
+        ],
+        [
+          "🟨 Qual forma tem quatro lados iguais?",
+          "opcao",
+          "Escolha:",
+          [
+            [
+              "Quadrado",
+              "Círculo",
+              "Triângulo"
+            ],
+            "Quadrado"
+          ],
+          "CORES E FORMAS 4–5 ANOS\nDesenhe um quadrado amarelo."
+        ]
+      ]
+    },
+    {
+      "idade": "6–7 anos",
+      "materia": "Cores e formas",
+      "fases": [
+        [
+          "Qual destas é uma cor primária?",
+          "opcao",
+          "Escolha:",
+          [
+            [
+              "Azul",
+              "Roxo",
+              "Rosa"
+            ],
+            "Azul"
+          ],
+          "CORES E FORMAS 6–7 ANOS\nPinte uma forma de azul."
+        ],
+        [
+          "Qual forma não tem lados?",
+          "opcao",
+          "Escolha:",
+          [
+            [
+              "Círculo",
+              "Quadrado",
+              "Triângulo"
+            ],
+            "Círculo"
+          ],
+          "CORES E FORMAS 6–7 ANOS\nDesenhe um círculo."
+        ],
+        [
+          "Qual forma tem 3 lados?",
+          "opcao",
+          "Escolha:",
+          [
+            [
+              "Triângulo",
+              "Quadrado",
+              "Círculo"
+            ],
+            "Triângulo"
+          ],
+          "CORES E FORMAS 6–7 ANOS\nDesenhe um triângulo."
+        ]
+      ]
+    },
+    {
+      "idade": "8–9 anos",
+      "materia": "Cores e formas",
+      "fases": [
+        [
+          "Qual forma tem 4 lados e lados opostos iguais?",
+          "opcao",
+          "Escolha:",
+          [
+            [
+              "Retângulo",
+              "Círculo",
+              "Triângulo"
+            ],
+            "Retângulo"
+          ],
+          "CORES E FORMAS 8–9 ANOS\nDesenhe um retângulo."
+        ],
+        [
+          "Misturar azul e amarelo forma qual cor?",
+          "opcao",
+          "Escolha:",
+          [
+            [
+              "Verde",
+              "Roxo",
+              "Laranja"
+            ],
+            "Verde"
+          ],
+          "CORES E FORMAS 8–9 ANOS\nMisture azul e amarelo."
+        ],
+        [
+          "Qual destas formas tem 5 lados?",
+          "opcao",
+          "Escolha:",
+          [
+            [
+              "Pentágono",
+              "Triângulo",
+              "Quadrado"
+            ],
+            "Pentágono"
+          ],
+          "CORES E FORMAS 8–9 ANOS\nDesenhe um pentágono."
+        ]
+      ]
+    },
+    {
+      "idade": "4–5 anos",
+      "materia": "Animais",
+      "fases": [
+        [
+          "🐰 Qual animal acompanha Luna?",
+          "opcao",
+          "Escolha:",
+          [
+            [
+              "Coelho",
+              "Gato",
+              "Cachorro"
+            ],
+            "Coelho"
+          ],
+          "ANIMAIS 4–5 ANOS\nCircule o COELHO."
+        ],
+        [
+          "🐱 Qual destes animais mia?",
+          "opcao",
+          "Escolha:",
+          [
+            [
+              "Gato",
+              "Coelho",
+              "Peixe"
+            ],
+            "Gato"
+          ],
+          "ANIMAIS 4–5 ANOS\nCircule o GATO."
+        ],
+        [
+          "🐶 Qual destes animais late?",
+          "opcao",
+          "Escolha:",
+          [
+            [
+              "Cachorro",
+              "Peixe",
+              "Pássaro"
+            ],
+            "Cachorro"
+          ],
+          "ANIMAIS 4–5 ANOS\nCircule o CACHORRO."
+        ]
+      ]
+    },
+    {
+      "idade": "6–7 anos",
+      "materia": "Animais",
+      "fases": [
+        [
+          "Qual animal vive na água?",
+          "opcao",
+          "Escolha:",
+          [
+            [
+              "Peixe",
+              "Coelho",
+              "Gato"
+            ],
+            "Peixe"
+          ],
+          "ANIMAIS 6–7 ANOS\nEscreva PEIXE."
+        ],
+        [
+          "Qual animal tem penas?",
+          "opcao",
+          "Escolha:",
+          [
+            [
+              "Pássaro",
+              "Cachorro",
+              "Coelho"
+            ],
+            "Pássaro"
+          ],
+          "ANIMAIS 6–7 ANOS\nEscreva PÁSSARO."
+        ],
+        [
+          "Qual animal costuma viver em uma toca?",
+          "opcao",
+          "Escolha:",
+          [
+            [
+              "Coelho",
+              "Peixe",
+              "Galinha"
+            ],
+            "Coelho"
+          ],
+          "ANIMAIS 6–7 ANOS\nEscreva COELHO."
+        ]
+      ]
+    },
+    {
+      "idade": "8–9 anos",
+      "materia": "Animais",
+      "fases": [
+        [
+          "Qual destes é um mamífero?",
+          "opcao",
+          "Escolha:",
+          [
+            [
+              "Coelho",
+              "Galinha",
+              "Peixe"
+            ],
+            "Coelho"
+          ],
+          "ANIMAIS 8–9 ANOS\nExplique por que o coelho é mamífero."
+        ],
+        [
+          "Qual destes animais põe ovos?",
+          "opcao",
+          "Escolha:",
+          [
+            [
+              "Galinha",
+              "Cachorro",
+              "Gato"
+            ],
+            "Galinha"
+          ],
+          "ANIMAIS 8–9 ANOS\nEscreva uma frase sobre a galinha."
+        ],
+        [
+          "Qual destes animais respira por brânquias?",
+          "opcao",
+          "Escolha:",
+          [
+            [
+              "Peixe",
+              "Coelho",
+              "Pássaro"
+            ],
+            "Peixe"
+          ],
+          "ANIMAIS 8–9 ANOS\nEscreva uma frase sobre o peixe."
+        ]
+      ]
+    },
+    {
+      "idade": "4–5 anos",
+      "materia": "Atividade para colorir",
+      "fases": [
+        [
+          "🎨 Desenhe Luna, o coelhinho e um castelo. Acrescente 5 estrelas.",
+          "criativa",
+          "",
+          null,
+          "ATIVIDADE PARA COLORIR 4–5 ANOS\nDesenhe Luna, o coelhinho e um castelo.\nAcrescente 5 estrelas."
+        ],
+        [
+          "🎨 Desenhe uma lua grande e pinte o céu.",
+          "criativa",
+          "",
+          null,
+          "ATIVIDADE PARA COLORIR 4–5 ANOS\nDesenhe uma lua grande e pinte o céu."
+        ],
+        [
+          "🎨 Desenhe o coelhinho em um jardim com flores.",
+          "criativa",
+          "",
+          null,
+          "ATIVIDADE PARA COLORIR 4–5 ANOS\nDesenhe o coelhinho em um jardim com flores."
+        ]
+      ]
+    },
+    {
+      "idade": "6–7 anos",
+      "materia": "Atividade para colorir",
+      "fases": [
+        [
+          "🎨 Desenhe Luna segurando seu livro mágico.",
+          "criativa",
+          "",
+          null,
+          "ATIVIDADE PARA COLORIR 6–7 ANOS\nDesenhe Luna segurando seu livro mágico."
+        ],
+        [
+          "🎨 Desenhe o castelo com 4 torres.",
+          "criativa",
+          "",
+          null,
+          "ATIVIDADE PARA COLORIR 6–7 ANOS\nDesenhe um castelo com 4 torres."
+        ],
+        [
+          "🎨 Desenhe uma floresta com 6 estrelas mágicas.",
+          "criativa",
+          "",
+          null,
+          "ATIVIDADE PARA COLORIR 6–7 ANOS\nDesenhe uma floresta com 6 estrelas mágicas."
+        ]
+      ]
+    },
+    {
+      "idade": "8–9 anos",
+      "materia": "Atividade para colorir",
+      "fases": [
+        [
+          "🎨 Crie uma cena de Luna entrando no castelo.",
+          "criativa",
+          "",
+          null,
+          "ATIVIDADE PARA COLORIR 8–9 ANOS\nCrie uma cena de Luna entrando no castelo."
+        ],
+        [
+          "🎨 Desenhe um mapa da floresta encantada.",
+          "criativa",
+          "",
+          null,
+          "ATIVIDADE PARA COLORIR 8–9 ANOS\nDesenhe um mapa da floresta encantada."
+        ],
+        [
+          "🎨 Desenhe uma nova sala mágica do castelo.",
+          "criativa",
+          "",
+          null,
+          "ATIVIDADE PARA COLORIR 8–9 ANOS\nDesenhe uma nova sala mágica do castelo."
+        ]
+      ]
+    }
+  ]
+}
