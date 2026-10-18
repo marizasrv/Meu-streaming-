@@ -4390,39 +4390,113 @@ elif menu in ["🧸 Infantil", "🎬 Filmes", "📺 Séries"]:
 
 
 elif menu == "✨ Assistente Criador IA":
-    st.markdown("## ✨ Assistente Criador — Mundo da Luna")
-    st.caption("Crie histórias, narrações e prompts de vídeo no notebook ou celular.")
-    st.info("Esta versão organiza roteiros e prompts. Para gerar um vídeo MP4 automaticamente, é necessário conectar um gerador de vídeo IA.")
-    with st.form("luna_assistente_form"):
-        publico = st.radio("Tipo de história", ["🐰 Infantil", "🌙 Adulto"], horizontal=True)
-        titulo = st.text_input("Título", value="Luna e o livro encantado")
-        ideia = st.text_area("Ideia da história", value="Luna encontra um livro mágico e viaja com seu coelhinho para uma floresta encantada onde existe um castelo.", height=120)
-        referencia = st.text_area("Aparência dos personagens", value="Luna, menina de 6 anos, com a mesma aparência da imagem de referência, acompanhada de seu coelhinho branco.", height=85)
-        cenas = st.slider("Número de cenas", 2, 12, 5)
-        gerar = st.form_submit_button("✨ CRIAR ROTEIRO E PROMPTS", use_container_width=True)
-    if gerar:
-        if not titulo.strip() or not ideia.strip():
-            st.warning("Preencha o título e a ideia da história.")
+    st.title("✨ Assistente Criador — Mundo da Luna")
+    st.caption("Mesmo fluxo da TV Samsung: Infantil/Adulto, roteiro, preparar vídeos, escolher cena e copiar prompts.")
+    st.info("Os roteiros e prompts são modelos preparados no aplicativo. Esta tela ainda não produz vídeos MP4 nem usa IA online.")
+
+    if "luna_tv_publico" not in st.session_state:
+        st.session_state["luna_tv_publico"] = "infantil"
+    if "luna_tv_tema" not in st.session_state:
+        st.session_state["luna_tv_tema"] = "O livro encantado e a floresta mágica"
+    if "luna_tv_cenas" not in st.session_state:
+        st.session_state["luna_tv_cenas"] = 5
+
+    topo1, topo2 = st.columns(2)
+    with topo1:
+        if st.button("← VOLTAR AO MENU", key="luna_tv_voltar", use_container_width=True):
+            st.session_state["menu_principal"] = "🏠 Início"
+            st.rerun()
+    with topo2:
+        if st.button("LIMPAR", key="luna_tv_limpar", use_container_width=True):
+            for nome in ["luna_tv_roteiro", "luna_tv_prompts", "luna_tv_salvo"]:
+                st.session_state.pop(nome, None)
+            st.session_state["luna_tv_tema"] = ""
+            st.rerun()
+
+    st.markdown("### Escolha Infantil ou Adulto")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("🐰 INFANTIL" + (" ✓" if st.session_state["luna_tv_publico"] == "infantil" else ""),
+                     key="luna_tv_infantil", use_container_width=True):
+            st.session_state["luna_tv_publico"] = "infantil"
+            st.rerun()
+    with col2:
+        if st.button("🌙 ADULTO" + (" ✓" if st.session_state["luna_tv_publico"] == "adulto" else ""),
+                     key="luna_tv_adulto", use_container_width=True):
+            st.session_state["luna_tv_publico"] = "adulto"
+            st.rerun()
+
+    tema = st.text_input("Tema da história", key="luna_tv_tema")
+    quantidade = st.selectbox("Quantidade de cenas", [3, 5, 10],
+                              key="luna_tv_cenas", format_func=lambda x: str(x) + " cenas")
+    if st.button("✨ CRIAR ROTEIRO E PROMPTS", key="luna_tv_criar", use_container_width=True):
+        if not tema.strip():
+            st.warning("Escreva o tema da história antes de criar.")
         else:
-            tom = "fantasia infantil suave" if publico == "🐰 Infantil" else "fantasia cinematográfica para adultos"
-            etapas = ["Apresentação", "Descoberta", "Aventura", "Surpresa", "Conclusão"]
-            linhas = ["# " + titulo.strip(), "Público: " + publico, "Ideia: " + ideia.strip(), ""]
-            for n in range(1, cenas + 1):
-                etapa = etapas[min((n - 1) * len(etapas) // cenas, len(etapas) - 1)]
-                linhas.extend([
-                    "## Cena " + str(n) + " — " + etapa,
-                    "Narração sugerida: descrever a etapa de " + etapa.lower() + " da aventura.",
-                    "Fala sugerida: criar uma frase curta coerente com esta cena.",
-                    "Prompt de vídeo: Animação 3D, " + tom + ". " + ideia.strip() +
-                    " Etapa: " + etapa + ". Personagens: " + referencia.strip() +
-                    ". Manter rosto, cabelo, roupas e cenário consistentes. Movimentos leves, câmera suave, " +
-                    "8 segundos, vertical 9:16.", ""
-                ])
-            st.session_state["luna_assistente_roteiro"] = "\n".join(linhas)
-    if st.session_state.get("luna_assistente_roteiro"):
-        st.markdown("### 🎬 Roteiro e prompts para vídeo")
-        st.text_area("Texto pronto para copiar", st.session_state["luna_assistente_roteiro"], height=360)
-        st.download_button("💾 BAIXAR ROTEIRO", data=st.session_state["luna_assistente_roteiro"].encode("utf-8"), file_name="roteiro_mundo_da_luna.txt", mime="text/plain", use_container_width=True)
+            infantil = st.session_state["luna_tv_publico"] == "infantil"
+            base = ("Luna, menina de 6 anos, acompanhada do coelhinho branco. Manter exatamente a aparência da imagem de referência e figurinos em todas as cenas."
+                    if infantil else "Uma protagonista adulta em fantasia misteriosa. Preservar identidade visual, roupas e cenário de referência em todas as cenas.")
+            locais = (["quarto acolhedor com livro encantado", "caminho da floresta mágica", "clareira iluminada por vagalumes", "portões do castelo", "jardim do castelo"]
+                      if infantil else ["vila antiga", "floresta sob a lua", "salão do castelo", "corredor misterioso", "terraço sob as estrelas"])
+            falas = (["Vamos descobrir o que o livro guarda!", "Coelhinho, veja aquele caminho!", "Que lugar maravilhoso!", "Será que podemos entrar?", "Nossa aventura continua!"]
+                     if infantil else ["Há algo estranho neste lugar.", "Preciso descobrir a verdade.", "Escute esse sussurro.", "A resposta está adiante.", "Finalmente entendi o mistério."])
+            roteiro = ["TEMA: " + tema.strip(), "PÚBLICO: " + ("Infantil" if infantil else "Adulto"),
+                       "PERSONAGENS E CONSISTÊNCIA: " + base, ""]
+            prompts = []
+            for i in range(quantidade):
+                local = locais[i % len(locais)]
+                cena = "CENA " + str(i + 1) + " — " + local
+                narracao = 'Em mais um capítulo de "' + tema.strip() + '", a aventura continua em ' + local + '. O cenário revela uma nova pista.'
+                fala = ("Luna: " if infantil else "Protagonista: ") + falas[i % len(falas)]
+                movimento = "Câmera avança lentamente, piscadas suaves e movimentos discretos de cabelo e roupas. Sem cortes bruscos."
+                roteiro.extend([cena, "NARRAÇÃO: " + narracao, "FALA: " + fala,
+                                "PROMPT DE IMAGEM: " + base + " Cena em " + local + ". Animação 3D cinematográfica, iluminação suave, sem letras.",
+                                "PROMPT DE MOVIMENTO: " + movimento, ""])
+                prompts.append("VÍDEO IA — " + cena + "\nDuração sugerida: 5 segundos. Formato: 16:9 horizontal para TV.\n"
+                               "Personagens e roupas iguais à imagem de referência. Movimentos suaves e iluminação consistente.\n"
+                               "TEMA: " + tema.strip() + "\nREFERÊNCIA: " + base + "\nNARRAÇÃO: " + narracao +
+                               "\nFALA: " + fala + "\nMOVIMENTO: " + movimento)
+            roteiro.append("OBSERVAÇÃO: Roteiro-base editável. Revise antes de publicar.")
+            st.session_state["luna_tv_roteiro"] = "\n".join(roteiro)
+            st.session_state["luna_tv_prompts"] = prompts
+            st.success("Roteiro criado. Os prompts de cada cena estão abaixo!")
+
+    st.markdown("### 🎬 Transformar roteiro em cenas de vídeo")
+    st.caption("Como na TV: PREPARAR VÍDEOS organiza os prompts; não gera o MP4 automaticamente.")
+    b1, b2 = st.columns(2)
+    with b1:
+        if st.button("🎬 PREPARAR VÍDEOS", key="luna_tv_preparar", use_container_width=True):
+            if st.session_state.get("luna_tv_prompts"):
+                st.success("Cenas preparadas. Escolha a cena abaixo.")
+            else:
+                st.warning("Primeiro clique em CRIAR ROTEIRO E PROMPTS.")
+    with b2:
+        if st.button("💾 SALVAR PROJETO", key="luna_tv_salvar", use_container_width=True):
+            if st.session_state.get("luna_tv_roteiro"):
+                st.session_state["luna_tv_salvo"] = {
+                    "roteiro": st.session_state["luna_tv_roteiro"],
+                    "prompts": list(st.session_state.get("luna_tv_prompts", []))}
+                st.success("Projeto salvo nesta sessão do notebook.")
+            else:
+                st.warning("Crie o roteiro primeiro.")
+    st.caption("Salvar projeto nesta tela guarda o conteúdo na sessão atual. Use Baixar texto para manter uma cópia no computador.")
+    prompts = st.session_state.get("luna_tv_prompts", [])
+    if prompts:
+        cena_escolhida = st.selectbox("Cena para copiar", list(range(len(prompts))),
+                                    format_func=lambda i: "Cena " + str(i + 1), key="luna_tv_cena_selecionada")
+        st.markdown("#### Prompt de vídeo da cena selecionada")
+        st.code(prompts[cena_escolhida], language=None)
+        st.text_area("📋 Copiar prompt (Ctrl+A, Ctrl+C)", value=prompts[cena_escolhida],
+                     height=190, key="luna_tv_prompt_copia")
+    else:
+        st.info("Crie a história para visualizar os prompts de cada cena aqui.")
+    st.markdown("### Seu roteiro")
+    roteiro_atual = st.session_state.get("luna_tv_roteiro", "")
+    st.text_area("Roteiro, narração e falas", value=roteiro_atual, height=290, key="luna_tv_saida_roteiro")
+    if roteiro_atual:
+        st.download_button("⬇ EXPORTAR TEXTO", data=roteiro_atual.encode("utf-8"),
+                           file_name="historia_luna_roteiro.txt", mime="text/plain",
+                           key="luna_tv_exportar", use_container_width=True)
 
 elif menu == "🎬 Criar vídeo com IA":
     st.markdown("## 🎬 Criar vídeo com IA")
